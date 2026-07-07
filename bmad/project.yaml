@@ -1,0 +1,39 @@
+project:
+  name: "PPC Training Ground"
+  type: "web-app"
+  level: 3
+  description: "Amazon PPC training platform for Filipino VAs (v2 rebuild, greenfield)"
+
+paths:
+  output_folder: "docs"
+  stories_folder: "docs/stories"
+  status_file: "bmad/workflow-status.yaml"
+  sprint_file: "bmad/sprint-status.yaml"
+
+language:
+  communication_language: "English"
+  document_output_language: "English"
+
+workflow:
+  phase_1_analysis:
+    product_brief: "completed"
+    research: "optional"
+    brainstorm: "optional"
+
+  phase_2_planning:
+    prd: "completed"
+    tech_spec: "completed"
+    ux_design: "completed"
+
+  phase_3_solutioning:
+    architecture: "completed"
+    gate_check: "completed"
+
+  phase_4_implementation:
+    sprint_planning: "in_progress"
+    stories: "in_progress"
+
+metadata:
+  created: "2026-07-07T15:43:00Z"
+  bmad_version: "6.0.0"
+  last_updated: "2026-07-07"

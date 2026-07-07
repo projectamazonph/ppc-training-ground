@@ -1,0 +1,139 @@
+project:
+  name: "PPC Training Ground"
+  level: 3
+  initialized: "2026-07-07T15:43:00Z"
+  last_updated: "2026-07-07T15:43:00Z"
+
+current_phase: 4
+current_workflow: "sprint_planning"
+
+phases:
+  phase_1_analysis:
+    name: "Analysis"
+    status: "completed"
+    workflows:
+      product_brief:
+        status: "required"
+        completed: true
+        output_file: "docs/product-brief.md"
+        completed_at: "2026-07-07"
+      research:
+        status: "optional"
+        completed: false
+      brainstorm:
+        status: "optional"
+        completed: false
+
+  phase_2_planning:
+    name: "Planning"
+    status: "completed"
+    workflows:
+      prd:
+        status: "required"
+        completed: true
+        output_file: "docs/build-spec.md"
+        completed_at: "2026-07-07"
+      tech_spec:
+        status: "optional"
+        completed: true
+        output_file: "docs/build-spec.md"
+        completed_at: "2026-07-07"
+      ux_design:
+        status: "recommended"
+        completed: true
+        output_file: "docs/design-brief.md"
+        completed_at: "2026-07-07"
+
+  phase_3_solutioning:
+    name: "Solutioning"
+    status: "completed"
+    workflows:
+      architecture:
+        status: "required"
+        completed: true
+        output_file: "docs/decisions.md"
+        completed_at: "2026-07-07"
+      gate_check:
+        status: "recommended"
+        completed: true
+        passed: true
+        completed_at: "2026-07-07"
+        output_file: "docs/db-schema.md"
+
+  phase_4_implementation:
+    name: "Implementation"
+    status: "in_progress"
+    workflows:
+      sprint_planning:
+        status: "required"
+        completed: true
+        output_file: "docs/sprint-plan.md"
+        completed_at: "2026-07-07"
+      stories:
+        total: 55
+        completed: 0
+        in_progress: 0
+        story_list:
+          - "STORY-001-scaffold"
+          - "STORY-002-tokens"
+          - "STORY-003-ui-library"
+          - "STORY-004-prisma-migration"
+          - "STORY-005-auth"
+          - "STORY-006-admin-rbac"
+          - "STORY-007-campaign-builder-engine"
+          - "STORY-008-bid-elevator-engine"
+          - "STORY-009-str-triage-engine"
+          - "STORY-010-tool-ui"
+          - "STORY-011-tool-session-persistence"
+          - "STORY-012-course-module-lesson-pages"
+          - "STORY-013-quiz-system"
+          - "STORY-014-progress-tracking"
+          - "STORY-015-curriculum-seed"
+          - "STORY-016-tier-gating"
+          - "STORY-017-badge-system"
+          - "STORY-018-certificate-generation"
+          - "STORY-019-live-classes-student"
+          - "STORY-020-gamification-fixtures"
+          - "STORY-021-xp-level-streak"
+          - "STORY-022-pricing-tier-seed"
+          - "STORY-023-xendit-integration"
+          - "STORY-024-checkout-flow"
+          - "STORY-025-enrollment-creation"
+          - "STORY-026-payment-admin-list"
+          - "STORY-027-user-management"
+          - "STORY-028-course-module-lesson-admin"
+          - "STORY-029-resource-upload"
+          - "STORY-030-tool-scenario-admin"
+          - "STORY-031-audit-analytics"
+          - "STORY-032-refund-request"
+          - "STORY-033-refund-approval"
+          - "STORY-034-receipt-pdf"
+          - "STORY-035-email-templates"
+          - "STORY-036-resend-integration"
+          - "STORY-037-eslint-no-ai-slop"
+          - "STORY-038-ui-copy-audit"
+          - "STORY-039-lesson-content-audit"
+          - "STORY-040-empty-states"
+          - "STORY-041-accessibility-audit"
+          - "STORY-042-vitest-setup"
+          - "STORY-043-unit-tests-lib"
+          - "STORY-044-integration-tests-actions"
+          - "STORY-045-playwright-setup"
+          - "STORY-046-coverage-enforcement"
+          - "STORY-047-sentry-setup"
+          - "STORY-048-structured-logging"
+          - "STORY-049-action-tracing"
+          - "STORY-050-lighthouse-ci"
+          - "STORY-051-alerting"
+          - "STORY-052-deploy-runbook"
+          - "STORY-053-backup-drill"
+          - "STORY-054-security-audit"
+          - "STORY-055-launch-checklist"
+
+metrics:
+  total_workflows: 12
+  completed_workflows: 9
+  progress_percentage: 75
+  estimated_stories: 55
+  completed_stories: 0
+  last_updated: "2026-07-07T15:43:00Z"

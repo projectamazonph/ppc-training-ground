@@ -1,0 +1,92 @@
+sprint:
+  number: 1
+  name: "Foundation"
+  start_date: "2026-07-07"
+  end_date: "2026-07-13"
+  status: "in_progress"
+
+capacity:
+  planned_points: 6
+  velocity: 6
+  buffer_points: 0
+
+stories:
+  - id: "STORY-001"
+    title: "Scaffold Next.js 16"
+    points: 1
+    status: "in_progress"
+    sprint: 1
+    epic: "Foundation"
+    owner: "Ryan"
+
+  - id: "STORY-002"
+    title: "Field Manual design tokens"
+    points: 1
+    status: "pending"
+    sprint: 1
+    epic: "Foundation"
+    owner: "Ryan"
+
+  - id: "STORY-003"
+    title: "Shared component library"
+    points: 1.5
+    status: "pending"
+    sprint: 1
+    epic: "Foundation"
+    owner: "Ryan"
+
+  - id: "STORY-004"
+    title: "Prisma + initial migration"
+    points: 1
+    status: "pending"
+    sprint: 1
+    epic: "Foundation"
+    owner: "Ryan"
+
+  - id: "STORY-005"
+    title: "Auth (JWT + jose)"
+    points: 1
+    status: "pending"
+    sprint: 1
+    epic: "Foundation"
+    owner: "Ryan"
+
+  - id: "STORY-006"
+    title: "Admin layout + RBAC"
+    points: 0.5
+    status: "pending"
+    sprint: 1
+    epic: "Foundation"
+    owner: "Ryan"
+
+burndown:
+  - day: 0
+    ideal_remaining: 6
+    actual_remaining: 6
+  - day: 1
+    ideal_remaining: 5.14
+    actual_remaining: null
+  - day: 2
+    ideal_remaining: 4.29
+    actual_remaining: null
+  - day: 3
+    ideal_remaining: 3.43
+    actual_remaining: null
+  - day: 4
+    ideal_remaining: 2.57
+    actual_remaining: null
+  - day: 5
+    ideal_remaining: 1.71
+    actual_remaining: null
+  - day: 6
+    ideal_remaining: 0.86
+    actual_remaining: null
+  - day: 7
+    ideal_remaining: 0
+    actual_remaining: null
+
+velocity_history: []
+
+completion_percentage: 0
+remaining_points: 6
+last_updated: "2026-07-07T15:43:00Z"
