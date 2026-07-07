@@ -1,13 +1,13 @@
 sprint:
   number: 3
-  name: "Curriculum (partial)"
+  name: "Curriculum"
   start_date: "2026-07-07"
-  end_date: "2026-07-13"
-  status: "in_progress"
+  end_date: "2026-07-08"
+  status: "completed"
 
 capacity:
   planned_points: 6
-  velocity: 3
+  velocity: 6
   buffer_points: 0
 
 stories:
@@ -39,18 +39,18 @@ stories:
     notes: "/dashboard, /dashboard/courses/[slug], /dashboard/courses/[slug]/lessons/[slug]. src/lib/mdx.ts is a lightweight markdown→HTML renderer (headings, paragraphs, bold/italic, code, lists, blockquotes)."
 
   - id: "STORY-017"
-    title: "Quiz system (attempt tracking, scoring, retry logic, XP bonus)"
+    title: "Tier gating (enroll-aware access)"
     points: 0.5
     status: "completed"
     sprint: 3
     epic: "Curriculum"
     owner: "Ryan"
-    notes: "Server-side scoring in submitQuizAction. Bonus XP for passing. Result screen with score circle and pass/fail copy. Auto-completes lesson on pass."
+    notes: "src/lib/tier-gate.ts evaluates course pricing-tier vs user's highest ACTIVE enrollment. TierLock component renders lock screen on lesson/quiz pages. Course index shows lock icon for each lesson under a locked course. Server actions startLessonAction, markLessonCompleteAction, submitQuizAction all enforce the gate. Tier-less courses stay free/always-accessible. Course import script (scripts/import-amph-content.ts) now attaches the PPC Foundations tier by default."
 
 burndown:
   - day: 0
-    ideal_remaining: 3
-    actual_remaining: 3
+    ideal_remaining: 6
+    actual_remaining: 6
   - day: 1
     ideal_remaining: 0
     actual_remaining: 0
@@ -63,9 +63,9 @@ velocity_history:
     points: 6
     completed_date: "2026-07-07"
   - sprint: 3
-    points: 3
-    completed_date: "2026-07-07"
+    points: 6
+    completed_date: "2026-07-08"
 
-completion_percentage: 50
-remaining_points: 3
-last_updated: "2026-07-07T20:00:00Z"
+completion_percentage: 100
+remaining_points: 0
+last_updated: "2026-07-08T20:00:00Z"

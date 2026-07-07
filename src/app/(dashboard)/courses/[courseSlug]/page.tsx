@@ -5,6 +5,7 @@ import { db } from '@/lib/db';
 import { Card, CardHeader, CardTitle, CardDescription, Badge } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
 import { ProgressStatus } from '@/lib/enums';
+import { evaluateCourseAccess } from '@/lib/tier-gate';
 import styles from './course.module.css';
 
 interface PageProps {
@@ -43,6 +44,11 @@ export default async function CourseDetailPage({ params }: PageProps) {
 
   if (!course) notFound();
 
+  // Tier gate — read-only preview only. Each lesson shows a lock icon when
+  // the user can't access the course; clicking still renders the TierLock screen.
+  const gate = await evaluateCourseAccess(user.id, courseSlug);
+  const locked = !gate.allowed;
+
   // Get lesson progress for the entire course
   const allLessonIds = course.modules.flatMap((m) => m.lessons.map((l) => l.id));
   const lessonProgress = allLessonIds.length > 0
@@ -77,6 +83,11 @@ export default async function CourseDetailPage({ params }: PageProps) {
             <div className={styles.moduleMeta}>
               <span>{module.lessons.length} lessons</span>
               <span>~{module.estimatedMinutes} min</span>
+              {locked && (
+                <Badge variant="warning">
+                  <Icon name="Lock" size="sm" /> Tier required
+                </Badge>
+              )}
             </div>
           </div>
 
@@ -92,7 +103,9 @@ export default async function CourseDetailPage({ params }: PageProps) {
                     className={styles.lessonLink}
                   >
                     <div className={styles.lessonStatus}>
-                      {isComplete ? (
+                      {locked ? (
+                        <Icon name="Lock" size="sm" />
+                      ) : isComplete ? (
                         <Icon name="Check" size="sm" />
                       ) : isInProgress ? (
                         <div className={styles.dotInProgress} />

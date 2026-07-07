@@ -13,6 +13,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createSafeAction, type ActionResult } from '@/lib/validation';
 import { ProgressStatus, AttemptStatus, EnrollmentStatus } from '@/lib/enums';
+import { evaluateCourseAccess } from '@/lib/tier-gate';
 
 const slugsSchema = z.object({
   courseSlug: z.string().min(1),
@@ -35,6 +36,15 @@ export async function startLessonAction(
 
   if (!lesson || lesson.module.course.slug !== input.courseSlug) {
     return { success: false, error: 'Lesson not found.' };
+  }
+
+  // Tier gate — deny if user lacks the required enrollment.
+  const gate = await evaluateCourseAccess(user.id, input.courseSlug);
+  if (!gate.allowed) {
+    return {
+      success: false,
+      error: 'Your current tier does not include this lesson. Upgrade to continue.',
+    };
   }
 
   // Upsert LessonProgress as IN_PROGRESS
@@ -67,6 +77,12 @@ export const markLessonCompleteAction = createSafeAction(slugsSchema, async (dat
 
   if (!lesson || lesson.module.course.slug !== data.courseSlug) {
     throw new Error('Lesson not found.');
+  }
+
+  // Tier gate — deny if user lacks the required enrollment.
+  const gate = await evaluateCourseAccess(user.id, data.courseSlug);
+  if (!gate.allowed) {
+    throw new Error('Your current tier does not include this lesson. Upgrade to continue.');
   }
 
   // Mark lesson complete + award XP
@@ -125,6 +141,12 @@ export const submitQuizAction = createSafeAction(submitQuizSchema, async (data) 
 
   if (!lesson || !lesson.quiz || lesson.module.course.slug !== data.courseSlug) {
     throw new Error('Quiz not found.');
+  }
+
+  // Tier gate — deny if user lacks the required enrollment.
+  const gate = await evaluateCourseAccess(user.id, data.courseSlug);
+  if (!gate.allowed) {
+    throw new Error('Your current tier does not include this quiz. Upgrade to continue.');
   }
 
   const totalQuestions = lesson.quiz.questions.length;

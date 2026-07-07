@@ -10,7 +10,7 @@ Solo developer. Originally 11 sprints at 6 pts/sprint = 11 weeks. Actual: 3 spri
 |--------|-------|------|--------|--------|
 | S1 | Foundation | Next.js scaffold + design system + auth + admin layout | ✅ Complete | 6 / 6 |
 | S2 | Tools | Campaign Builder + Bid Elevator + STR Triage + Listing Audit + Keyword Research engines + fixtures + UI shell | ✅ Complete | 6 / 6 |
-| S3 | Curriculum (partial) | Content import + curriculum pages + quiz system | 🟡 In progress | 3 / 6 |
+| S3 | Curriculum | Content import + curriculum pages + quiz system + tier gating UI | ✅ Complete | 6 / 6 |
 | S4 | Tool UIs | Replace Sprint 2 stub runners with real interactive UIs | ⏳ Next | — |
 | S5 | Gamification | Badges auto-award + Certificates + Live Classes | Backlog | — |
 | S6 | Payments | PayMongo Checkout + Enrollment + Tier gating | Backlog | — |
@@ -21,7 +21,7 @@ Solo developer. Originally 11 sprints at 6 pts/sprint = 11 weeks. Actual: 3 spri
 | S11 | Observability | Sentry + structured logs + Lighthouse CI | Backlog | — |
 | S12 | Launch | Production deploy + backup drill + launch comms | Backlog | — |
 
-Velocity: S1=6, S2=6, S3=3. Slip-trigger (3 consecutive sprints at <5) not triggered.
+Velocity: S1=6, S2=6, S3=6. Slip-trigger (3 consecutive sprints at <5) not triggered.
 
 ---
 
@@ -59,9 +59,9 @@ Velocity: S1=6, S2=6, S3=3. Slip-trigger (3 consecutive sprints at <5) not trigg
 
 ---
 
-## Sprint 3: Curriculum (3/6 pts) — 🟡 In progress
+## Sprint 3: Curriculum (6/6 pts) — ✅ Complete 2026-07-08
 
-**Goal:** Import AMPH-Academy v1 content + build curriculum pages + quiz system.
+**Goal:** Import AMPH-Academy v1 content + build curriculum pages + quiz system + tier-based access.
 
 | Story | Pts | Status | Description |
 |-------|-----|--------|-------------|
@@ -69,9 +69,9 @@ Velocity: S1=6, S2=6, S3=3. Slip-trigger (3 consecutive sprints at <5) not trigg
 | STORY-014: Schema fix (enums→String) | 0.5 | ✅ | Prisma SQLite doesn't support enums. Migrated 20 enums to String + `src/lib/enums.ts` const objects. |
 | STORY-015: Curriculum pages | 1 | ✅ | `/dashboard`, `/dashboard/courses/[slug]`, `/dashboard/courses/[slug]/lessons/[slug]`. MDX render in `src/lib/mdx.ts`. Progress tracking. |
 | STORY-016: Quiz system | 0.5 | ✅ | Server-side scoring, pass/fail result, bonus XP, auto-complete on pass. |
-| STORY-017: Tier gating (deferred) | 0.5 | ⏳ | `requireTier()` helper exists from Sprint 1. Needs UI integration on lesson pages (tier-aware access). |
+| STORY-017: Tier gating (enroll-aware access) | 0.5 | ✅ | `src/lib/tier-gate.ts` evaluates course pricing-tier vs user's highest ACTIVE enrollment. `TierLock` component renders lock screen on lesson/quiz pages. Course index shows lock icon for each lesson under a locked course. Server actions `startLessonAction`, `markLessonCompleteAction`, `submitQuizAction` all enforce the gate. Tier-less courses stay free/always-accessible. Course import script now attaches the PPC Foundations tier by default. |
 
-**Done when:** Student can read lesson, take quiz, see progress, accumulate XP. Tier gating on paid content.
+**Done when:** Student can read lesson, take quiz, see progress, accumulate XP. Tier gating on paid content. **Verified:** users without an enrollment see the lock screen on lesson + quiz pages with upgrade CTAs; users with an ACTIVE enrollment at-or-above the required tier pass through to lesson content. Server actions reject unauthorized POSTs.
 
 ---
 

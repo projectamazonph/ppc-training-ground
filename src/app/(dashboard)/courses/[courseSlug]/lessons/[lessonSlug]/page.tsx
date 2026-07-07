@@ -7,6 +7,8 @@ import { Icon } from '@/components/ui/Icon';
 import { markLessonCompleteAction, startLessonAction } from '@/app/actions/progress';
 import { ProgressStatus } from '@/lib/enums';
 import { renderLesson } from '@/lib/mdx';
+import { evaluateCourseAccess, listActivePricingTiers } from '@/lib/tier-gate';
+import { TierLock } from '@/components/dashboard/TierLock';
 import styles from './lesson.module.css';
 
 interface PageProps {
@@ -24,12 +26,7 @@ export default async function LessonPage({ params }: PageProps) {
   const user = await requireAuth();
   const { courseSlug, lessonSlug } = await params;
 
-  // Start the lesson (creates LessonProgress if not exists, returns current state)
-  await startLessonAction({
-    courseSlug,
-    lessonSlug,
-  });
-
+  // Look up the lesson + course up-front so the gate, progress, and render all share it.
   const lesson = await db.lesson.findUnique({
     where: { slug: lessonSlug, isPublished: true, deletedAt: null },
     include: {
@@ -52,6 +49,33 @@ export default async function LessonPage({ params }: PageProps) {
   });
 
   if (!lesson || lesson.module.course.slug !== courseSlug) notFound();
+
+  // Tier gate — render lock screen for paid content the user cannot access.
+  const gate = await evaluateCourseAccess(user.id, courseSlug);
+  if (!gate.allowed) {
+    const pricingTiers = await listActivePricingTiers();
+    return (
+      <TierLock
+        gate={gate}
+        courseTitle={lesson.module.course.title}
+        pricingTiers={pricingTiers.map((t) => ({
+          id: t.id,
+          slug: t.slug,
+          name: t.name,
+          description: t.description,
+          tier: t.tier,
+          pricePhp: t.pricePhp,
+          features: t.features,
+        }))}
+      />
+    );
+  }
+
+  // Start the lesson (creates LessonProgress if not exists, returns current state)
+  await startLessonAction({
+    courseSlug,
+    lessonSlug,
+  });
 
   // Get progress
   const progress = await db.lessonProgress.findFirst({

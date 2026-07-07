@@ -2,7 +2,7 @@ project:
   name: "AMPH Academy v2"
   level: 3
   initialized: "2026-07-07T15:43:00Z"
-  last_updated: "2026-07-07T20:00:00Z"
+  last_updated: "2026-07-08T20:00:00Z"
 
 current_phase: 4
 current_workflow: "sprint_planning"
@@ -71,7 +71,7 @@ phases:
         completed_at: "2026-07-07"
       stories:
         total: 17
-        completed: 16
+        completed: 17
         in_progress: 0
         story_list:
           - "STORY-001-scaffold"
@@ -90,11 +90,12 @@ phases:
           - "STORY-014-amph-content-import"
           - "STORY-015-curriculum-pages"
           - "STORY-016-quiz-system"
+          - "STORY-017-tier-gating"
 
 metrics:
   total_workflows: 13
   completed_workflows: 10
   progress_percentage: 77
   estimated_stories: 17
-  completed_stories: 16
-  last_updated: "2026-07-07T20:00:00Z"
+  completed_stories: 17
+  last_updated: "2026-07-08T20:00:00Z"

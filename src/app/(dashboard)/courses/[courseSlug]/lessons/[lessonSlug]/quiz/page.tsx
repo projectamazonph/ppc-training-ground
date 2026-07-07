@@ -5,6 +5,8 @@ import { db } from '@/lib/db';
 import { Card, CardHeader, CardTitle, CardDescription, Button, Badge } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
 import { submitQuizAction } from '@/app/actions/progress';
+import { evaluateCourseAccess, listActivePricingTiers } from '@/lib/tier-gate';
+import { TierLock } from '@/components/dashboard/TierLock';
 import styles from './quiz.module.css';
 
 interface PageProps {
@@ -34,6 +36,27 @@ export default async function QuizPage({ params, searchParams }: PageProps) {
 
   if (!lesson || lesson.module.course.slug !== courseSlug) notFound();
   if (!lesson.quiz) notFound();
+
+  // Tier gate — render lock screen for paid content the user cannot access.
+  const gate = await evaluateCourseAccess(user.id, courseSlug);
+  if (!gate.allowed) {
+    const pricingTiers = await listActivePricingTiers();
+    return (
+      <TierLock
+        gate={gate}
+        courseTitle={lesson.module.course.title}
+        pricingTiers={pricingTiers.map((t) => ({
+          id: t.id,
+          slug: t.slug,
+          name: t.name,
+          description: t.description,
+          tier: t.tier,
+          pricePhp: t.pricePhp,
+          features: t.features,
+        }))}
+      />
+    );
+  }
 
   // If ?score=N&passed=true, show result screen
   if (scoreParam !== undefined) {

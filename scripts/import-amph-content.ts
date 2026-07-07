@@ -40,7 +40,8 @@ const COURSE = {
   description:
     'Amazon advertising training for Filipino virtual assistants. Master CPC, ACoS, ROAS, campaign architecture, bidding, search term triage, and competitive intelligence through structured modules and interactive tools.',
   difficulty: 'FOUNDATIONS' as CourseDifficulty,
-  pricingTierId: null as string | null,
+  // Attached at import time by looking up the PPC Foundations PricingTier.
+  pricingTierSlug: 'ppc-foundations',
   estimatedHours: 25,
 };
 
@@ -112,6 +113,12 @@ function makeExcerpt(body: string): string {
 }
 
 async function importCourse(): Promise<string> {
+  // Look up the PricingTier CUID by slug so the course is tiered, not free.
+  const tier = await prisma.pricingTier.findUnique({
+    where: { slug: COURSE.pricingTierSlug },
+    select: { id: true, tier: true },
+  });
+
   const course = await prisma.course.upsert({
     where: { slug: COURSE.slug },
     update: {
@@ -119,6 +126,7 @@ async function importCourse(): Promise<string> {
       description: COURSE.description,
       difficulty: COURSE.difficulty,
       estimatedHours: COURSE.estimatedHours,
+      pricingTierId: tier?.id ?? null,
     },
     create: {
       slug: COURSE.slug,
@@ -126,11 +134,17 @@ async function importCourse(): Promise<string> {
       description: COURSE.description,
       difficulty: COURSE.difficulty,
       estimatedHours: COURSE.estimatedHours,
+      pricingTierId: tier?.id ?? null,
       isPublished: true,
       publishedAt: new Date(),
     },
   });
-  console.log(`  ✓ Course: ${course.title}`);
+
+  if (tier) {
+    console.log(`  ✓ Course: ${course.title} (tier: ${tier.tier})`);
+  } else {
+    console.log(`  ✓ Course: ${course.title} (no tier attached — run prisma/seed.ts first)`);
+  }
   return course.id;
 }
 

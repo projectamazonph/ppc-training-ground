@@ -26,6 +26,7 @@ import {
   Check,
   Warning,
   Info,
+  Lock,
   CaretDown,
   CaretRight,
   CaretLeft,
@@ -78,6 +79,7 @@ export type PhosphorIconName =
   | 'Check'
   | 'Warning'
   | 'Info'
+  | 'Lock'
   | 'CaretDown'
   | 'CaretRight'
   | 'CaretLeft'
@@ -108,6 +110,7 @@ const ICON_MAP: Record<PhosphorIconName, React.ComponentType<PhosphorIconProps>>
   Check,
   Warning,
   Info,
+  Lock,
   CaretDown,
   CaretRight,
   CaretLeft,
