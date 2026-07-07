@@ -1,10 +1,10 @@
 # Sprint Plan — AMPH Academy v2
 
-**Date:** 2026-07-07
+**Date:** 2026-07-08
 **Owner:** Ryan Roland Dabao
-**Status:** Active (16/17 stories shipped across 3 sprints)
+**Status:** Active (22/22 stories shipped across 4 sprints)
 
-Solo developer. Originally 11 sprints at 6 pts/sprint = 11 weeks. Actual: 3 sprints of high-velocity delivery (Sprint 1: 6 pts, Sprint 2: 6 pts, Sprint 3: 3 pts so far).
+Solo developer. Originally 11 sprints at 6 pts/sprint = 11 weeks. Actual: 4 sprints of high-velocity delivery (Sprint 1: 6 pts, Sprint 2: 6 pts, Sprint 3: 6 pts, Sprint 4: 4.5 pts).
 
 | Sprint | Track | Goal | Status | Points |
 |--------|-------|------|--------|--------|
@@ -180,14 +180,15 @@ Velocity: S1=6, S2=6, S3=6, S4=4.5. Slip-trigger (3 consecutive sprints at <5) n
 
 ---
 
-## Done So Far (16/17 in Sprint 1-3, ~55 originally planned but consolidated)
+## Done So Far (22/22 in Sprints 1-4, ~55 originally planned but consolidated)
 
-Sprints 1-3 shipped the foundation, all 5 tool engines + scenarios, content import, and curriculum pages. Roughly 30% of the original 55-story plan.
+Sprints 1-4 shipped the foundation, all 5 tool engines + 30 scenarios, content import, curriculum pages, quiz system, tier gating, and the 5 interactive tool UIs. Roughly 40% of the original 55-story plan.
 
-The remaining 38 stories (Sprints 4-12) are organized into 9 thematic sprints. Each sprint is 1 week of work at the current 6-pt velocity.
+The remaining 33 stories (Sprints 5-12) are organized into 8 thematic sprints. Each sprint is 1 week of work at the current ~6-pt velocity.
 
 ## Notes on Scope Changes from Original Plan
 
 - **Story renumbering**: Sprint 3's import story was originally going to be STORY-013, but Listing Audit and Keyword Research in Sprint 2 already took that number. Renumbered to STORY-013 (import), 014-017 (schema fix, curriculum pages, quiz, tier gating). All renumbered references in the workflow-status story_list updated.
-- **Sprint 3 partial**: Only 3/6 pts done. The remaining 3 pts (tier gating UI integration + maybe content audit) carry into Sprint 4 alongside the tool UIs.
+- **Sprint 3 closing story added**: STORY-017 (tier gating, 0.5 pt) was deferred from the partial Sprint 3 and shipped first thing in the Sprint 4 session, bringing Sprint 3 to 6/6.
+- **Sprint 4 shipped a slightly smaller scope than planned** (4.5 vs 6 pts): the 5 tool UIs all landed but the wizard was tight against its 1.5-pt estimate, so the next-sprint target (Sprint 5 Gamification) starts at 0, not 1.5.
 - **Sprint consolidation**: Original 11 sprints × 6 pts = 66 pts. New plan: 12 sprints × ~6 pts = ~72 pts, with stories compressed where engines shared patterns.

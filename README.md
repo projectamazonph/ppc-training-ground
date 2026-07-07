@@ -12,9 +12,9 @@ Three courses. One outcome: the VA becomes the Amazon ads specialist clients ret
 |--------|--------|---------|
 | **Sprint 1** — Foundation | ✅ Complete (2026-07-07) | 6 / 6 |
 | **Sprint 2** — Tools (5 engines + fixtures) | ✅ Complete (2026-07-07) | 6 / 6 |
-| **Sprint 3** — Curriculum (partial) | 🟡 In progress (3 / 6 pts) | 4 / 5 |
-| **Sprint 4** — Tool UIs | ⏳ Next | 0 / 5 |
-| Sprint 5 — Gamification | Backlog | 0 / 3 |
+| **Sprint 3** — Curriculum + tier gating | ✅ Complete (2026-07-08) | 5 / 5 |
+| **Sprint 4** — Tool UIs | ✅ Complete (2026-07-08) | 5 / 5 |
+| Sprint 5 — Gamification | ⏳ Next | 0 / 3 |
 | Sprint 6 — Payments | Backlog | 0 / 4 |
 | Sprint 7 — Admin | Backlog | 0 / 4 |
 | Sprint 8 — Refunds + Email | Backlog | 0 / 3 |
@@ -22,7 +22,7 @@ Three courses. One outcome: the VA becomes the Amazon ads specialist clients ret
 | Sprint 10 — Tests | Backlog | 0 / 5 |
 | Sprint 11 — Observability | Backlog | 0 / 5 |
 | Sprint 12 — Launch | Backlog | 0 / 4 |
-| **Total** | **17 / 55 stories (31%)** | |
+| **Total** | **22 / 55 stories (40%)** | |
 
 | Layer | Status |
 |-------|--------|
@@ -36,7 +36,7 @@ Three courses. One outcome: the VA becomes the Amazon ads specialist clients ret
 | AMPH v1 content imported (31 lessons, 5 quizzes) | ✅ Complete — `scripts/import-amph-content.ts` |
 | Curriculum pages (dashboard, course, lesson, quiz) | ✅ Complete — `src/app/(dashboard)/` |
 | Voice + copy guide | ✅ Spec complete — `docs/voice-guide.md` |
-| 5 tool interactive UIs | ⏳ Stubbed — full UIs in Sprint 4 |
+| 5 tool interactive UIs | ✅ Complete — `src/components/tools/` (5 client runners + shared `ToolResult`) |
 | Business layer (PayMongo) | ⏳ Spec complete, code in Sprint 6 — `docs/business-layer.md` |
 | Admin panel (full surface) | ⏳ Layout only, full panels in Sprint 7 — `docs/admin-backend.md` |
 | Tests | ❌ Not started (Sprint 10) |
@@ -256,7 +256,7 @@ Every component imports a `.module.css` file that uses `var(--token)` references
 
 ## Sprint Status
 
-Sprints 1-3 shipped the foundation, all 5 tool engines + scenarios, content import, and curriculum pages.
+Sprints 1-4 shipped the foundation, all 5 tool engines + 30 scenarios, content import, curriculum pages, quiz system, tier gating, and the 5 interactive tool UIs.
 
 - Next.js 16 scaffold with TypeScript strict
 - Field Manual design system (60+ tokens, full dark mode)
@@ -266,11 +266,13 @@ Sprints 1-3 shipped the foundation, all 5 tool engines + scenarios, content impo
 - Edge middleware with RBAC for `/admin/*` and `/dashboard/*`
 - 5 tool engines with 30 scenarios (Campaign Builder SP/SB/SD/BTV, Bid Elevator, STR Triage, Listing Audit, Keyword Research)
 - Tool session persistence (save/resume/submit/grade)
-- AMPH v1 content imported (1 course, 9 modules, 31 lessons, 5 quizzes, 30 questions)
+- AMPH v1 content imported (1 course, 9 modules, 31 lessons, 5 quizzes, 30 questions) with $USD→₱PHP currency refactor
 - Curriculum pages: dashboard, course detail, lesson reader, quiz
+- Tier-gated course access (enroll-aware): TierLock screen on lesson/quiz pages, lock icons on course index, server actions enforce the gate
+- 5 interactive tool UIs: Listing Audit form, Keyword Research categorizer, Bid Elevator table, STR Triage triager, Campaign Builder 5-step wizard (BTV-aware)
 - 1 admin + 3 pricing tiers + 5 badges seeded
 
-**Next: Sprint 4 — Tool UIs.** Replace the 5 stub tool runners with real interactive UIs (Campaign Builder wizard, Bid Elevator table editor, STR Triage triager, Listing Audit form, Keyword Research categorizer).
+**Next: Sprint 5 — Gamification.** Auto-award badges from `Badge.criteria` JSON, generate `Certificate` with PDF + verification hash, schedule `LiveClass` with registration + Resend email reminder.
 
 See `docs/sprint-plan.md` for the full roadmap and `bmad/sprint-status.yaml` for current state.
 
