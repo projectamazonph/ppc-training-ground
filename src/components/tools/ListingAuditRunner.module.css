@@ -1,0 +1,219 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5, 1.25rem);
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.listingPreview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 0.75rem);
+  margin: 0;
+}
+
+.listingPreview > div {
+  padding: var(--space-3, 0.75rem);
+  background: var(--surface-2, rgba(15, 23, 42, 0.03));
+  border-radius: var(--radius-md, 8px);
+}
+
+.listingPreview dt {
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: 600;
+  color: var(--ink-500, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-1, 0.25rem);
+}
+
+.listingPreview dd {
+  margin: 0;
+  color: var(--ink-900, #0f172a);
+  line-height: 1.5;
+}
+
+.listingPreview ul {
+  margin: 0;
+  padding-left: var(--space-4, 1rem);
+}
+
+.metaRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-2, 0.5rem);
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.metaRow > div {
+  text-align: center;
+}
+
+.metaRow dd {
+  font-size: var(--text-lg, 1.125rem);
+  font-weight: 600;
+}
+
+.findingsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 0.5rem);
+}
+
+.findingItem {
+  border: 1px solid var(--border, rgba(15, 23, 42, 0.1));
+  border-radius: var(--radius-md, 8px);
+  background: var(--surface-1, #fff);
+  transition: border-color var(--duration-fast, 120ms) var(--ease-out, ease);
+}
+
+.findingItem[data-checked='true'] {
+  border-color: var(--warning, #d97706);
+  background: var(--warning-bg, rgba(245, 158, 11, 0.04));
+}
+
+.findingLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3, 0.75rem);
+  padding: var(--space-3, 0.75rem);
+  cursor: pointer;
+}
+
+.findingLabel input {
+  margin-top: 4px;
+}
+
+.findingIcon {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.findingIcon[data-severity='good'] {
+  background: var(--success-bg, rgba(34, 197, 94, 0.12));
+  color: var(--success, #16a34a);
+}
+
+.findingIcon[data-severity='warning'] {
+  background: var(--warning-bg, rgba(245, 158, 11, 0.12));
+  color: var(--warning, #d97706);
+}
+
+.findingIcon[data-severity='critical'] {
+  background: var(--danger-bg, rgba(220, 38, 38, 0.12));
+  color: var(--danger, #dc2626);
+}
+
+.findingField {
+  font-weight: 600;
+  text-transform: capitalize;
+  color: var(--ink-900, #0f172a);
+}
+
+.findingHint {
+  font-size: var(--text-sm, 0.875rem);
+  color: var(--ink-500, #64748b);
+  margin-top: 2px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4, 1rem);
+  margin-top: var(--space-3, 0.75rem);
+}
+
+.formGrid label,
+.bulletsLabel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1, 0.25rem);
+  font-size: var(--text-sm, 0.875rem);
+  color: var(--ink-700, #334155);
+  font-weight: 500;
+}
+
+.formGrid input,
+.formGrid textarea {
+  font: inherit;
+  padding: var(--space-2, 0.5rem);
+  border: 1px solid var(--border, rgba(15, 23, 42, 0.15));
+  border-radius: var(--radius-sm, 4px);
+  background: var(--surface-1, #fff);
+  color: var(--ink-900, #0f172a);
+}
+
+.formGrid input:focus,
+.formGrid textarea:focus {
+  outline: 2px solid var(--accent, #0f172a);
+  outline-offset: 1px;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.checkboxLabel {
+  flex-direction: row !important;
+  align-items: center;
+  gap: var(--space-2, 0.5rem) !important;
+}
+
+.bulletRow {
+  display: flex;
+  gap: var(--space-2, 0.5rem);
+  margin-bottom: var(--space-2, 0.5rem);
+}
+
+.bulletRow input {
+  flex: 1;
+  font: inherit;
+  padding: var(--space-2, 0.5rem);
+  border: 1px solid var(--border, rgba(15, 23, 42, 0.15));
+  border-radius: var(--radius-sm, 4px);
+}
+
+.removeBtn {
+  background: transparent;
+  border: 1px solid var(--border, rgba(15, 23, 42, 0.15));
+  border-radius: var(--radius-sm, 4px);
+  padding: var(--space-2, 0.5rem);
+  cursor: pointer;
+  color: var(--ink-500, #64748b);
+}
+
+.removeBtn:hover {
+  color: var(--danger, #dc2626);
+  border-color: var(--danger, #dc2626);
+}
+
+.error {
+  color: var(--danger, #dc2626);
+  font-size: var(--text-sm, 0.875rem);
+  margin: 0;
+}
+
+.submitRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4, 1rem);
+  padding-top: var(--space-4, 1rem);
+  border-top: 1px solid var(--border, rgba(15, 23, 42, 0.1));
+}
+
+.hint {
+  font-size: var(--text-sm, 0.875rem);
+  color: var(--ink-500, #64748b);
+  margin: 0;
+  flex: 1;
+}

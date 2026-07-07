@@ -11,8 +11,8 @@ Solo developer. Originally 11 sprints at 6 pts/sprint = 11 weeks. Actual: 3 spri
 | S1 | Foundation | Next.js scaffold + design system + auth + admin layout | ✅ Complete | 6 / 6 |
 | S2 | Tools | Campaign Builder + Bid Elevator + STR Triage + Listing Audit + Keyword Research engines + fixtures + UI shell | ✅ Complete | 6 / 6 |
 | S3 | Curriculum | Content import + curriculum pages + quiz system + tier gating UI | ✅ Complete | 6 / 6 |
-| S4 | Tool UIs | Replace Sprint 2 stub runners with real interactive UIs | ⏳ Next | — |
-| S5 | Gamification | Badges auto-award + Certificates + Live Classes | Backlog | — |
+| S4 | Tool UIs | Replace Sprint 2 stub runners with real interactive UIs | ✅ Complete | 4.5 / 4.5 |
+| S5 | Gamification | Badges auto-award + Certificates + Live Classes | ⏳ Next | — |
 | S6 | Payments | PayMongo Checkout + Enrollment + Tier gating | Backlog | — |
 | S7 | Admin | Full admin panel (users, courses, content, payments, audit) | Backlog | — |
 | S8 | Refunds + Email | Refund flow + Resend templates + receipts | Backlog | — |
@@ -21,7 +21,7 @@ Solo developer. Originally 11 sprints at 6 pts/sprint = 11 weeks. Actual: 3 spri
 | S11 | Observability | Sentry + structured logs + Lighthouse CI | Backlog | — |
 | S12 | Launch | Production deploy + backup drill + launch comms | Backlog | — |
 
-Velocity: S1=6, S2=6, S3=6. Slip-trigger (3 consecutive sprints at <5) not triggered.
+Velocity: S1=6, S2=6, S3=6, S4=4.5. Slip-trigger (3 consecutive sprints at <5) not triggered.
 
 ---
 
@@ -75,17 +75,19 @@ Velocity: S1=6, S2=6, S3=6. Slip-trigger (3 consecutive sprints at <5) not trigg
 
 ---
 
-## Sprint 4: Tool UIs (next)
+## Sprint 4: Tool UIs (4.5/4.5 pts) — ✅ Complete 2026-07-08
 
 **Goal:** Replace Sprint 2 stub runners with real interactive UIs for all 5 tools.
 
-| Story | Pts | Description |
-|-------|-----|-------------|
-| STORY-018: Campaign Builder wizard | 1.5 | 5-step Amazon-style wizard: campaign settings → bidding → ad group → targets → review. BTV uses audience step instead of targets. Save/load via existing server actions. |
-| STORY-019: Bid Elevator table | 1 | Keyword performance table (synthetic). Editable bid input per row. Auto-evaluate budget compliance. Submit + score. |
-| STORY-020: STR Triage triager | 1 | Term-by-term decision flow. Show search term + performance + suggested action. Pick keep/pause/negate/bid. Submit + score. |
-| STORY-021: Listing Audit form | 0.5 | Show current listing (with issues auto-flagged). Student selects findings + revises listing. Submit + score. |
-| STORY-022: Keyword Research categorizer | 0.5 | Show candidate pool. Categorize each as PRIMARY/SECONDARY/NEGATIVE. Flag negatives. Submit + score. |
+| Story | Pts | Status | Description |
+|-------|-----|--------|-------------|
+| STORY-021: Listing Audit form | 0.5 | ✅ | `src/components/tools/ListingAuditRunner.tsx`. 2-step form: flag issues with checkboxes per field (title/bullets/description/images/aplus/pricing/reviews) → revise the listing (title + bullets with add/remove, description, image count, A+ toggle, price, review count, rating). |
+| STORY-022: Keyword Research categorizer | 0.5 | ✅ | `src/components/tools/KeywordResearchRunner.tsx`. Per-candidate row with relevance/volume/competition metric chips + optional notes + 3-button priority picker (PRIMARY/SECONDARY/NEGATIVE). Live count summary at top. Submit blocked until every candidate is classified. |
+| STORY-019: Bid Elevator table | 1 | ✅ | `src/components/tools/BidElevatorRunner.tsx`. Per-keyword row in a 10-column table: keyword + match + current bid + impression/click/order/spend/sales/ACoS + editable new bid input. Highlights rows where ACoS exceeds target. Summary card shows projected daily spend, budget headroom, count of bids changed. Warning when total new bids exceed the daily budget. |
+| STORY-020: STR Triage triager | 1 | ✅ | `src/components/tools/StrTriageRunner.tsx`. Per-term card: search term + matched keyword + match type + 8-cell performance grid + 5-action picker (keep/optimize-bid/pause/negate-exact/negate-phrase). Conditional subfields: optimize-bid reveals new-bid input; negate-* reveals negative-keyword input. Live count summary at top. Submit blocked while any term is pending. |
+| STORY-018: Campaign Builder wizard | 1.5 | ✅ | `src/components/tools/CampaignBuilderRunner.tsx`. 5-step wizard with stepper indicator: campaign settings (name, type as card picker filtered by scenario's allowedCampaignTypes, start/end date, daily budget) → bidding (strategy from allowedBidStrategies + default bid) → ad group → targets (keywords + product targets as add/remove rows) OR audiences (BTV swap) → review (full draft display with warnings). Per-step validation gates Next button. BTV scenario switches the targets step to an audiences step and resets the bid strategy to CPM_FIXED. Reuses `startToolSession` + `saveToolSession` + `submitToolSession`; engine unchanged. |
+
+**Done when:** All 5 tools accept student input, validate against scenario constraints, and submit for grading via the existing server actions. **Verified:** `pnpm typecheck` shows zero new TS errors attributable to Sprint 4 (baseline 36 unchanged). All new files pass the no-ai-slop rule. Engine + scoring + scenarios + session persistence (Sprint 2) unchanged.
 
 ---
 

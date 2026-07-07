@@ -1,56 +1,65 @@
 sprint:
-  number: 3
-  name: "Curriculum"
-  start_date: "2026-07-07"
+  number: 4
+  name: "Tool UIs"
+  start_date: "2026-07-08"
   end_date: "2026-07-08"
   status: "completed"
 
 capacity:
-  planned_points: 6
-  velocity: 6
+  planned_points: 4.5
+  velocity: 4.5
   buffer_points: 0
 
 stories:
-  - id: "STORY-014"
-    title: "Import AMPH-Academy v1 content (31 MDX lessons + 5 quizzes + 30 questions)"
-    points: 1
-    status: "completed"
-    sprint: 3
-    epic: "Curriculum"
-    owner: "Ryan"
-    notes: "scripts/import-amph-content.ts pulls from /storage/.../AMPH-Academy/project/content. Idempotent upsert by slug. Currency refactor: $USD → ₱PHP (e.g., $24.99 → ₱1,250 (about $24.99))."
-
-  - id: "STORY-015"
-    title: "Schema fix: enums → String + app-layer enums.ts"
+  - id: "STORY-021"
+    title: "Listing Audit form UI"
     points: 0.5
     status: "completed"
-    sprint: 3
-    epic: "Curriculum"
+    sprint: 4
+    epic: "Tools"
     owner: "Ryan"
-    notes: "Prisma SQLite does not support enums. Removed 20 enums from schema.prisma, created src/lib/enums.ts with const-object pattern. Updated all Sprint 1-2 imports."
+    notes: "src/components/tools/ListingAuditRunner.tsx. 2-step form: (1) flag issues with checkboxes per field (title/bullets/description/images/aplus/pricing/reviews), (2) revise the listing (title/bullets array with add/remove, description, image count, A+ toggle, price, review count, rating). Reuses startToolSession + saveToolSession + submitToolSession. ToolResult shows the grade breakdown."
 
-  - id: "STORY-016"
-    title: "Course/Module/Lesson pages (MDX render, navigation, progress tracking)"
-    points: 1
-    status: "completed"
-    sprint: 3
-    epic: "Curriculum"
-    owner: "Ryan"
-    notes: "/dashboard, /dashboard/courses/[slug], /dashboard/courses/[slug]/lessons/[slug]. src/lib/mdx.ts is a lightweight markdown→HTML renderer (headings, paragraphs, bold/italic, code, lists, blockquotes)."
-
-  - id: "STORY-017"
-    title: "Tier gating (enroll-aware access)"
+  - id: "STORY-022"
+    title: "Keyword Research categorizer UI"
     points: 0.5
     status: "completed"
-    sprint: 3
-    epic: "Curriculum"
+    sprint: 4
+    epic: "Tools"
     owner: "Ryan"
-    notes: "src/lib/tier-gate.ts evaluates course pricing-tier vs user's highest ACTIVE enrollment. TierLock component renders lock screen on lesson/quiz pages. Course index shows lock icon for each lesson under a locked course. Server actions startLessonAction, markLessonCompleteAction, submitQuizAction all enforce the gate. Tier-less courses stay free/always-accessible. Course import script (scripts/import-amph-content.ts) now attaches the PPC Foundations tier by default."
+    notes: "src/components/tools/KeywordResearchRunner.tsx. Per-candidate row: keyword + relevance/volume/competition metric chips + optional notes input + 3-button priority picker (PRIMARY/SECONDARY/NEGATIVE). Live count summary at top (4 buckets). Submit blocked until every candidate is classified."
+
+  - id: "STORY-019"
+    title: "Bid Elevator table UI"
+    points: 1
+    status: "completed"
+    sprint: 4
+    epic: "Tools"
+    owner: "Ryan"
+    notes: "src/components/tools/BidElevatorRunner.tsx. Per-keyword row in a 10-column table: keyword + match + current bid + impression/click/order/spend/sales/ACoS + editable new bid input. Highlight rows where ACoS exceeds target. Live summary card shows projected daily spend, budget headroom, count of bids changed. Warning when total new bids exceed the daily budget."
+
+  - id: "STORY-020"
+    title: "STR Triage triager UI"
+    points: 1
+    status: "completed"
+    sprint: 4
+    epic: "Tools"
+    owner: "Ryan"
+    notes: "src/components/tools/StrTriageRunner.tsx. Per-term card: search term + matched keyword + match type + 8-cell performance grid + 5-action picker (keep/optimize-bid/pause/negate-exact/negate-phrase). Conditional subfields: optimize-bid reveals new-bid input; negate-* reveals negative-keyword input (defaulted to the term). Live count summary at top. Submit blocked while any term is pending."
+
+  - id: "STORY-018"
+    title: "Campaign Builder wizard UI"
+    points: 1.5
+    status: "completed"
+    sprint: 4
+    epic: "Tools"
+    owner: "Ryan"
+    notes: "src/components/tools/CampaignBuilderRunner.tsx. 5-step wizard with stepper indicator: campaign settings (name, type as card picker filtered by scenario's allowedCampaignTypes, start/end date, daily budget) -> bidding (strategy from allowedBidStrategies + default bid) -> ad group (name) -> targets (keywords + product targets as add/remove rows) OR audiences (BTV swap) -> review (full draft display with warnings). Per-step validation gates Next button. BTV scenario switches the targets step to an audiences step and resets the bid strategy to CPM_FIXED. Reuses startToolSession + saveToolSession + submitToolSession; engine unchanged."
 
 burndown:
   - day: 0
-    ideal_remaining: 6
-    actual_remaining: 6
+    ideal_remaining: 4.5
+    actual_remaining: 4.5
   - day: 1
     ideal_remaining: 0
     actual_remaining: 0
@@ -65,7 +74,10 @@ velocity_history:
   - sprint: 3
     points: 6
     completed_date: "2026-07-08"
+  - sprint: 4
+    points: 4.5
+    completed_date: "2026-07-08"
 
 completion_percentage: 100
 remaining_points: 0
-last_updated: "2026-07-08T20:00:00Z"
+last_updated: "2026-07-08T22:00:00Z"

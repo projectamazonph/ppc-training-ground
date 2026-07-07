@@ -1,0 +1,180 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5, 1.25rem);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.targetsRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-3, 0.75rem);
+  margin-top: var(--space-3, 0.75rem);
+}
+
+.targetStat {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+  background: var(--surface-2, rgba(15, 23, 42, 0.04));
+  border-radius: var(--radius-md, 8px);
+}
+
+.targetLabel {
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--ink-500, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.targetValue {
+  font-size: var(--text-lg, 1.125rem);
+  font-weight: 700;
+  color: var(--ink-900, #0f172a);
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.bidTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm, 0.875rem);
+}
+
+.bidTable th,
+.bidTable td {
+  text-align: left;
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+  border-bottom: 1px solid var(--border, rgba(15, 23, 42, 0.08));
+}
+
+.bidTable th {
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--ink-500, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  background: var(--surface-2, rgba(15, 23, 42, 0.02));
+}
+
+.bidTable tr[data-changed='true'] {
+  background: var(--info-bg, rgba(37, 99, 235, 0.04));
+}
+
+.bidTable tr[data-acos='high'] td:last-child,
+.bidTable tr[data-acos='high'] td:nth-child(9) {
+  color: var(--warning, #d97706);
+  font-weight: 600;
+}
+
+.keywordCell {
+  font-weight: 500;
+  color: var(--ink-900, #0f172a);
+}
+
+.numCell {
+  font-variant-numeric: tabular-nums;
+  text-align: right !important;
+  color: var(--ink-700, #334155);
+  white-space: nowrap;
+}
+
+.bidInputCell {
+  text-align: right !important;
+  white-space: nowrap;
+}
+
+.bidInputCell input {
+  font: inherit;
+  font-size: var(--text-sm, 0.875rem);
+  width: 80px;
+  padding: 4px 8px;
+  border: 1px solid var(--border, rgba(15, 23, 42, 0.15));
+  border-radius: var(--radius-sm, 4px);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.bidInputCell input:focus {
+  outline: 2px solid var(--accent, #0f172a);
+  outline-offset: 1px;
+}
+
+.pesoSign {
+  font-weight: 600;
+  color: var(--ink-500, #64748b);
+  margin-right: 2px;
+}
+
+.previewCard {
+  background: var(--surface-2, rgba(15, 23, 42, 0.04));
+}
+
+.previewCard[data-over='true'] {
+  background: var(--warning-bg, rgba(245, 158, 11, 0.06));
+  border-color: var(--warning, #d97706);
+}
+
+.previewRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-4, 1rem);
+}
+
+.previewLabel {
+  display: block;
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--ink-500, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.previewValue {
+  display: block;
+  font-size: var(--text-xl, 1.25rem);
+  font-weight: 700;
+  color: var(--ink-900, #0f172a);
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.previewValue[data-positive='false'] {
+  color: var(--danger, #dc2626);
+}
+
+.warning {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  margin: var(--space-3, 0.75rem) 0 0;
+  font-size: var(--text-sm, 0.875rem);
+  color: var(--warning, #d97706);
+}
+
+.error {
+  color: var(--danger, #dc2626);
+  font-size: var(--text-sm, 0.875rem);
+  margin: 0;
+}
+
+.submitRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4, 1rem);
+  padding-top: var(--space-4, 1rem);
+  border-top: 1px solid var(--border, rgba(15, 23, 42, 0.1));
+}
+
+.hint {
+  font-size: var(--text-sm, 0.875rem);
+  color: var(--ink-500, #64748b);
+  margin: 0;
+  flex: 1;
+}
