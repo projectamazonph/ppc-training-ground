@@ -11,9 +11,11 @@
  */
 
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardDescription, Button, Badge } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
 import { db } from '@/lib/db';
+import { getSession } from '@/lib/auth';
 import { CheckoutStatus } from '@/lib/enums';
 import styles from './complete.module.css';
 
@@ -57,6 +59,18 @@ export default async function CheckoutCompletePage({ searchParams }: PageProps) 
   }
 
   if (checkout.status === CheckoutStatus.PAID) {
+    // STORY-027: guest checkout completion.
+    // If the payer isn't signed in, force them through /auth/signup to
+    // claim their placeholder account. Email is forwarded so the form
+    // prefills. After signup, they're redirected back here and signed in,
+    // so the next render falls through to SuccessCard below.
+    const session = await getSession();
+    if (!session) {
+      const params = new URLSearchParams({ email: checkout.email });
+      if (returnUrl) params.set('next', `/checkout/complete?returnUrl=${encodeURIComponent(returnUrl)}`);
+      else params.set('next', '/checkout/complete');
+      redirect(`/auth/signup?${params.toString()}`);
+    }
     return <SuccessCard tierName={checkout.pricingTier.name} />;
   }
 

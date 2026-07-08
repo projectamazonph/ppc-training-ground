@@ -7,7 +7,13 @@ import { Toast } from '@/components/ui/Toast';
 import { signUpAction } from '@/app/actions/auth';
 import styles from '../signin/auth.module.css';
 
-export function SignUpForm({ error: initialError }: { error: string | null }) {
+interface SignUpFormProps {
+  error: string | null;
+  prefilledEmail?: string;
+  nextUrl?: string;
+}
+
+export function SignUpForm({ error: initialError, prefilledEmail = '', nextUrl = '/' }: SignUpFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(initialError);
@@ -27,7 +33,9 @@ export function SignUpForm({ error: initialError }: { error: string | null }) {
       name: (formData.get('name') as string) || undefined,
     });
     if (result.success) {
-      router.push('/');
+      // STORY-027: respect the `next` param so guest checkout returns to
+      // /checkout/complete (now signed in → falls through to SuccessCard).
+      router.push(nextUrl || '/');
       router.refresh();
       toast('Account created', 'success');
     } else {
@@ -39,7 +47,16 @@ export function SignUpForm({ error: initialError }: { error: string | null }) {
     <form action={(formData) => startTransition(() => handleSubmit(formData))} className={styles.form}>
       {error && <div className={styles.errorBanner} role="alert">{error}</div>}
       <Input label="Name" type="text" name="name" autoComplete="name" placeholder="Maria Cruz" />
-      <Input label="Email" type="email" name="email" autoComplete="email" required placeholder="[email protected]" />
+      <Input
+        label="Email"
+        type="email"
+        name="email"
+        autoComplete="email"
+        required
+        defaultValue={prefilledEmail}
+        hint={prefilledEmail ? 'From your checkout. Change if needed.' : undefined}
+        placeholder="[email protected]"
+      />
       <Input label="Password" type="password" name="password" autoComplete="new-password" required hint="At least 8 characters." />
       <Input label="Confirm password" type="password" name="confirm" autoComplete="new-password" required />
       <Button type="submit" variant="primary" size="lg" fullWidth loading={isPending}>

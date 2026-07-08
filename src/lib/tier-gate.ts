@@ -120,6 +120,47 @@ export async function evaluateCourseAccess(
 }
 
 /**
+ * Tier check helper for server actions / pages that want to throw on denial
+ * instead of branching on the structured result. Returns the same shape so
+ * the caller can pull `userTier` for messaging if needed.
+ *
+ * Used by progress actions in `src/app/actions/progress.ts` as belt-and-
+ * suspenders next to the page-level `<TierLock>` render: pages gate visually,
+ * actions gate server-side so direct POSTs can't bypass the lock.
+ */
+export class TierAccessDeniedError extends Error {
+  reason: string;
+  userTier: CourseTier | null;
+  requiredTier: CourseTier | null;
+  constructor(
+    reason: string,
+    userTier: CourseTier | null,
+    requiredTier: CourseTier | null,
+  ) {
+    super(`Tier access denied: ${reason}`);
+    this.name = 'TierAccessDeniedError';
+    this.reason = reason;
+    this.userTier = userTier;
+    this.requiredTier = requiredTier;
+  }
+}
+
+export async function requireCourseAccess(
+  userId: string,
+  courseSlug: string,
+): Promise<Extract<Awaited<ReturnType<typeof evaluateCourseAccess>>, { allowed: true }>> {
+  const result = await evaluateCourseAccess(userId, courseSlug);
+  if (result.allowed === false) {
+    throw new TierAccessDeniedError(
+      result.reason,
+      result.userTier,
+      result.requiredTier,
+    );
+  }
+  return result;
+}
+
+/**
  * Convenience helper for server actions / pages that just want a boolean.
  */
 export async function userCanAccessCourse(

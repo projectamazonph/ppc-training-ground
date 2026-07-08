@@ -24,9 +24,13 @@ stories:
   - id: "STORY-027"
     title: "Tie Enrollment to Payment — verified payments grant tier-gated course access"
     points: 1
-    status: "pending"
+    status: "completed"
     sprint: 6
     epic: "Payments"
+    owner: "Ryan"
+    started_date: "2026-07-10"
+    completed_date: "2026-07-10"
+    notes: "Guest checkout completion flow: /checkout/complete detects no session + paid checkout → redirects to /auth/signup?email=<checkout.email>&next=/checkout/complete. SignUpForm pre-fills email (editable, with hint), respects ?next= for return URL. signUpAction upgraded to claim placeholder accounts (passwordHash starts with `placeholder_`) — replaces hash, sets name + emailVerified in place. /pricing page on flow close. Seed script adds grandfatherFreeEnrollment() — any pre-existing user without an enrollment gets a backdated ACTIVE Enrollment at PPC_FOUNDATIONS so the tier gate doesn't lock the curriculum post-launch. tier-gate.ts gains TierAccessDeniedError + requireCourseAccess() helper for future server-action use. TypeScript 0 errors. AI-slop scan clean."
 
   - id: "STORY-028"
     title: "Refund flow — student request, admin approval, PayMongo refund call"
@@ -64,9 +68,9 @@ velocity_history:
     points: 3.5
     completed_date: "2026-07-09"
   - sprint: 6
-    points: 1
-    completed_date: "2026-07-09"
+    points: 2
+    completed_date: "2026-07-10"
 
-completion_percentage: 25
-remaining_points: 3
-last_updated: "2026-07-09T20:30:00Z"
+completion_percentage: 50
+remaining_points: 2
+last_updated: "2026-07-10T13:00:00Z"

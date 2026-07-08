@@ -27,8 +27,35 @@ import {
 
 export const signUpAction = createSafeAction(signUpSchema, async (data) => {
   const existing = await db.user.findUnique({ where: { email: data.email } });
+
+  // Two sign-up cases:
+  //   1. New email — create a fresh STUDENT user.
+  //   2. Existing email with `placeholder_<uuid>` passwordHash — guest checkout
+  //      created this account; the user is now claiming it by setting a real
+  //      password. Upgrade in place: replace hash, set name, mark verified.
+  //   3. Existing email with a real passwordHash — email is taken.
   if (existing) {
-    throw new Error('An account with that email already exists.');
+    const isPlaceholder =
+      existing.passwordHash && existing.passwordHash.startsWith('placeholder_');
+    if (!isPlaceholder) {
+      throw new Error('An account with that email already exists.');
+    }
+    const upgraded = await db.user.update({
+      where: { id: existing.id },
+      data: {
+        name: data.name ?? existing.name,
+        passwordHash: hashPassword(data.password),
+        emailVerified: new Date(),
+      },
+    });
+    const token = await signToken({
+      sub: upgraded.id,
+      email: upgraded.email,
+      role: upgraded.role,
+      name: upgraded.name,
+    });
+    await setAuthCookie(token);
+    return { userId: upgraded.id };
   }
 
   const user = await db.user.create({

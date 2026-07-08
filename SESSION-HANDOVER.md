@@ -1,7 +1,7 @@
 # Session Handover — AMPH Academy v2
 
-**Session date:** 2026-07-07 to 2026-07-09 (Sprints 1–6 partial — Sprint 5 closed + Sprint 6 STORY-026 shipped)
-**Last commit:** fdfa8af feat(payments): STORY-026 — PayMongo checkout, webhook, public pricing
+**Session date:** 2026-07-07 to 2026-07-10 (Sprints 1–6 partial — Sprint 5 closed + Sprint 6 STORY-026 + STORY-027 shipped)
+**Last commit:** feat(payments): STORY-027 — guest signup completion + grandfather seed
 **Repo:** github.com/projectamazonph/amph-v2
 
 ## What this session accomplished
@@ -36,17 +36,11 @@ most recent — completed 2026-07-09.
   - `src/app/actions/live-classes.ts`: registerForLiveClass (ULTIMATE tier gate server-side, capacity check, idempotent restore-or-create), cancelLiveClassRegistration, listMyRegistrations
   - Pages: `/dashboard/live-classes` (index, register buttons, upgrade prompt for non-Ultimate), `/dashboard/live-classes/[id]` (detail with join button + seat progress)
   - Email reminder stubbed (Sprint 8 wires Resend templates)
-  **Next: Sprint 6 STORY-027.** Enrollment + tier-gating flow tied to payments. THREE questions answered for next session:
-
-  1. Guest checkout post-payment flow: A (Set your password page), B (force signup), or C (just /dashboard with redirect)?
-  2. Existing users grandfathered with FREE PPC enrollment at seed? A yes / B no
-  3. Should I dive into STORY-027 in next session, or stop after STORY-026?
-
-  See `docs/business-layer.md` for the full payments spec. The library code (enrollment.ts, paymongo.ts, webhook-signature.ts, pricing.ts) is in place; what's missing is the guest signup completion page and the explicit requireTier checks on lesson/quiz actions.
+  **Next: Sprint 6 STORY-028.** Refund flow — student request page + admin approval + PayMongo refund call. `refundPayment()` already in `paymongo.ts`. UI not yet.
 
   ## What's NOT done (deferred)
 
-  - **STORY-027 → STORY-029** — Guest checkout completion page, refund flow, BIR-compliant receipt PDFs.
+  - **STORY-028 → STORY-029** — Refund flow, BIR-compliant receipt PDFs.
   - **Sprint 7: Admin panels** — user/course/payment/audit management
   - **Sprint 8: Email templates** — Resend (live class reminder belongs here, currently stubbed in code)
   - **Sprint 9: Polish** — voice-guide audit, accessibility
@@ -54,6 +48,14 @@ most recent — completed 2026-07-09.
   - **Observability** (Sprint 11) — Sentry, structured logs
   - **End-to-end runtime verification** — `pnpm dev` not run in this sandbox (no Node). All code is type-correct at the structure level; final verification happens locally.
   - **Git push** — no remote configured. Next session: `git remote -v` to verify origin, then `git push origin main --tags`.
+
+  ## STORY-027 what shipped (2026-07-10)
+
+  - **Guest checkout completion** — `/checkout/complete` detects no session + paid checkout → redirects to `/auth/signup?email=<checkout.email>&next=/checkout/complete`. After signup the user returns to the same /checkout/complete URL, now signed in, and falls through to `SuccessCard`.
+  - **SignUpForm prefills email** — query params `?email` and `?next` are honored. Email is editable (with hint) so users can correct a typo; `?next` controls the post-submit redirect target.
+  - **Placeholder account claim** — `signUpAction` detects `passwordHash` starting with `placeholder_` (set by `enrollment.ts:findOrCreateUserByEmail` during guest checkout) and upgrades in place: replace hash, set name, mark emailVerified. Real accounts with an existing hash still get the "email already exists" error.
+  - **Grandfather free enrollment** — `prisma/seed.ts` runs `grandfatherFreeEnrollment()` after tier/badge setup. Any user without an existing (non-deleted) enrollment gets a backdated ACTIVE Enrollment at PPC_FOUNDATIONS so the tier gate doesn't lock the curriculum for admin or pre-payment dev users. Idempotent (upsert).
+  - **`requireCourseAccess()` helper** — `src/lib/tier-gate.ts` adds `TierAccessDeniedError` + `requireCourseAccess(userId, slug)` for future server-action use. Existing progress actions still use inline `evaluateCourseAccess` — no regression.
 
 ## Critical context for next session
 

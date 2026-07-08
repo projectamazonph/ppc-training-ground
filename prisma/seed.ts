@@ -16,6 +16,7 @@ import {
   CourseTier,
   BadgeCategory,
   BadgeTier,
+  EnrollmentStatus,
 } from '../src/lib/enums';
 import { randomBytes, scryptSync } from 'node:crypto';
 
@@ -312,6 +313,61 @@ async function upsertLiveClasses(): Promise<void> {
   console.log(`  ✓ live classes: ${classes.length}`);
 }
 
+async function grandfatherFreeEnrollment(): Promise<void> {
+  // STORY-027: any pre-existing user (admin + any earlier dev users from
+  // before payments existed) gets a free PPC Foundations enrollment so the
+  // tier gate doesn't lock the curriculum. Idempotent — skips users who
+  // already have any non-deleted enrollment at any status.
+  const tier = await prisma.pricingTier.findUnique({
+    where: { slug: 'ppc-foundations' },
+    select: { id: true, tier: true },
+  });
+  if (!tier) {
+    console.log('  ⚠ ppc-foundations tier missing — skipping grandfather');
+    return;
+  }
+  const course = await prisma.course.findFirst({
+    where: { pricingTierId: tier.id, deletedAt: null },
+    select: { id: true },
+  });
+  if (!course) {
+    console.log('  ⚠ no course bound to ppc-foundations — skipping grandfather');
+    return;
+  }
+
+  const candidates = await prisma.user.findMany({
+    where: {
+      enrollments: { none: { deletedAt: null } },
+    },
+    select: { id: true, email: true },
+  });
+
+  if (candidates.length === 0) {
+    console.log('  ✓ grandfather: 0 users needed backfill');
+    return;
+  }
+
+  let created = 0;
+  for (const u of candidates) {
+    await prisma.enrollment.upsert({
+      where: { userId_courseId: { userId: u.id, courseId: course.id } },
+      update: {},
+      create: {
+        userId: u.id,
+        courseId: course.id,
+        pricingTierId: tier.id,
+        tier: tier.tier,
+        status: EnrollmentStatus.ACTIVE,
+        // Backdate so the timeline reflects "this user had access before
+        // payments launched" rather than "right now at seed time".
+        enrolledAt: new Date('2026-07-01T00:00:00Z'),
+      },
+    });
+    created += 1;
+  }
+  console.log(`  ✓ grandfather: ${created} user(s) → free PPC Foundations`);
+}
+
 async function main(): Promise<void> {
   console.log('Seeding AMPH Academy v2...\n');
 
@@ -319,6 +375,7 @@ async function main(): Promise<void> {
   await upsertPricingTiers();
   await upsertBadges();
   await upsertLiveClasses();
+  await grandfatherFreeEnrollment();
 
   console.log('\nSeed complete.');
   console.log(`\nSign in with: ${process.env.ADMIN_EMAIL ?? '[email protected]'}`);
