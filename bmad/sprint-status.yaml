@@ -14,11 +14,12 @@ stories:
   - id: "STORY-026"
     title: "PayMongo Checkout — webhook + signature verify + idempotency"
     points: 1
-    status: "in_progress"
+    status: "completed"
     sprint: 6
     epic: "Payments"
     owner: "Ryan"
-    notes: "src/lib/paymongo.ts (client), src/lib/webhook-signature.ts (HMAC SHA-256 verify), src/app/api/paymongo/webhook/route.ts (POST handler, idempotency table). Idempotency table already in Prisma schema (PayMongoEvent unique on providerEventId). Scaffolding files staged in working tree."
+    completed_date: "2026-07-09"
+    notes: "Shipped in commit fdfa8af. POST /api/paymongo/webhook with HMAC-SHA256 signature verify against PAYMONGO_WEBHOOK_SECRET + ProcessedWebhook idempotency log (unique on paymongoEventId). Public /pricing page with 3-tier layout + CheckoutButton calling createCheckoutSessionAction. /checkout/complete page with success/pending/failed states. Library code (paymongo.ts, webhook-signature.ts, enrollment.ts, pricing.ts, checkout.ts) all wired. Migration 20260708042743 applied. TypeScript 0 errors."
 
   - id: "STORY-027"
     title: "Tie Enrollment to Payment — verified payments grant tier-gated course access"
@@ -62,7 +63,10 @@ velocity_history:
   - sprint: 5
     points: 3.5
     completed_date: "2026-07-09"
+  - sprint: 6
+    points: 1
+    completed_date: "2026-07-09"
 
-completion_percentage: 0
-remaining_points: 4
-last_updated: "2026-07-09T19:45:00Z"
+completion_percentage: 25
+remaining_points: 3
+last_updated: "2026-07-09T20:30:00Z"
