@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/auth';
+import { ToastProvider } from '@/components/ui/Toast';
 import { SignUpForm } from './SignUpForm';
 import styles from '../signin/auth.module.css';
 
@@ -28,18 +29,20 @@ export default async function SignUpPage({ searchParams }: PageProps) {
 
   return (
     <main id="main-content" className={styles.authContainer}>
-      <div className={styles.authCard}>
-        <h1 className={styles.title}>Create your account</h1>
-        <p className={styles.subtitle}>
-          Start with the free tools. Upgrade when you&apos;re ready for the full curriculum.
-        </p>
+      <ToastProvider>
+        <div className={styles.authCard}>
+          <h1 className={styles.title}>Create your account</h1>
+          <p className={styles.subtitle}>
+            Start with the free tools. Upgrade when you&apos;re ready for the full curriculum.
+          </p>
 
-        <SignUpForm error={error} prefilledEmail={prefilledEmail} nextUrl={nextUrl} />
+          <SignUpForm error={error} prefilledEmail={prefilledEmail} nextUrl={nextUrl} />
 
-        <p className={styles.footer}>
-          Already have an account? <Link href="/auth/signin">Sign in</Link>
-        </p>
-      </div>
+          <p className={styles.footer}>
+            Already have an account? <Link href="/auth/signin">Sign in</Link>
+          </p>
+        </div>
+      </ToastProvider>
     </main>
   );
 }

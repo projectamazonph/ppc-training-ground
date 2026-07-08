@@ -127,9 +127,9 @@ function PendingCard({ checkoutId }: { checkoutId?: string } = {}) {
               <Button variant="primary">Refresh status</Button>
             </Link>
           ) : (
-            <Button variant="primary" onClick={() => window.location.reload()}>
-              Refresh page
-            </Button>
+            <Link href="/checkout/complete">
+              <Button variant="primary">Refresh page</Button>
+            </Link>
           )}
           <Link href="/dashboard">
             <Button variant="ghost">Go to dashboard anyway</Button>

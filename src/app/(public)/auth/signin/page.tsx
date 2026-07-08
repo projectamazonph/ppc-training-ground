@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/auth';
+import { ToastProvider } from '@/components/ui/Toast';
 import { SignInForm } from './SignInForm';
 import styles from './auth.module.css';
 
@@ -25,16 +26,18 @@ export default async function SignInPage({ searchParams }: PageProps) {
 
   return (
     <main id="main-content" className={styles.authContainer}>
-      <div className={styles.authCard}>
-        <h1 className={styles.title}>Sign in</h1>
-        <p className={styles.subtitle}>Welcome back. Sign in to continue learning.</p>
+      <ToastProvider>
+        <div className={styles.authCard}>
+          <h1 className={styles.title}>Sign in</h1>
+          <p className={styles.subtitle}>Welcome back. Sign in to continue learning.</p>
 
-        <SignInForm error={error} redirectTo={params.redirect} />
+          <SignInForm error={error} redirectTo={params.redirect} />
 
-        <p className={styles.footer}>
-          New here? <Link href="/auth/signup">Create an account</Link>
-        </p>
-      </div>
+          <p className={styles.footer}>
+            New here? <Link href="/auth/signup">Create an account</Link>
+          </p>
+        </div>
+      </ToastProvider>
     </main>
   );
 }
