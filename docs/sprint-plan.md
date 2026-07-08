@@ -13,15 +13,15 @@ Solo developer. Originally 11 sprints at 6 pts/sprint = 11 weeks. Actual: 4 spri
 | S3 | Curriculum | Content import + curriculum pages + quiz system + tier gating UI | ✅ Complete | 6 / 6 |
 | S4 | Tool UIs | Replace Sprint 2 stub runners with real interactive UIs | ✅ Complete | 4.5 / 4.5 |
 | S5 | Gamification | Badges auto-award + Certificates + Live Classes | ⏳ Next | — |
-| S6 | Payments | PayMongo Checkout + Enrollment + Tier gating | Backlog | — |
-| S7 | Admin | Full admin panel (users, courses, content, payments, audit) | Backlog | — |
+| S6 | Payments | PayMongo Checkout + Enrollment + Tier gating | ✅ Complete | 4 / 4 |
+| S7 | Admin | Full admin panel (users, courses, payments, audit) | ⏳ Next | — |
 | S8 | Refunds + Email | Refund flow + Resend templates + receipts | Backlog | — |
 | S9 | Polish | Voice guide applied to all UI copy + lesson content audit | Backlog | — |
 | S10 | Tests | Vitest unit/integration + Playwright E2E | Backlog | — |
 | S11 | Observability | Sentry + structured logs + Lighthouse CI | Backlog | — |
 | S12 | Launch | Production deploy + backup drill + launch comms | Backlog | — |
 
-Velocity: S1=6, S2=6, S3=6, S4=4.5. Slip-trigger (3 consecutive sprints at <5) not triggered.
+Velocity: S1=6, S2=6, S3=6, S4=4.5, S5=3.5, S6=4. Slip-trigger (3 consecutive sprints at <5) not triggered.
 
 ---
 
@@ -180,9 +180,9 @@ Velocity: S1=6, S2=6, S3=6, S4=4.5. Slip-trigger (3 consecutive sprints at <5) n
 
 ---
 
-## Done So Far (22/22 in Sprints 1-4, ~55 originally planned but consolidated)
+## Done So Far (29/29 in Sprints 1-6, 53% of 55-story plan)
 
-Sprints 1-4 shipped the foundation, all 5 tool engines + 30 scenarios, content import, curriculum pages, quiz system, tier gating, and the 5 interactive tool UIs. Roughly 40% of the original 55-story plan.
+Sprints 1-6 shipped: Foundation, Tools, Curriculum, Tool UIs, Gamification, and Payments (PayMongo + enrollment + refunds + receipt PDFs).
 
 The remaining 33 stories (Sprints 5-12) are organized into 8 thematic sprints. Each sprint is 1 week of work at the current ~6-pt velocity.
 

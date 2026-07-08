@@ -1,8 +1,8 @@
 sprint:
-  number: 6
-  name: "Payments"
-  start_date: "2026-07-09"
-  end_date: "2026-07-10"
+  number: 7
+  name: "Admin"
+  start_date: "2026-07-10"
+  end_date: "2026-07-11"
   status: "in_progress"
 
 capacity:
@@ -10,7 +10,10 @@ capacity:
   velocity: 0
   buffer_points: 0
 
-stories:
+stories: []
+
+completed_stories:
+
   - id: "STORY-026"
     title: "PayMongo Checkout — webhook + signature verify + idempotency"
     points: 1
@@ -28,9 +31,8 @@ stories:
     sprint: 6
     epic: "Payments"
     owner: "Ryan"
-    started_date: "2026-07-10"
     completed_date: "2026-07-10"
-    notes: "Guest checkout completion flow: /checkout/complete detects no session + paid checkout → redirects to /auth/signup?email=<checkout.email>&next=/checkout/complete. SignUpForm pre-fills email (editable, with hint), respects ?next= for return URL. signUpAction upgraded to claim placeholder accounts (passwordHash starts with `placeholder_`) — replaces hash, sets name + emailVerified in place. /pricing page on flow close. Seed script adds grandfatherFreeEnrollment() — any pre-existing user without an enrollment gets a backdated ACTIVE Enrollment at PPC_FOUNDATIONS so the tier gate doesn't lock the curriculum post-launch. tier-gate.ts gains TierAccessDeniedError + requireCourseAccess() helper for future server-action use. TypeScript 0 errors. AI-slop scan clean."
+    notes: "Guest checkout completion flow: /checkout/complete detects no session + paid checkout → redirects to /auth/signup?email=<checkout.email>&next=/checkout/complete. SignUpForm pre-fills email (editable). signUpAction upgraded to claim placeholder accounts. Seed script adds grandfatherFreeEnrollment(). tier-gate.ts gains TierAccessDeniedError + requireCourseAccess(). TypeScript 0 errors. AI-slop scan clean."
 
   - id: "STORY-028"
     title: "Refund flow — student request, admin approval, PayMongo refund call"
@@ -39,9 +41,8 @@ stories:
     sprint: 6
     epic: "Payments"
     owner: "Ryan"
-    started_date: "2026-07-10"
     completed_date: "2026-07-10"
-    notes: "Shipped in commit pending. Student-side: /dashboard/payments lists payments with refund eligibility (7-day window) + status badges, /dashboard/payments/[id]/request-refund form posts reason to createRefundRequestAction. Admin-side: /admin/refunds queue (FIFO, oldest first) with PROCESSED/REJECTED month counts, /admin/refunds/[id] detail with approve/reject inline forms. Library: src/lib/refunds.ts with isWithinRefundWindow / daysRemainingInWindow / hasBlockingRefundRequest / alreadyRefundedAmountPhp + listUserPayments / listPendingRefundRequests / getRefundRequestDetail. Actions: src/app/actions/refunds.ts — createRefundRequestAction (validates ownership, eligibility, no open request; computes full refund amount = payment.amountPhp - alreadyRefunded), approveRefundAction (PayMongo refundPayment() call, status PENDING→APPROVED→PROCESSED with FAILED branch on API error; idempotent on double-admin race via updateMany status guard), rejectRefundAction (PENDING→REJECTED, requires reviewer note ≥10 chars). Sidebar link added. Webhook handlePaymentRefunded() in src/lib/enrollment.ts remains the source of truth for Payment.status + Enrollment.status updates. Email confirmations stubbed for Sprint 8 (Resend). TypeScript 0 errors, AI-slop scan clean."
+    notes: "Student-side: /dashboard/payments lists payments with refund eligibility + status badges, /dashboard/payments/[id]/request-refund form. Admin-side: /admin/refunds queue + /admin/refunds/[id] detail with approve/reject. Library: src/lib/refunds.ts with isWithinRefundWindow / hasBlockingRefundRequest / alreadyRefundedAmountPhp. Actions: createRefundRequestAction, approveRefundAction (PayMongo refundPayment(), idempotent), rejectRefundAction. Sidebar link added. Email confirmations stubbed for Sprint 8. TypeScript 0 errors."
 
   - id: "STORY-029"
     title: "Receipt PDF — BIR-compliant sequential numbering + Vercel Blob storage"
@@ -50,9 +51,8 @@ stories:
     sprint: 6
     epic: "Payments"
     owner: "Ryan"
-    started_date: "2026-07-10"
     completed_date: "2026-07-10"
-    notes: "Shipped in commit pending. PDF template (src/lib/receipt-pdf.tsx) — @react-pdf/renderer Document with header (business name + TIN), receipt number, buyer block, line items table, VAT breakdown (Net + 12% VAT + Grand Total), footer with payment reference. Format follows BIR receipt conventions. Library (src/lib/receipts.tsx) — formatReceiptNumber(sequence, year) produces 'BS 00001-2026', nextInvoiceSequence(year) finds max across all invoices ending in the year + 1, issueInvoiceForPayment(paymentId) idempotent (returns existing if any) — splits gross into net + VAT via inclusive pricing (net = gross/1.12, vat = gross-net), persist Invoice row. renderInvoicePdf(invoiceId) builds ReceiptData, calls renderToBuffer, writes to public/receipts/{id}.pdf. API route /api/invoices/[id]/pdf — owner-only, lazy-renders if pdfUrl is null, returns application/pdf with content-disposition inline. Auto-issue wired into handleCheckoutPaid (enrollment.ts) right after Payment create — try/catch so a numbering race can't fail the webhook. Storage SWAP POINT documented in receipts.tsx: replace fs.writeFile with @vercel/blob upload. Student UI: /dashboard/payments shows receipt number badge per payment + Download receipt button (ghost variant with Download icon) opening /api/invoices/{id}/pdf in new tab. Bonus: src/lib/format.ts extracted (formatPhp, formatDate, formatDateTime, formatReceiptNumber) — payments page now uses shared formatters instead of duplicates. TypeScript 0 errors. AI-slop scan clean."
+    notes: "PDF template (src/lib/receipt-pdf.tsx) — BIR-compliant with sequential 'BS 00001-2026' numbering. Library (src/lib/receipts.tsx) — formatReceiptNumber, nextInvoiceSequence, issueInvoiceForPayment (idempotent, splits gross into net+VAT). Auto-issue wired into handleCheckoutPaid. Student UI: receipt number badge + Download button per payment. Storage SWAP POINT documented. TypeScript 0 errors."
 
 burndown:
   - day: 0
@@ -79,6 +79,6 @@ velocity_history:
     points: 4
     completed_date: "2026-07-10"
 
-completion_percentage: 100
-remaining_points: 0
-last_updated: "2026-07-10T15:30:00Z"
+completion_percentage: 0
+remaining_points: 4
+last_updated: "2026-07-10T18:00:00Z"
