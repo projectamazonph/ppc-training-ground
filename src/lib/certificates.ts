@@ -151,23 +151,33 @@ export async function issueCertificate(
 }
 
 /**
- * Get a certificate by its public verification hash, joined with course + user
- * info for display. Safe to call from public verify pages — no auth required.
+ * Public-safe subset of a certificate — used on the /verify/[hash] page and
+ * any other unauthenticated surface. Returns only the recipient's name; avatar
+ * and email stay behind the owner-only dashboard route.
  */
-export async function getCertificateByVerificationHash(verificationHash: string): Promise<{
+export interface PublicCertificate {
   id: string;
   verificationHash: string;
   status: string;
   issuedAt: Date;
   revokedAt: Date | null;
   revokedReason: string | null;
-  user: { name: string; image: string | null };
+  user: { name: string };
   course: { title: string; description: string; estimatedHours: number };
-} | null> {
+}
+
+/**
+ * Get a certificate by its public verification hash, joined with course + user
+ * info for display. Returns only public-safe fields — never include `image`
+ * or `email` here, because the verification page is reachable without auth.
+ */
+export async function getCertificateByVerificationHash(
+  verificationHash: string,
+): Promise<PublicCertificate | null> {
   const cert = await db.certificate.findUnique({
     where: { verificationHash, deletedAt: null },
     include: {
-      user: { select: { name: true, image: true } },
+      user: { select: { name: true } },
       course: { select: { title: true, description: true, estimatedHours: true } },
     },
   });
@@ -179,10 +189,7 @@ export async function getCertificateByVerificationHash(verificationHash: string)
     issuedAt: cert.issuedAt,
     revokedAt: cert.revokedAt,
     revokedReason: cert.revokedReason,
-    user: {
-      name: cert.user.name ?? 'Student',
-      image: cert.user.image,
-    },
+    user: { name: cert.user.name ?? 'Student' },
     course: cert.course,
   };
 }

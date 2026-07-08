@@ -178,10 +178,10 @@ export default async function LiveClassesIndexPage() {
   );
 }
 
-function formatPrice(cents: number): string {
+function formatPrice(php: number): string {
   return new Intl.NumberFormat('en-PH', {
     style: 'currency',
     currency: 'PHP',
     maximumFractionDigits: 0,
-  }).format(cents / 100);
+  }).format(php);
 }

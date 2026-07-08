@@ -27,9 +27,8 @@ const TIER_LABEL: Record<string, string> = {
   ULTIMATE_TRANSFORMATION: 'Ultimate Transformation',
 };
 
-function formatPrice(centavos: number): string {
-  const pesos = centavos / 100;
-  return `₱${pesos.toLocaleString('en-PH')}`;
+function formatPrice(php: number): string {
+  return `₱${php.toLocaleString('en-PH')}`;
 }
 
 function getReasonCopy(reason: TierLockProps['gate']['reason']): {

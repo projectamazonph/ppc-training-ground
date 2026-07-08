@@ -169,8 +169,16 @@ export async function userMeetsTierRequirement(
   requiredTier: CourseTier,
 ): Promise<{ allowed: boolean; userTier: CourseTier | null }> {
   const userTier = await getUserHighestTier(userId);
-  const userRank = TIER_RANK[userTier ?? CourseTierConst.PPC_FOUNDATIONS] ?? 0;
-  const requiredRank = TIER_RANK[requiredTier] ?? 0;
+  // No active enrollment => no tier => cannot meet *any* requirement.
+  // (PPC_FOUNDATIONS is treated as the floor, not a default.)
+  if (userTier === null) {
+    return { allowed: false, userTier: null };
+  }
+  const userRank = TIER_RANK[userTier];
+  const requiredRank = TIER_RANK[requiredTier];
+  if (userRank === undefined || requiredRank === undefined) {
+    return { allowed: false, userTier };
+  }
   return {
     allowed: userRank >= requiredRank,
     userTier,
