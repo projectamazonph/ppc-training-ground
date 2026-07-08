@@ -68,6 +68,22 @@ Anti-patterns to AVOID:
 - No hero metric layouts (big number + small label + gradient accent)
 - No rounded rectangles with thick colored border on one side
 - No sparklines as decoration
+
+Motion and Interaction (mandatory for every screen):
+- Every button: tactile -1px translateY on :active (press down feel). No neon outer glows.
+- Every interactive card: subtle lift (translateY(-1px)) + shadow-sm on hover. Transition 200ms ease-out.
+- Page sections: staggered cascade reveal on load. Each section fades in with 50ms delay between sections. Use opacity 0→1 + translateY(8px→0) over 400ms ease-out.
+- Lists (courses, tools, keywords): waterfall reveal. First item appears immediately, each subsequent item delays 60ms.
+- Form inputs: focus ring transitions to accent color (#FF6B35) over 150ms. No instant color jumps.
+- Progress bars: animate width from 0 to final value on mount over 600ms ease-out.
+- Sidebar nav items: hover wash (#F4F3EE) transitions in over 120ms.
+- Score numbers (tool results): count-up animation from 0 to final value over 800ms.
+
+Layout Rules (enforce in every prompt):
+- Left-aligned hero text. Centered heroes are banned for this project — asymmetric, left-aligned compositions only.
+- No 3-column equal card grids. Use 2-column zig-zag, asymmetric layouts, or horizontal scroll for feature showcases.
+- Max-width containment: 1200px for content, 720px for reading (lessons), 640px for forms.
+- Every element occupies its own spatial zone. No overlapping. No absolute-positioned content stacking.
 ```
 
 ---
@@ -86,58 +102,69 @@ Page structure (top to bottom):
    - Right: "Sign in" text link (#404040) + "Get started" button (primary, #FF6B35)
    - Bottom border: 1px #E5E5E0
 
-2. HERO SECTION (generous spacing, 80px+ top padding):
+2. HERO SECTION (generous spacing, 80px+ top padding, LEFT-ALIGNED — not centered):
+   - Layout: Two-column asymmetric. Left column (60% width): text content. Right column (40%): empty or subtle decorative element (a single large JetBrains Mono number like "₱80k" in #FFE5D9, rotated slightly, acting as visual punctuation — NOT an image, NOT a card).
    - Eyebrow text above heading: "AMAZON PPC TRAINING FOR FILIPINO VAs" (Space Grotesk, 0.75rem, uppercase, #737373, letter-spacing 0.05em)
    - Main heading: "Stop earning ₱15k/month. Start charging ₱60k–₱80k for Amazon ads." (Space Grotesk 600, clamp(2.25rem, 4vw, 3rem), #171717, max-width 700px, line-height 1.15)
    - Subheading: "AMPH Academy teaches Filipino VAs the Amazon advertising work that clients pay premium rates for. Practice with real campaign tools, not just theory videos." (1.125rem, #404040, max-width 560px, line-height 1.5)
-   - Two CTAs side by side: "See pricing →" (primary button, #FF6B35) + "Try a free tool" (secondary button, bordered)
-   - NO hero image. Text-only hero. Clean, direct, type-led.
+   - Single CTA: "See pricing →" (primary button, #FF6B35). No secondary button — one CTA per viewport.
+   - NO hero image. Text-only hero with one typographic decorative element. Clean, direct, type-led.
+   - Motion: Heading fades in + slides up from 8px below over 400ms ease-out. Subheading delays 100ms. CTA delays 200ms. Right column element delays 300ms.
 
 3. SOCIAL PROOF BAR (subtle, full-width, #F4F3EE background):
    - Horizontal row of 4 stats in a single line: "500+ VAs trained" | "₱50M+ ad spend managed" | "60% average completion" | "4.8/5 student rating"
    - Style: Space Grotesk 600 for numbers, 400 for labels, #171717 numbers, #737373 labels
    - Separated by thin vertical dividers (1px #E5E5E0)
+   - Motion: Each stat fades in with 80ms stagger (left to right). Numbers count up from 0 over 600ms.
 
-4. WHAT YOU LEARN (3-column grid):
+4. WHAT YOU LEARN (asymmetric 2-column layout — NOT 3 equal columns):
    - Section heading: "What you learn" (h2, left-aligned)
-   - 3 items in a grid (repeat(auto-fit, minmax(280px, 1fr))):
+   - Layout: Left column (60%) has the first item in large type with a longer description. Right column (40%) stacks the remaining two items more compactly. This creates visual hierarchy — the first item gets emphasis.
      a. "Campaign structure" — "How to build Sponsored Products campaigns that Amazon's algorithm rewards. SP, SB, SD, and BTV structures explained with real examples."
      b. "Bid optimization" — "When to raise bids, when to lower them, and when to leave the campaign alone. Practice with the Bid Elevator tool."
      c. "Search term triage" — "Cut wasted spend on irrelevant clicks without killing the keywords that convert. 20 real search terms to practice on."
    - Each item: heading (h3) + paragraph (#404040). NO cards. NO icons above headings. Just text in a clean grid with generous spacing.
+   - Motion: Items cascade in with 60ms stagger between them.
 
-5. THREE TIERS (pricing preview, not full pricing page):
+5. THREE TIERS (pricing preview — asymmetric layout, NOT 3 equal columns):
    - Section heading: "Three tiers. One goal."
-   - 3-column layout:
-     a. "PPC Foundations" — ₱2,999 — "5 core modules, basic tools, quizzes, badges"
-     b. "Accelerated Mastery" — ₱5,999 — "8 modules, all tools, all resources, recordings" — marked "Most popular" with an info badge
-     c. "Ultimate Transformation" — ₱9,999 — "Everything + weekly live classes, 1-on-1 review, priority certificates"
+   - Layout: Featured tier (Accelerated Mastery) takes center stage — larger card, 50% width. The other two tiers stack vertically on the left (25% width each). This creates a clear "most popular" focus without a badge.
+   - Left column (stacked):
+     a. "PPC Foundations" — ₱2,999 — compact card
+     c. "Ultimate Transformation" — ₱9,999 — compact card
+   - Center column (featured):
+     b. "Accelerated Mastery" — ₱5,999 — larger card with #FF6B35 left border accent, "Most popular" badge
    - Each tier: tier name (small caps eyebrow), price in large mono font (JetBrains Mono, ₱ symbol smaller), feature bullets, "Get started" button
-   - The "Accelerated Mastery" tier gets a subtle accent border (#FF6B35 left border or top accent strip) to indicate "Most popular"
+   - Motion: Left cards slide in from left, center card scales up from 0.95, stagger 100ms between each.
 
-6. TOOLS SHOWCASE:
+6. TOOLS SHOWCASE (zig-zag layout — NOT equal card grid):
    - Section heading: "Practice with real tools"
    - Description: "Five interactive tools that simulate the Amazon Advertising Console. Not theory. Practice."
-   - 5 items in a horizontal scrollable row or 3+2 grid:
-     a. Campaign Builder — "Build SP, SB, SD, and BTV campaign structures"
-     b. Bid Elevator — "Practice bid optimization across 10 scenarios"
-     c. Search Term Triage — "Triage 20 real search terms per session"
-     d. Listing Audit — "Audit product listings for ad readiness"
-     e. Keyword Research — "Research and categorize keywords by intent"
-   - Each tool: name + one-line description. Minimal. No screenshots (we don't have them yet).
+   - Layout: Zig-zag rows. Odd items (1, 3, 5) have text left + visual right. Even items (2, 4) have visual left + text right. Since we have no screenshots, the "visual" side is a large JetBrains Mono number (e.g., "05" for scenario count) in #FFE5D9 as a decorative typographic element.
+   - Items:
+     a. Campaign Builder — "Build SP, SB, SD, and BTV campaign structures" — "05" decorative number
+     b. Bid Elevator — "Practice bid optimization across 10 scenarios" — "10" decorative number
+     c. Search Term Triage — "Triage 20 real search terms per session" — "20" decorative number
+     d. Listing Audit — "Audit product listings for ad readiness" — "05" decorative number
+     e. Keyword Research — "Research and categorize keywords by intent" — "05" decorative number
+   - Each item: name (h3) + one-line description (#404040) + decorative number. Alternating layout creates rhythm.
+   - Motion: Each row slides in from alternating directions (odd from left, even from right) with 80ms stagger.
 
-7. RYAN SECTION (founder/authority):
-   - Left-aligned text block (not centered, not a card)
-   - "Built by someone who's done the work"
-   - "Ryan has managed ₱50M+ in Amazon ad spend across 200+ client accounts since 2014. He built AMPH Academy because the training he wished existed when he started doesn't exist anywhere — especially not for Filipino VAs."
-   - No photo. Text-only authority block.
+7. RYAN SECTION (founder/authority, left-aligned, asymmetric):
+   - Layout: Left-aligned text block (60% width). Right side (40%): large decorative number "₱50M+" in JetBrains Mono, #FFE5D9, acting as visual weight.
+   - "Built by someone who's done the work" (h2)
+   - "Ryan has managed ₱50M+ in Amazon ad spend across 200+ client accounts since 2014. He built AMPH Academy because the training he wished existed when he started doesn't exist anywhere — especially not for Filipino VAs." (#404040)
+   - No photo. Text-only authority block with typographic decoration.
+   - Motion: Text slides in from left, decorative number fades in with 200ms delay.
 
 8. CTA SECTION:
    - Full-width background #171717 (dark)
-   - Heading: "Start earning ₱60k–₱80k/month" (white text)
-   - Subtext: "Join 500+ Filipino VAs who specialized in Amazon advertising through AMPH Academy."
-   - Single CTA button: "See pricing →" (#FF6B35 button on dark background)
+   - Layout: Left-aligned text (not centered). Heading + subtext + button stacked left. Right side: empty — let the dark space do the work.
+   - Heading: "Start earning ₱60k–₱80k/month" (white text, left-aligned)
+   - Subtext: "Join 500+ Filipino VAs who specialized in Amazon advertising through AMPH Academy." (left-aligned)
+   - Single CTA button: "See pricing →" (#FF6B35 button on dark background, left-aligned)
    - Generous padding (64px vertical)
+   - Motion: Heading fades in + slides up. Button delays 150ms.
 
 9. FOOTER:
    - Simple. 3 columns: "AMPH Academy" (brand + copyright), "Platform" (links: Pricing, Tools, Sign in), "Contact" (email link)
@@ -208,8 +235,13 @@ Page structure:
    - Heading: "Pick the tier that matches where you are." (h1, centered, clamp(1.75rem, 3vw, 2.25rem))
    - Subtext: "Three months from now you'll either be earning ₱60,000 a month doing Amazon PPC work, or you'll be explaining to your family why that 'side hustle' didn't pan out. The tier doesn't change what we teach — it changes how fast you get unstuck." (#404040, max-width 640px, centered)
 
-2. TIER CARDS (3 columns, max-width 1000px centered):
-   Each card: white background, 1px border #E5E5E0, radius 6px, padding 32px
+2. TIER CARDS (asymmetric layout — NOT 3 equal columns):
+   Layout: Featured tier (Accelerated Mastery) is the hero card — larger, centered, with #FF6B35 left border accent. The other two tiers sit on either side as smaller, quieter cards. This creates a clear visual hierarchy: "this is the one we recommend."
+   - Left smaller card: PPC Foundations — ₱2,999
+   - Center featured card: Accelerated Mastery — ₱5,999 (larger, accent border, "Most popular" badge)
+   - Right smaller card: Ultimate Transformation — ₱9,999
+   Each card: white background, 1px border #E5E5E0, radius 6px, padding 32px (featured card: padding 40px)
+   Motion: Cards stagger in from bottom with 100ms delay between each. Featured card scales from 0.97 to 1.0.
    
    a. PPC FOUNDATIONS — ₱2,999
       - Eyebrow: "PPC FOUNDATIONS" (uppercase, 0.75rem, #737373)
@@ -294,15 +326,17 @@ Layout: Full-width with sidebar navigation on the left (collapsible on mobile).
      b. "Level 4" + "Current level"
      c. "12" + "Day streak"
      d. "3" + "Courses"
+     Motion: Cards stagger in from bottom with 80ms delay. Numbers count up from 0 over 600ms ease-out.
    
    - COURSES SECTION:
      - Heading: "Courses" (h2, margin-bottom 16px)
      - Course cards in a grid (repeat(auto-fit, minmax(320px, 1fr))):
-       Each card: white, border, radius 6px, padding 24px, interactive (hover lift)
+       Each card: white, border, radius 6px, padding 24px, interactive (hover lift + shadow-sm, transition 200ms ease-out)
        - Top row: Course title (h3) + difficulty badge (right-aligned)
        - Description text (#404040)
-       - Progress bar: thin bar (4px height, #F4F3EE background, #FF6B35 fill, radius 2px)
+       - Progress bar: thin bar (4px height, #F4F3EE background, #FF6B35 fill, radius 2px). Animate width from 0 on mount.
        - Below bar: "12 / 31 lessons" (left) + "39% complete" (right) — both #737373
+       Motion: Cards stagger in with 80ms delay between each.
    
    - TOOLS SECTION:
      - Heading: "Tools" (h2)
@@ -420,10 +454,11 @@ Layout: Full-width with sidebar, centered content.
      - Explanation text (after submit): "#404040, font-size 0.875rem, margin-top 8px"
    
    - Submit section:
-     - "Submit answers" button (primary, full width, disabled until all questions answered)
+     - "Submit answers" button (primary, full width, disabled until all questions answered). Tactile -1px translateY on :active.
      - After submit: show score "4/5 — 80% — Passed!" or "3/5 — 60% — Not quite"
      - If passed: "Continue to next lesson →" button
      - If failed: "Try again" button
+     Motion: Score fades in + scales from 0.95 to 1.0 over 400ms.
 ```
 
 ---
@@ -442,12 +477,15 @@ Layout: Full-width with sidebar, main content.
      - "Tools" (h1)
      - "Practice real Amazon Advertising Console workflows with synthetic data." (#404040)
    
-   - Tool cards (grid: repeat(auto-fit, minmax(320px, 1fr)), gap 24px):
-     Each card: white, border, radius 6px, padding 24px, interactive
+   - Tool cards (2-column asymmetric grid — NOT equal cards):
+     Layout: First tool (Campaign Builder) takes full width as a hero card. Remaining 4 tools in 2x2 grid below.
+     Hero card: white, border, radius 6px, padding 32px, interactive (hover lift + shadow-sm)
      - Tool name (h3): "Campaign Builder"
      - Description: "Build SP, SB, SD, and BTV campaign structures step by step."
      - Meta: "5 scenarios" badge + "SP · SB · SD · BTV" badge
      - "Open tool →" link (#FF6B35)
+     Grid cards: white, border, radius 6px, padding 24px, interactive
+     Motion: Hero card fades in first. Grid cards stagger in with 80ms delay.
    
    - Five tools:
      1. Campaign Builder — "Build SP, SB, SD, and BTV campaign structures step by step." — 5 scenarios
@@ -534,6 +572,7 @@ Layout: Full-width with admin sidebar, main content.
      b. "3" + "Published courses"
      c. "5" + "Badges"
      d. "₱284,500" + "Total revenue"
+     Motion: Cards stagger in from bottom with 80ms delay. Numbers count up from 0 over 600ms ease-out.
    
    - RECENT ACTIVITY TABLE:
      - Heading: "Recent payments"
@@ -1074,6 +1113,7 @@ Layout: Full-width with student sidebar, centered content.
      - Number: "85" (Space Grotesk 700, 4rem)
      - Label: "/ 100" (#737373)
      - Below: "Passed!" badge (success, green) or "Not quite" badge (danger, red)
+     - Motion: Number counts up from 0 to 85 over 800ms ease-out. Badge fades in after count completes (800ms delay).
    
    - Overall feedback card (white, border, padding 24px):
      - "Campaign Builder — Launch a wireless earbuds SP campaign"
@@ -1084,6 +1124,7 @@ Layout: Full-width with student sidebar, centered content.
      - Left: criterion name + passed/failed icon
      - Right: score "18 / 20" (JetBrains Mono)
      - Below: feedback text (#404040, 0.875rem)
+     Motion: Criteria cascade in with 60ms stagger between each. Each slides up from 4px below + fades in.
      
      Example criteria:
      - ✓ Campaign type correct (20/20)
