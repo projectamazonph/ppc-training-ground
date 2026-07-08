@@ -16,27 +16,12 @@ import { Card, CardHeader, CardTitle, CardDescription, Button, Badge } from '@/c
 import { Icon } from '@/components/ui/Icon';
 import { requireAuth } from '@/lib/auth';
 import { listUserPayments, daysRemainingInWindow, refundStatusLabel, REFUND_WINDOW_DAYS } from '@/lib/refunds';
+import { formatPhp, formatDate, formatReceiptNumber } from '@/lib/format';
 import styles from './payments.module.css';
 
 export const metadata = {
   title: 'Payments — AMPH Academy',
 };
-
-function formatPhp(amountPhp: number): string {
-  return new Intl.NumberFormat('en-PH', {
-    style: 'currency',
-    currency: 'PHP',
-    maximumFractionDigits: 2,
-  }).format(amountPhp);
-}
-
-function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('en-PH', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(date);
-}
 
 interface PageProps {
   searchParams: Promise<{ refund?: string; error?: string; id?: string }>;
@@ -159,6 +144,14 @@ export default async function PaymentsPage({ searchParams }: PageProps) {
                         Refund request: {refundStatusLabel(lastRequest.status)}
                       </p>
                     )}
+                    {p.invoice && (
+                      <p className={styles.invoiceNote}>
+                        <Icon name="Receipt" size="sm" /> Receipt{' '}
+                        <code className={styles.receiptNumber}>
+                          {formatReceiptNumber(parseInt(p.invoice.number.slice(0, 5), 10), parseInt(p.invoice.number.slice(-4), 10))}
+                        </code>
+                      </p>
+                    )}
                     {canRequestRefund && (
                       <p className={styles.windowNote}>
                         <Icon name="Clock" size="sm" /> {days} day
@@ -167,6 +160,17 @@ export default async function PaymentsPage({ searchParams }: PageProps) {
                     )}
                   </div>
                   <div className={styles.rowActions}>
+                    {p.invoice && (
+                      <Link
+                        href={`/api/invoices/${p.invoice.id}/pdf`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button variant="ghost" size="sm">
+                          <Icon name="Download" size="sm" /> Receipt
+                        </Button>
+                      </Link>
+                    )}
                     {canRequestRefund ? (
                       <Link href={`/dashboard/payments/${p.id}/request-refund`}>
                         <Button variant="secondary">Request refund</Button>

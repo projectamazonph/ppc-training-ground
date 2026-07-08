@@ -15,14 +15,14 @@ Three courses. One outcome: the VA becomes the Amazon ads specialist clients ret
 | **Sprint 3** — Curriculum + tier gating | ✅ Complete (2026-07-08) | 5 / 5 |
 | **Sprint 4** — Tool UIs | ✅ Complete (2026-07-08) | 5 / 5 |
 | **Sprint 5** — Gamification | ✅ Complete (2026-07-09) | 3 / 3 |
-| Sprint 6 — Payments | ⏳ In progress (3/4) | 3 / 4 |
+| Sprint 6 — Payments | ✅ Complete (2026-07-10) | 4 / 4 |
 | Sprint 7 — Admin | Backlog | 0 / 4 |
 | Sprint 8 — Refunds + Email | Backlog | 0 / 3 |
 | Sprint 9 — Polish | Backlog | 1 / 5 (no-ai-slop done) |
 | Sprint 10 — Tests | Backlog | 0 / 5 |
 | Sprint 11 — Observability | Backlog | 0 / 5 |
 | Sprint 12 — Launch | Backlog | 0 / 4 |
-| **Total** | **28 / 55 stories (51%)** | |
+| **Total** | **29 / 55 stories (53%)** | |
 
 | Layer | Status |
 |-------|--------|
@@ -256,7 +256,7 @@ Every component imports a `.module.css` file that uses `var(--token)` references
 
 ## Sprint Status
 
-Sprints 1-5 shipped the foundation, all 5 tool engines + 30 scenarios, content import, curriculum pages, quiz system, tier gating, the 5 interactive tool UIs, and the full gamification stack: auto-awarded badges, PDF certificates with public verification, and live classes with tier-gated registration. Sprint 6 — Payments started 2026-07-09: STORY-026 (PayMongo checkout + webhook + public pricing) shipped, STORY-027 (guest signup completion + grandfather free PPC enrollment) shipped 2026-07-10, STORY-028 (refund flow — student request, admin approval, PayMongo refund call) shipped 2026-07-10.
+Sprints 1-5 shipped the foundation, all 5 tool engines + 30 scenarios, content import, curriculum pages, quiz system, tier gating, the 5 interactive tool UIs, and the full gamification stack: auto-awarded badges, PDF certificates with public verification, and live classes with tier-gated registration. Sprint 6 — Payments completed 2026-07-10: STORY-026 (PayMongo checkout + webhook + public pricing), STORY-027 (guest signup completion + grandfather free PPC enrollment), STORY-028 (refund flow — student request, admin approval, PayMongo refund call), STORY-029 (BIR-compliant receipt PDFs with sequential numbering, auto-issued on payment).
 
 - Next.js 16 scaffold with TypeScript strict
 - Field Manual design system (60+ tokens, full dark mode)
@@ -272,7 +272,7 @@ Sprints 1-5 shipped the foundation, all 5 tool engines + 30 scenarios, content i
 - 5 interactive tool UIs: Listing Audit form, Keyword Research categorizer, Bid Elevator table, STR Triage triager, Campaign Builder 5-step wizard (BTV-aware)
 - 1 admin + 3 pricing tiers + 5 badges seeded
 
-**Next: Sprint 6 STORY-029.** BIR-compliant receipt PDFs (sequential numbering + Vercel Blob). `Invoice` table already in Sprint 6 migration.
+**Next: Sprint 7 — Admin panels.** User/course/payment/audit management. Spec at `docs/admin-backend.md`.
 
 See `docs/sprint-plan.md` for the full roadmap and `bmad/sprint-status.yaml` for current state.
 

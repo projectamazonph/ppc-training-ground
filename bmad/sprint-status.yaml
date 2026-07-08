@@ -46,9 +46,13 @@ stories:
   - id: "STORY-029"
     title: "Receipt PDF — BIR-compliant sequential numbering + Vercel Blob storage"
     points: 1
-    status: "pending"
+    status: "completed"
     sprint: 6
     epic: "Payments"
+    owner: "Ryan"
+    started_date: "2026-07-10"
+    completed_date: "2026-07-10"
+    notes: "Shipped in commit pending. PDF template (src/lib/receipt-pdf.tsx) — @react-pdf/renderer Document with header (business name + TIN), receipt number, buyer block, line items table, VAT breakdown (Net + 12% VAT + Grand Total), footer with payment reference. Format follows BIR receipt conventions. Library (src/lib/receipts.tsx) — formatReceiptNumber(sequence, year) produces 'BS 00001-2026', nextInvoiceSequence(year) finds max across all invoices ending in the year + 1, issueInvoiceForPayment(paymentId) idempotent (returns existing if any) — splits gross into net + VAT via inclusive pricing (net = gross/1.12, vat = gross-net), persist Invoice row. renderInvoicePdf(invoiceId) builds ReceiptData, calls renderToBuffer, writes to public/receipts/{id}.pdf. API route /api/invoices/[id]/pdf — owner-only, lazy-renders if pdfUrl is null, returns application/pdf with content-disposition inline. Auto-issue wired into handleCheckoutPaid (enrollment.ts) right after Payment create — try/catch so a numbering race can't fail the webhook. Storage SWAP POINT documented in receipts.tsx: replace fs.writeFile with @vercel/blob upload. Student UI: /dashboard/payments shows receipt number badge per payment + Download receipt button (ghost variant with Download icon) opening /api/invoices/{id}/pdf in new tab. Bonus: src/lib/format.ts extracted (formatPhp, formatDate, formatDateTime, formatReceiptNumber) — payments page now uses shared formatters instead of duplicates. TypeScript 0 errors. AI-slop scan clean."
 
 burndown:
   - day: 0
@@ -72,9 +76,9 @@ velocity_history:
     points: 3.5
     completed_date: "2026-07-09"
   - sprint: 6
-    points: 3
+    points: 4
     completed_date: "2026-07-10"
 
-completion_percentage: 75
-remaining_points: 1
-last_updated: "2026-07-10T14:30:00Z"
+completion_percentage: 100
+remaining_points: 0
+last_updated: "2026-07-10T15:30:00Z"

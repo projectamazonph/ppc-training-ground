@@ -85,7 +85,8 @@ export async function alreadyRefundedAmountPhp(paymentId: string): Promise<numbe
 
 /**
  * List the current user's completed payments, with refund-request state
- * attached so the UI can show "requested" or "refunded" badges.
+ * and invoice attached so the UI can show "requested" / "refunded" badges
+ * and a "Download receipt" link.
  */
 export async function listUserPayments(userId: string) {
   return db.payment.findMany({
@@ -109,6 +110,11 @@ export async function listUserPayments(userId: string) {
         orderBy: { createdAt: 'desc' },
         take: 1,
         select: { id: true, status: true, amountPhp: true, reason: true, createdAt: true },
+      },
+      // STORY-029: invoice relation for the "Download receipt" link.
+      // 1:1 with payment (paymentId is @unique on Invoice).
+      invoice: {
+        select: { id: true, number: true, pdfUrl: true, issuedAt: true },
       },
     },
   });

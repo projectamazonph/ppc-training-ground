@@ -2,7 +2,7 @@ project:
   name: "AMPH Academy v2"
   level: 3
   initialized: "2026-07-07T15:43:00Z"
-  last_updated: "2026-07-10T14:30:00Z"
+  last_updated: "2026-07-10T15:30:00Z"
 
 current_phase: 4
 current_workflow: "sprint_planning"
@@ -70,8 +70,8 @@ phases:
         output_file: "docs/sprint-plan.md"
         completed_at: "2026-07-07"
       stories:
-        total: 28
-        completed: 28
+        total: 29
+        completed: 29
         in_progress: 0
         story_list:
           - "STORY-001-scaffold"
@@ -102,11 +102,12 @@ phases:
           - "STORY-026-paymongo-checkout"
           - "STORY-027-enrollment-to-payment"
           - "STORY-028-refund-flow"
+          - "STORY-029-receipt-pdf"
 
 metrics:
   total_workflows: 13
   completed_workflows: 10
   progress_percentage: 77
-  estimated_stories: 28
-  completed_stories: 28
-  last_updated: "2026-07-10T14:30:00Z"
+  estimated_stories: 29
+  completed_stories: 29
+  last_updated: "2026-07-10T15:30:00Z"

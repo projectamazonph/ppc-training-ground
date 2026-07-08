@@ -17,6 +17,7 @@ import 'server-only';
 
 import { db } from './db';
 import { CheckoutStatus, EnrollmentStatus, PaymentMethod, PaymentStatus } from './enums';
+import { issueInvoiceForPayment } from './receipts';
 import { randomUUID } from 'node:crypto';
 
 export interface CheckoutPaidEvent {
@@ -216,6 +217,19 @@ export async function handleCheckoutPaid(
       metadata: JSON.stringify(metadata ?? {}),
     },
   });
+
+  // STORY-029: auto-issue the BIR receipt invoice right after the
+  // Payment row is durable. Numbering + VAT split handled inside
+  // `issueInvoiceForPayment`. PDF generation is lazy (on first GET).
+  // We deliberately don't block the webhook on PDF render — invoice
+  // creation is the only durable bit; render happens on demand.
+  // Errors are logged but don't fail the webhook (the student can
+  // request a manual issue from /dashboard/payments if needed).
+  try {
+    await issueInvoiceForPayment(payment.id);
+  } catch (err) {
+    console.error(`[webhook] Failed to issue invoice for payment ${payment.id}:`, err);
+  }
 
   // Find or create user (guest checkout support)
   const { id: userId, isNew } = await findOrCreateUserByEmail(checkout.email, metadata.name ?? null);

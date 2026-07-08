@@ -126,6 +126,24 @@
   font-style: italic;
 }
 
+.invoiceNote {
+  font-size: 13px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-muted, #5a5a6e);
+}
+
+.receiptNumber {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+  font-size: 12px;
+  background: var(--color-surface-elevated, #f7f7fb);
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--color-text, #1a1a2e);
+}
+
 .bannerSuccess {
   background: #f0fdf4;
   border-color: #86efac;

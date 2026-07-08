@@ -1,18 +1,18 @@
 # Session Handoff — AMPH Academy v2
 
-**Session date:** 2026-07-07 to 2026-07-10 (Sprints 1–6 partial — Sprint 5 closed + Sprint 6 STORY-026 + STORY-027 + STORY-028 shipped)
-**Last commit:** feat(payments): STORY-028 — refund flow (student + admin)
+**Session date:** 2026-07-07 to 2026-07-10 (Sprints 1–6 complete — Sprint 5 closed + Sprint 6 fully shipped 4/4)
+**Last commit:** feat(payments): STORY-029 — BIR-compliant receipt PDFs
 **Repo:** github.com/projectamazonph/amph-v2
 **Project path:** /storage/emulated/0/Hermes Projects/projects/amph-v2
 
 ## Current state — pick up here
 
-- **Sprint 6 (Payments):** 3/4 stories complete = **75%**
-- **Project total:** 28/55 stories = **51%**
-- **Pushed commits on main:** d482aa9, 532af3d, be1f6ce, fdfa8af, d2a4231, dcd819d, 1bc2c62
+- **Sprint 6 (Payments):** 4/4 stories complete = **100%** — closed
+- **Project total:** 29/55 stories = **53%**
+- **Pushed commits on main:** 84b985f, be398c3, d482aa9, 532af3d, be1f6ce, fdfa8af, d2a4231, dcd819d, 1bc2c62
 - **TypeScript:** 0 errors (`pnpm typecheck`)
 - **AI-slop scan:** clean
-- **Dual-vault sync:** done this session (was blocked previously)
+- **Dual-vault sync:** done
 
 ## Resume command for next session
 
@@ -56,20 +56,14 @@ grep "status:" bmad/sprint-status.yaml | head -10
 
 ## Next session: open work
 
-### Sprint 6 remaining (1 story, 1 pt)
-1. **STORY-029** — BIR-compliant receipt PDFs
-   - `@react-pdf/renderer` template (similar pattern to `src/lib/cert-pdf.tsx`)
-   - Sequential numbering: `BS #{number}-#{yyyy}` format
-   - Store in Vercel Blob; downloadable from `/dashboard/payments`
-   - `Invoice` table already in Sprint 6 migration `20260708042743_sprint6_payments_foundation`
-
-### Sprint 7 (after S6 finishes)
-- Admin panels (4 stories): user mgmt, course mgmt, payment audit log, settings
+### Sprint 7 (next, 4 stories)
+- Admin panels: user mgmt, course mgmt, payment audit log, settings
 - Spec at `docs/admin-backend.md`
 
 ### Known Sprint 9 cleanup
 - ESLint v9 doesn't read legacy `.eslintrc.json` — flat config migration needed
 - `next lint` deprecated in Next 16
+- 3 local `formatPrice` duplicates in live-classes + TierLock — extract to `@/lib/format`
 
 ## What's NOT done (deferred)
 
