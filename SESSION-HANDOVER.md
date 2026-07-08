@@ -1,7 +1,7 @@
 # Session Handover — AMPH Academy v2
 
-**Session date:** 2026-07-07 to 2026-07-09 (Sprints 1–5 across two mega-sessions)
-**Last commit:** 1bc2c62 feat(gamification): complete badges, certificates, live-classes, tier-gate (Sprint 5)
+**Session date:** 2026-07-07 to 2026-07-09 (Sprints 1–6 partial — Sprint 5 closed + Sprint 6 STORY-026 shipped)
+**Last commit:** fdfa8af feat(payments): STORY-026 — PayMongo checkout, webhook, public pricing
 **Repo:** github.com/projectamazonph/amph-v2
 
 ## What this session accomplished
@@ -36,17 +36,24 @@ most recent — completed 2026-07-09.
   - `src/app/actions/live-classes.ts`: registerForLiveClass (ULTIMATE tier gate server-side, capacity check, idempotent restore-or-create), cancelLiveClassRegistration, listMyRegistrations
   - Pages: `/dashboard/live-classes` (index, register buttons, upgrade prompt for non-Ultimate), `/dashboard/live-classes/[id]` (detail with join button + seat progress)
   - Email reminder stubbed (Sprint 8 wires Resend templates)
-  - Seed: `upsertLiveClasses` adds 2 demo classes (1 upcoming + 1 past with recording)
+  **Next: Sprint 6 STORY-027.** Enrollment + tier-gating flow tied to payments. THREE questions answered for next session:
 
-## What's NOT done (deferred)
+  1. Guest checkout post-payment flow: A (Set your password page), B (force signup), or C (just /dashboard with redirect)?
+  2. Existing users grandfathered with FREE PPC enrollment at seed? A yes / B no
+  3. Should I dive into STORY-027 in next session, or stop after STORY-026?
 
-- **Sprint 6: Payments** — PayMongo integration per `docs/business-layer.md`. Now ready to start since tier gate + enrollment schema exist.
-- **Sprint 7: Admin panels** — user/course/payment/audit management
-- **Sprint 8: Email templates** — Resend (live class reminder belongs here, currently stubbed in code)
-- **Sprint 9: Polish** — voice-guide audit, accessibility
-- **Tests** (Sprint 10) — 0% coverage, the badge engine is a natural first target
-- **Observability** (Sprint 11) — Sentry, structured logs
-- **End-to-end runtime verification** — `pnpm dev` not run in this sandbox (no Node). All code is type-correct at the structure level; final verification happens locally.
+  See `docs/business-layer.md` for the full payments spec. The library code (enrollment.ts, paymongo.ts, webhook-signature.ts, pricing.ts) is in place; what's missing is the guest signup completion page and the explicit requireTier checks on lesson/quiz actions.
+
+  ## What's NOT done (deferred)
+
+  - **STORY-027 → STORY-029** — Guest checkout completion page, refund flow, BIR-compliant receipt PDFs.
+  - **Sprint 7: Admin panels** — user/course/payment/audit management
+  - **Sprint 8: Email templates** — Resend (live class reminder belongs here, currently stubbed in code)
+  - **Sprint 9: Polish** — voice-guide audit, accessibility
+  - **Tests** (Sprint 10) — 0% coverage, the badge engine is a natural first target
+  - **Observability** (Sprint 11) — Sentry, structured logs
+  - **End-to-end runtime verification** — `pnpm dev` not run in this sandbox (no Node). All code is type-correct at the structure level; final verification happens locally.
+  - **Git push** — no remote configured. Next session: `git remote -v` to verify origin, then `git push origin main --tags`.
 
 ## Critical context for next session
 
