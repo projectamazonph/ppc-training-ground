@@ -199,10 +199,10 @@ export default async function LiveClassDetailPage({ params }: PageProps) {
   );
 }
 
-function formatPrice(php: number): string {
+function formatPrice(centavos: number): string {
   return new Intl.NumberFormat('en-PH', {
     style: 'currency',
     currency: 'PHP',
-    maximumFractionDigits: 0,
-  }).format(php);
+    maximumFractionDigits: 2,
+  }).format(centavos / 100);
 }
