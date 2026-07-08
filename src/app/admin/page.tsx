@@ -2,6 +2,8 @@ import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui
 import { Icon } from '@/components/ui/Icon';
 import { requireAdmin } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { formatPhp, formatDate } from '@/lib/format';
+import Link from 'next/link';
 import styles from './page.module.css';
 
 export const metadata = {
@@ -11,82 +13,178 @@ export const metadata = {
 export default async function AdminDashboardPage() {
   const admin = await requireAdmin();
 
-  // Quick stats — keep queries cheap
-  const [userCount, courseCount, badgeCount] = await Promise.all([
-    db.user.count(),
-    db.course.count(),
-    db.badge.count(),
+  const [
+    totalUsers,
+    activeUsers,
+    publishedCourses,
+    badgeCount,
+    totalRevenueAgg,
+    recentPayments,
+    totalEnrollments,
+    pendingRefunds,
+  ] = await Promise.all([
+    db.user.count({ where: { status: { not: 'DELETED' } } }),
+    db.user.count({ where: { status: 'ACTIVE' } }),
+    db.course.count({ where: { publishedAt: { not: null } } }),
+    db.userBadge.count(),
+    db.payment.aggregate({
+      where: { status: 'PAID' },
+      _sum: { amountPhp: true },
+    }),
+    db.payment.findMany({
+      where: { status: 'PAID' },
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+        pricingTier: { select: { name: true } },
+      },
+      orderBy: { paidAt: 'desc' },
+      take: 10,
+    }),
+    db.enrollment.count({ where: { status: 'ACTIVE' } }),
+    db.refundRequest.count({ where: { status: 'PENDING' } }),
   ]);
+
+  const totalRevenue = totalRevenueAgg._sum.amountPhp ?? 0;
 
   return (
     <div className={styles.dashboard}>
       <header className={styles.header}>
         <h1 className={styles.greeting}>Welcome, {admin.name ?? admin.email}</h1>
         <p className={styles.subtitle}>
-          You&apos;re signed in as an admin. Sprint 1 ships the foundation — the rest fills in over the next 11 sprints.
+          AMPH Academy Admin — {activeUsers} active users, {publishedCourses} published courses
         </p>
       </header>
 
       <section className={styles.stats}>
         <Card>
           <CardHeader>
-            <CardTitle>Users</CardTitle>
+            <CardTitle>Total Users</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={styles.statValue}>{userCount}</div>
-            <Badge variant="default">Total accounts</Badge>
+            <div className={styles.statValue}>{totalUsers}</div>
+            <Badge variant="default">{activeUsers} active</Badge>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Courses</CardTitle>
+            <CardTitle>Published Courses</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={styles.statValue}>{courseCount}</div>
-            <Badge variant="info">Published + drafts</Badge>
+            <div className={styles.statValue}>{publishedCourses}</div>
+            <Badge variant="info">{totalEnrollments} enrollments</Badge>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Badges</CardTitle>
+            <CardTitle>Badges Awarded</CardTitle>
           </CardHeader>
           <CardContent>
             <div className={styles.statValue}>{badgeCount}</div>
-            <Badge variant="success">Seeded</Badge>
+            <Badge variant="success">Earned by students</Badge>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Pricing tiers</CardTitle>
+            <CardTitle>Total Revenue</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={styles.statValue}>3</div>
-            <Badge variant="warning">PPC Foundations / Mastery / Ultimate</Badge>
+            <div className={styles.statValue}>{formatPhp(totalRevenue)}</div>
+            <Badge variant="success">From {publishedCourses > 0 ? publishedCourses : 0} courses</Badge>
           </CardContent>
         </Card>
       </section>
 
-      <section className={styles.next}>
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <span className={styles.nextTitle}>
-                <Icon name="Rocket" size="md" />
-                Next up
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>
-              Sprint 1 is the foundation. The interactive tools, curriculum, payments, and full admin
-              panels come in Sprints 2-6. Today you can verify auth, see seeded data, and confirm
-              that admin RBAC works.
-            </p>
-          </CardContent>
-        </Card>
+      <section className={styles.activity}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>Recent Payments</h2>
+          <Link href="/admin/payments" className={styles.viewAll}>
+            View all payments <Icon name="ArrowRight" size="sm" />
+          </Link>
+        </div>
+
+        {recentPayments.length === 0 ? (
+          <Card>
+            <CardContent>
+              <p className={styles.empty}>No payments yet. Revenue will appear here once students enroll.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className={styles.tableWrapper}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Tier</th>
+                  <th>Amount</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentPayments.map((payment) => (
+                  <tr key={payment.id}>
+                    <td>
+                      <div className={styles.studentCell}>
+                        <span className={styles.studentName}>
+                          {payment.user?.name ?? 'Unknown'}
+                        </span>
+                        <span className={styles.studentEmail}>
+                          {payment.user?.email}
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      <Badge variant="default">{payment.pricingTier?.name ?? '—'}</Badge>
+                    </td>
+                    <td className={styles.amountCell}>{formatPhp(payment.amountPhp)}</td>
+                    <td className={styles.dateCell}>
+                      {payment.paidAt ? formatDate(payment.paidAt) : '—'}
+                    </td>
+                    <td>
+                      <Badge variant="success">Paid</Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className={styles.quickLinks}>
+        <h2 className={styles.sectionTitle}>Quick Actions</h2>
+        <div className={styles.linksGrid}>
+          <Link href="/admin/users" className={styles.quickLink}>
+            <Icon name="User" size="md" />
+            <span>Manage Users</span>
+            <Icon name="ArrowRight" size="sm" />
+          </Link>
+          <Link href="/admin/courses" className={styles.quickLink}>
+            <Icon name="BookOpen" size="md" />
+            <span>Manage Courses</span>
+            <Icon name="ArrowRight" size="sm" />
+          </Link>
+          <Link href="/admin/refunds" className={styles.quickLink}>
+            <Icon name="Receipt" size="md" />
+            <span>
+              Review Refunds
+              {pendingRefunds > 0 && (
+                <Badge variant="danger" className={styles.alertBadge}>
+                  {pendingRefunds}
+                </Badge>
+              )}
+            </span>
+            <Icon name="ArrowRight" size="sm" />
+          </Link>
+          <Link href="/admin/payments" className={styles.quickLink}>
+            <Icon name="CreditCard" size="md" />
+            <span>Payments</span>
+            <Icon name="ArrowRight" size="sm" />
+          </Link>
+        </div>
       </section>
     </div>
   );
