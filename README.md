@@ -9,13 +9,13 @@ Three courses. One outcome: the VA becomes the Amazon ads specialist clients ret
 ## Status
 
 | Sprint | Status | Stories |
-|--------|--------|---------|
+|---|---|---|
 | **Sprint 1** — Foundation | ✅ Complete (2026-07-07) | 6 / 6 |
 | **Sprint 2** — Tools (5 engines + fixtures) | ✅ Complete (2026-07-07) | 6 / 6 |
 | **Sprint 3** — Curriculum + tier gating | ✅ Complete (2026-07-08) | 5 / 5 |
 | **Sprint 4** — Tool UIs | ✅ Complete (2026-07-08) | 5 / 5 |
-| Sprint 5 — Gamification | ⏳ Next | 0 / 3 |
-| Sprint 6 — Payments | Backlog | 0 / 4 |
+| **Sprint 5** — Gamification | ✅ Complete (2026-07-09) | 3 / 3 |
+| Sprint 6 — Payments | ⏳ Next | 0 / 4 |
 | Sprint 7 — Admin | Backlog | 0 / 4 |
 | Sprint 8 — Refunds + Email | Backlog | 0 / 3 |
 | Sprint 9 — Polish | Backlog | 1 / 5 (no-ai-slop done) |
@@ -256,7 +256,7 @@ Every component imports a `.module.css` file that uses `var(--token)` references
 
 ## Sprint Status
 
-Sprints 1-4 shipped the foundation, all 5 tool engines + 30 scenarios, content import, curriculum pages, quiz system, tier gating, and the 5 interactive tool UIs.
+Sprints 1-5 shipped the foundation, all 5 tool engines + 30 scenarios, content import, curriculum pages, quiz system, tier gating, the 5 interactive tool UIs, and the full gamification stack: auto-awarded badges, PDF certificates with public verification, and live classes with tier-gated registration.
 
 - Next.js 16 scaffold with TypeScript strict
 - Field Manual design system (60+ tokens, full dark mode)
@@ -272,7 +272,7 @@ Sprints 1-4 shipped the foundation, all 5 tool engines + 30 scenarios, content i
 - 5 interactive tool UIs: Listing Audit form, Keyword Research categorizer, Bid Elevator table, STR Triage triager, Campaign Builder 5-step wizard (BTV-aware)
 - 1 admin + 3 pricing tiers + 5 badges seeded
 
-**Next: Sprint 5 — Gamification.** Auto-award badges from `Badge.criteria` JSON, generate `Certificate` with PDF + verification hash, schedule `LiveClass` with registration + Resend email reminder.
+**Next: Sprint 6 — Payments.** PayMongo checkout, enrollment-tied payments, refund flow, BIR-compliant receipt PDFs.
 
 See `docs/sprint-plan.md` for the full roadmap and `bmad/sprint-status.yaml` for current state.
 

@@ -2,7 +2,7 @@ project:
   name: "AMPH Academy v2"
   level: 3
   initialized: "2026-07-07T15:43:00Z"
-  last_updated: "2026-07-09T18:00:00Z"
+  last_updated: "2026-07-09T19:15:00Z"
 
 current_phase: 4
 current_workflow: "sprint_planning"

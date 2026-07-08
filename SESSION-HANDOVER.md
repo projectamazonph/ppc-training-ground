@@ -1,7 +1,7 @@
 # Session Handover — AMPH Academy v2
 
-**Session date:** 2026-07-07 to 2026-07-09 (Sprints 4 + 5 across two sessions)
-**Last commit:** TBD (Sprint 5 uncommitted at handover)
+**Session date:** 2026-07-07 to 2026-07-09 (Sprints 1–5 across two mega-sessions)
+**Last commit:** 1bc2c62 feat(gamification): complete badges, certificates, live-classes, tier-gate (Sprint 5)
 **Repo:** github.com/projectamazonph/amph-v2
 
 ## What this session accomplished

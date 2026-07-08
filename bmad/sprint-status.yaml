@@ -2,8 +2,8 @@ sprint:
   number: 5
   name: "Gamification"
   start_date: "2026-07-09"
-  end_date: "2026-07-10"
-  status: "in_progress"
+  end_date: "2026-07-09"
+  status: "completed"
 
 capacity:
   planned_points: 3.5
