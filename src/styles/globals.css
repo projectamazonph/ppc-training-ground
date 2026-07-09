@@ -103,6 +103,18 @@
   --container-md: 768px;
   --container-lg: 1024px;
   --container-xl: 1200px;
+
+  /* Breakpoints (for JS matchMedia reference) */
+  --bp-sm: 640px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+
+  /* Responsive layout */
+  --side-pad: clamp(16px, 4vw, 48px);
+  --max-content: 1200px;
+  --max-reading: 720px;
+  --max-form: 640px;
 }
 
 /* Dark mode — auto-applies when user has OS dark preference.
@@ -264,4 +276,85 @@ pre {
   margin: 0 auto;
   padding-left: clamp(var(--space-4), 4vw, var(--space-12));
   padding-right: clamp(var(--space-4), 4vw, var(--space-12));
+}
+
+/* ── Responsive helpers ────────────────────────────────────────── */
+
+/* .stack-mobile — vertical by default, horizontal at ≥1024px */
+.stack-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+@media (min-width: 1024px) {
+  .stack-mobile {
+    flex-direction: row;
+    gap: var(--space-6);
+    align-items: center;
+  }
+}
+
+/* .cards-mobile — 1-col → 2-col → 3-col */
+.cards-mobile {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: 1fr;
+}
+@media (min-width: 768px) {
+  .cards-mobile {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+}
+@media (min-width: 1024px) {
+  .cards-mobile {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-5);
+  }
+}
+
+/* .table-mobile — full table at ≥768px, card list at <768px */
+.table-mobile {
+  width: 100%;
+  border-collapse: collapse;
+}
+.table-mobile thead th {
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--text-xs);
+  color: var(--ink-500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.table-mobile tbody td {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+@media (max-width: 767px) {
+  .table-mobile thead { display: none; }
+  .table-mobile tbody tr {
+    display: block;
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-3);
+    background: var(--surface-1);
+  }
+  .table-mobile tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-2) 0;
+    border-bottom: 0;
+    gap: var(--space-3);
+  }
+  .table-mobile tbody td::before {
+    content: attr(data-label);
+    font-size: var(--text-xs);
+    color: var(--ink-500);
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
 }
