@@ -1,7 +1,7 @@
 # AMPH Academy v2 — Session Handover
 
 **Date:** 2026-07-11
-**Session end state:** Sprint 8 committed (NOT pushed — no GitHub credentials on this machine), docs updated
+**Session end state:** Sprint 8 pushed + audit P0 fixed and pushed
 **Project:** `/storage/emulated/0/Hermes Projects/projects/amph-v2`
 
 ---
@@ -10,7 +10,7 @@
 
 **Sprint 8 — Email Infrastructure (4 pts, all done)**
 
-Committed as `32e1784` on `main`. 5 files changed, 748 insertions.
+Committed as `32e1784` on `main` + `993c5f5` (docs). All pushed.
 
 - **`src/lib/email.tsx`** (540 lines) — Resend client singleton + `sendEmail()` helper + 3 React Email templates
   - `EnrollmentConfirmationEmail` — AMPH branded, Taglish kuya tone
@@ -21,6 +21,16 @@ Committed as `32e1784` on `main`. 5 files changed, 748 insertions.
 - **`src/app/actions/refunds.ts`** — refund status emails wired on all 3 flows: create/approve/reject (best-effort)
 - **`src/app/api/resend/webhook/route.ts`** — email delivery tracking webhook with HMAC-SHA256 signature verification
 
+**Audit Fix — Auth P0 (2026-07-11)**
+
+Committed + pushed as `ef3493f`. All 3 admin server actions had zero authorization guards — any authenticated user could escalate themselves to ADMIN, modify courses, or suspend/delete users. Page-level `requireAdmin()` does not protect server actions invoked directly.
+
+Files fixed:
+- `src/app/actions/admin-courses.ts` — `updateCourseAction`, `addModuleAction` now call `adminGuard()`
+- `src/app/actions/admin-users.ts` — `updateUserAction`, `suspendUserAction`, `reactivateUserAction`, `deleteUserAction` now call `adminGuard()`
+- `src/app/actions/admin-scenarios.ts` — guard added so future actions are protected from the start
+- `package.json` — fixed broken `lint` script (ESLint v9 flat config conflict with `eslint .`)
+
 ---
 
 ## Current Project State
@@ -29,8 +39,9 @@ Committed as `32e1784` on `main`. 5 files changed, 748 insertions.
 |---|---|
 | **Stories complete** | 37 / 55 |
 | **Sprints done** | S1–S8 |
-| **Last commit** | `32e1784` on `main` (NOT pushed — push needs GitHub auth) |
-| **TypeScript** | `pnpm typecheck` exits 0 |
+| **Last commit** | `ef3493f` on `main` (pushed) |
+| **TypeScript** | `pnpm tsc --noEmit` exits 0 |
+| **Lint** | `pnpm lint` — works in CI, broken locally due to space-in-path (cosmetic only) |
 
 ---
 
@@ -45,16 +56,30 @@ Committed as `32e1784` on `main`. 5 files changed, 748 insertions.
 
 ---
 
-## Resend Setup (Needed Before Production)
+## Resend Setup (Needed Before Production Emails Fire)
 
 Add to `.env.local`:
 
 ```env
 RESEND_API_KEY=re_xxxxxxxxxxxxx
-RESEND_FROM_EMAIL=AMPH Academy <noreply@projectamazonph.com>
+RESEND_FROM_EMAIL="AMPH Academy <noreply@projectamazonph.com>"
 # Optional: for webhook signature verification
 RESEND_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxx
 ```
+
+---
+
+## Open Issues (from 2026-07-11 Audit)
+
+| # | Severity | Issue | Status |
+|---|---|---|---|
+| 1 | P1 | PayMongo webhook — no HMAC verification | Open |
+| 2 | P1 | `RESEND_API_KEY` still missing from `.env.local` | Open |
+| 3 | P1 | Resend webhook — HMAC verification not wired | Open |
+| 4 | P2 | `gitleaks` not in CI | Open |
+| 5 | P2 | Story count unclear: 37 vs 55 | Open |
+
+Full audit report: `~/SecondBrain/projects/audits/2026-07-11-amph-v2-audit.md`
 
 ---
 
@@ -67,21 +92,18 @@ RESEND_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxx
 | `src/app/actions/live-classes.ts` | Live class registration — email sent after `db.liveClassRegistration.upsert` |
 | `src/app/actions/refunds.ts` | All 3 refund flows — emails sent after `revalidatePath` |
 | `src/app/api/resend/webhook/route.ts` | Resend delivery tracking webhook |
-| `bmad/workflow-status.yaml` | 37/37 stories complete, Sprint 8 done |
+| `src/app/actions/admin-courses.ts` | Admin course mutations — NOW protected with `requireAdmin()` |
+| `src/app/actions/admin-users.ts` | Admin user mutations — NOW protected with `requireAdmin()` |
+| `bmad/workflow-status.yaml` | 37/37 stories, Sprint 8 done |
 
 ---
 
 ## Commands
 
 ```bash
-# Dev
 cd "/storage/emulated/0/Hermes Projects/projects/amph-v2"
 pnpm dev
-
-# Type check (required before commit)
-pnpm typecheck
-
-# Push (run on machine with GitHub auth)
+pnpm typecheck   # required before commit
 git push
 ```
 
@@ -91,7 +113,7 @@ git push
 
 - CSS Modules only — no Tailwind
 - Server Components + Server Actions for data mutations
-- `requireAdmin()` from `@/lib/auth` on every admin page
+- `requireAdmin()` from `@/lib/auth` on every **admin page AND every admin server action**
 - `auditLog()` from `@/lib/admin-audit` on every admin mutation
 - Always `revalidatePath` after mutations
 - Zero TypeScript errors before commit
