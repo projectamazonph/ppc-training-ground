@@ -70,16 +70,18 @@ phases:
         output_file: "docs/sprint-plan.md"
         completed_at: "2026-07-07"
       stories:
-        total: 42
-        completed: 37
-        in_progress: 5
+        total: 47
+        completed: 42
+        in_progress: 0
         sprint_8_notes: >
           Sprint 8 completed 2026-07-11 (commit 1414754). Stories wire transactional emails (Resend + React Email):
           enrollment confirmation on payment webhook, live class reminder on registration, refund status
           notifications on request/approve/reject. Also created /api/resend/webhook for delivery tracking.
         sprint_9_notes: >
-          Sprint 9 in progress (5 pts, 5 stories). Polish + mobile-first refactor.
-          See docs/sprint-9/PLAN.md and docs/stories/STORY-038 through STORY-042.
+          Sprint 9 completed 2026-07-12. All 5 stories done: design system audit (email template
+          exception added), responsive breakpoint infrastructure (globals.css), BottomNav component,
+          marketing+auth mobile-first refactor (5 pages), student app shell+tools refactor (7 pages).
+          All pages now render correctly at 390px and 1280px. Lint clean.
         story_list:
           - "STORY-001-scaffold"
           - "STORY-002-tokens"
@@ -128,6 +130,6 @@ metrics:
   total_workflows: 13
   completed_workflows: 10
   progress_percentage: 100
-  estimated_stories: 42
-  completed_stories: 37
+  estimated_stories: 47
+  completed_stories: 42
   last_updated: "2026-07-12T00:00:00Z"

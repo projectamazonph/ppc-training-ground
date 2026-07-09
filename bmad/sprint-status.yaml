@@ -7,14 +7,188 @@ sprint:
   name: "Polish + Mobile-First Refactor"
   start_date: "2026-07-12"
   end_date: "2026-07-13"
-  status: "in_progress"
+  status: "complete"
 
 capacity:
   planned_points: 5
-  velocity: 0
+  velocity: 5
   buffer_points: 0
 
 completed_stories:
+  - id: "STORY-001"
+    title: "Scaffold Next.js 16"
+    points: 1
+    sprint: 1
+    epic: "Foundation"
+    owner: "Ryan"
+  - id: "STORY-002"
+    title: "Field Manual design tokens"
+    points: 1
+    sprint: 1
+    epic: "Foundation"
+    owner: "Ryan"
+  - id: "STORY-003"
+    title: "Shared component library"
+    points: 1.5
+    sprint: 1
+    epic: "Foundation"
+    owner: "Ryan"
+  - id: "STORY-004"
+    title: "Prisma + initial migration"
+    points: 1
+    sprint: 1
+    epic: "Foundation"
+    owner: "Ryan"
+  - id: "STORY-005"
+    title: "Auth (JWT + jose)"
+    points: 1
+    sprint: 1
+    epic: "Foundation"
+    owner: "Ryan"
+  - id: "STORY-006"
+    title: "Admin layout + RBAC"
+    points: 0.5
+    sprint: 1
+    epic: "Foundation"
+    owner: "Ryan"
+  - id: "STORY-007"
+    title: "Campaign Builder engine"
+    points: 1
+    sprint: 2
+    epic: "Tools"
+    owner: "Ryan"
+  - id: "STORY-008"
+    title: "Bid Elevator engine"
+    points: 1
+    sprint: 2
+    epic: "Tools"
+    owner: "Ryan"
+  - id: "STORY-009"
+    title: "STR Triage engine"
+    points: 1
+    sprint: 2
+    epic: "Tools"
+    owner: "Ryan"
+  - id: "STORY-010"
+    title: "Tool UI shell"
+    points: 1.5
+    sprint: 2
+    epic: "Tools"
+    owner: "Ryan"
+  - id: "STORY-011"
+    title: "ToolSession persistence"
+    points: 1
+    sprint: 2
+    epic: "Tools"
+    owner: "Ryan"
+  - id: "STORY-012"
+    title: "Listing Audit + Keyword Research"
+    points: 0.5
+    sprint: 2
+    epic: "Tools"
+    owner: "Ryan"
+  - id: "STORY-013"
+    title: "Content import"
+    points: 1
+    sprint: 3
+    epic: "Curriculum"
+    owner: "Ryan"
+  - id: "STORY-014"
+    title: "Schema fix (enums to String)"
+    points: 0.5
+    sprint: 3
+    epic: "Curriculum"
+    owner: "Ryan"
+  - id: "STORY-015"
+    title: "Curriculum pages"
+    points: 1
+    sprint: 3
+    epic: "Curriculum"
+    owner: "Ryan"
+  - id: "STORY-016"
+    title: "Quiz system"
+    points: 0.5
+    sprint: 3
+    epic: "Curriculum"
+    owner: "Ryan"
+  - id: "STORY-017"
+    title: "Tier gating (enroll-aware access)"
+    points: 0.5
+    sprint: 3
+    epic: "Curriculum"
+    owner: "Ryan"
+  - id: "STORY-018"
+    title: "Campaign Builder wizard"
+    points: 1.5
+    sprint: 4
+    epic: "Tool UIs"
+    owner: "Ryan"
+  - id: "STORY-019"
+    title: "Bid Elevator table"
+    points: 1
+    sprint: 4
+    epic: "Tool UIs"
+    owner: "Ryan"
+  - id: "STORY-020"
+    title: "STR Triage triager"
+    points: 1
+    sprint: 4
+    epic: "Tool UIs"
+    owner: "Ryan"
+  - id: "STORY-021"
+    title: "Listing Audit form"
+    points: 0.5
+    sprint: 4
+    epic: "Tool UIs"
+    owner: "Ryan"
+  - id: "STORY-022"
+    title: "Keyword Research categorizer"
+    points: 0.5
+    sprint: 4
+    epic: "Tool UIs"
+    owner: "Ryan"
+  - id: "STORY-023"
+    title: "Auto-award badges"
+    points: 1
+    sprint: 5
+    epic: "Gamification"
+    owner: "Ryan"
+  - id: "STORY-024"
+    title: "Certificate generation"
+    points: 1
+    sprint: 5
+    epic: "Gamification"
+    owner: "Ryan"
+  - id: "STORY-025"
+    title: "Live Classes"
+    points: 1.5
+    sprint: 5
+    epic: "Gamification"
+    owner: "Ryan"
+  - id: "STORY-026"
+    title: "PayMongo Checkout"
+    points: 1.5
+    sprint: 6
+    epic: "Payments"
+    owner: "Ryan"
+  - id: "STORY-027"
+    title: "Enrollment + tier gating"
+    points: 1
+    sprint: 6
+    epic: "Payments"
+    owner: "Ryan"
+  - id: "STORY-028"
+    title: "Refund flow"
+    points: 1
+    sprint: 6
+    epic: "Payments"
+    owner: "Ryan"
+  - id: "STORY-029"
+    title: "Receipt PDF"
+    points: 0.5
+    sprint: 6
+    epic: "Payments"
+    owner: "Ryan"
   - id: "STORY-030"
     title: "Admin dashboard stats upgrade + user management CRUD"
     points: 1
