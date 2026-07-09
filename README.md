@@ -256,7 +256,9 @@ Every component imports a `.module.css` file that uses `var(--token)` references
 
 ## Sprint Status
 
-Sprints 1-5 shipped the foundation, all 5 tool engines + 30 scenarios, content import, curriculum pages, quiz system, tier gating, the 5 interactive tool UIs, and the full gamification stack: auto-awarded badges, PDF certificates with public verification, and live classes with tier-gated registration. Sprint 6 — Payments completed 2026-07-10: STORY-026 (PayMongo checkout + webhook + public pricing), STORY-027 (guest signup completion + grandfather free PPC enrollment), STORY-028 (refund flow — student request, admin approval, PayMongo refund call), STORY-029 (BIR-compliant receipt PDFs with sequential numbering, auto-issued on payment).
+**37/42 stories shipped across Sprints 1–8 (88% of plan).** Sprints 1–5 shipped the foundation, all 5 tool engines + 30 scenarios, content import, curriculum pages, quiz system, tier gating, the 5 interactive tool UIs, and the full gamification stack: auto-awarded badges, PDF certificates with public verification, and live classes with tier-gated registration. **Sprint 6 — Payments** (2026-07-10): STORY-026/027/028/029 — PayMongo checkout + webhook, enrollment + tier gating, refund flow engine, BIR-compliant receipt PDFs. **Sprint 7 — Admin** (2026-07-10): STORY-030/031/032/033 — admin dashboard + user management, course/module/lesson CRUD with MDX editor, tool scenario admin, analytics dashboards. **Sprint 8 — Refunds + Email** (2026-07-11, commit `1414754`): STORY-034/035/036/037 — admin refund approval UI, 3 Resend React Email templates, webhook handler with HMAC signature verification.
+
+**Next: Sprint 9 — Polish + Mobile.** Token audit + Tailwind purge, responsive breakpoint infrastructure, BottomNav shared component, mobile-first refactor of 12 student-facing pages. Plan at `docs/sprint-9/PLAN.md`. Stories at `docs/stories/STORY-038.md` through `STORY-042.md`.
 
 - Next.js 16 scaffold with TypeScript strict
 - Field Manual design system (60+ tokens, full dark mode)
@@ -271,8 +273,9 @@ Sprints 1-5 shipped the foundation, all 5 tool engines + 30 scenarios, content i
 - Tier-gated course access (enroll-aware): TierLock screen on lesson/quiz pages, lock icons on course index, server actions enforce the gate
 - 5 interactive tool UIs: Listing Audit form, Keyword Research categorizer, Bid Elevator table, STR Triage triager, Campaign Builder 5-step wizard (BTV-aware)
 - 1 admin + 3 pricing tiers + 5 badges seeded
-
-**Next: Sprint 7 — Admin panels.** User/course/payment/audit management. Spec at `docs/admin-backend.md`.
+- Admin panel: 8 screens (dashboard + user mgmt + course CRUD + tool scenarios + analytics + refunds + settings + badges)
+- Refund flow: student request → admin approve/reject → PayMongo refund API + email
+- Email: enrollment confirmation, live class reminder, refund status (3 templates) + Resend webhook handler
 
 See `docs/sprint-plan.md` for the full roadmap and `bmad/sprint-status.yaml` for current state.
 

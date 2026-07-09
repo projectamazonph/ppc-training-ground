@@ -1,35 +1,44 @@
 # AMPH Academy v2 — Session Handover
 
-**Date:** 2026-07-11
-**Session end state:** Sprint 8 pushed + audit P0 fixed and pushed
+**Date:** 2026-07-12
+**Session end state:** Sprint 9 PLANNED (5 stories, 5 pts), BMAD state files updated, all sprint docs synced. NO code work landed in this session — Sprint 8 was already committed in the prior session (commit `1414754`).
 **Project:** `/storage/emulated/0/Hermes Projects/projects/amph-v2`
 
 ---
 
 ## What Was Accomplished
 
-**Sprint 8 — Email Infrastructure (4 pts, all done)**
+**Sprint 9 Planning (this session)**
 
-Committed as `32e1784` on `main` + `993c5f5` (docs). All pushed.
+Closed out documentation for Sprints 5–8 (which had been recorded as "backlog" in `docs/sprint-plan.md` even though the code shipped) and authored the Sprint 9 plan + 5 story files.
 
-- **`src/lib/email.tsx`** (540 lines) — Resend client singleton + `sendEmail()` helper + 3 React Email templates
-  - `EnrollmentConfirmationEmail` — AMPH branded, Taglish kuya tone
-  - `LiveClassReminderEmail` — class title, instructor, scheduledAt, meetingUrl, durationMinutes
-  - `RefundStatusEmail` — 'requested'/'approved'/'rejected' variants with reviewer notes
-- **`src/lib/enrollment.ts`** — enrollment confirmation email wired in `handleCheckoutPaid()` after enrollment creation (best-effort)
-- **`src/app/actions/live-classes.ts`** — live class reminder wired in `registerForLiveClass()` after registration upsert (best-effort)
-- **`src/app/actions/refunds.ts`** — refund status emails wired on all 3 flows: create/approve/reject (best-effort)
-- **`src/app/api/resend/webhook/route.ts`** — email delivery tracking webhook with HMAC-SHA256 signature verification
+- **`docs/sprint-plan.md`** — Updated header date + status (37/42 stories, 88% of plan). Added ✅ Complete markers on Sprints 5, 6, 7, 8. Re-scoped Sprint 9 from "voice/empty-states/a11y audit" to "Polish + Mobile". Updated "Done So Far" footer.
+- **`docs/sprint-9/PLAN.md`** — New file. Sprint goal, capacity reasoning, story table, dependency graph, out-of-scope list, DoD checklist, Sprint 10 order-of-operations handoff.
+- **`docs/stories/STORY-038.md`** through **`STORY-042.md`** — Per-story artifacts with goal, why-first/last ordering, acceptance criteria, files-touched, code shape excerpts, pitfalls, verification commands, DoD.
+- **`bmad/sprint-status.yaml`** — Flipped Sprint 8 from `in_progress` → completed (STORIES 034–037 moved to `completed_stories`). Added Sprint 9 with STORIES 038–042 in `planned_stories`. Velocity tracking updated.
+- **`bmad/workflow-status.yaml`** — Bumped `total: 42`, `completed: 37`, `in_progress: 5`, `estimated_stories: 42`. Added 5 Sprint 9 story slugs to `story_list`. Added `sprint_9_notes`. Refreshed `last_updated: 2026-07-12T00:00:00Z`.
+- **`README.md`** — Sprint Status section updated with all 8 sprints complete (37/42 stories), Next pointer to Sprint 9.
 
-**Audit Fix — Auth P0 (2026-07-11)**
+**State on disk**
 
-Committed + pushed as `ef3493f`. All 3 admin server actions had zero authorization guards — any authenticated user could escalate themselves to ADMIN, modify courses, or suspend/delete users. Page-level `requireAdmin()` does not protect server actions invoked directly.
+| | |
+|---|---|
+| **Stories complete** | 37 / 42 |
+| **Sprints done** | S1–S8 |
+| **Current sprint** | S9 (planned, 5 stories, 0 completed) |
+| **Last commit** | `1414754` on `main` (NOT pushed — push needs GitHub auth on a desktop machine) |
+| **TypeScript** | `pnpm typecheck` exits 0 |
 
-Files fixed:
-- `src/app/actions/admin-courses.ts` — `updateCourseAction`, `addModuleAction` now call `adminGuard()`
-- `src/app/actions/admin-users.ts` — `updateUserAction`, `suspendUserAction`, `reactivateUserAction`, `deleteUserAction` now call `adminGuard()`
-- `src/app/actions/admin-scenarios.ts` — guard added so future actions are protected from the start
-- `package.json` — fixed broken `lint` script (ESLint v9 flat config conflict with `eslint .`)
+---
+
+## Sprint 9 Quick Reference
+
+- **Goal:** Mobile-first refactor of student-facing surface. Every page renders correctly at 390px + 1280px using Field Manual tokens.
+- **Capacity:** 5 pts
+- **Stories:** STORY-038 (audit) → STORY-039 (tokens + helpers) → STORY-040 (BottomNav) → STORY-041 (marketing+auth mobile) → STORY-042 (student flow mobile)
+- **Source-of-truth prototypes:** `/workspace/amph-v2-stitch/generated/mobile/*.html` (24 screens, Field Manual tokens, mobile-first). Two prototypes still need generation: `landing-mobile.html` (from Stitch `9b9f7eb...`) and `dashboard-mobile.html` (from Stitch `663ad1dc...`). Both are first-tasks inside STORY-041 and STORY-042 respectively.
+- **Plan:** `docs/sprint-9/PLAN.md`
+- **Stories:** `docs/stories/STORY-038.md` through `STORY-042.md`
 
 ---
 
@@ -42,6 +51,12 @@ Files fixed:
 | **Last commit** | `ef3493f` on `main` (pushed) |
 | **TypeScript** | `pnpm tsc --noEmit` exits 0 |
 | **Lint** | `pnpm lint` — works in CI, broken locally due to space-in-path (cosmetic only) |
+
+Files fixed:
+- `src/app/actions/admin-courses.ts` — `updateCourseAction`, `addModuleAction` now call `adminGuard()`
+- `src/app/actions/admin-users.ts` — `updateUserAction`, `suspendUserAction`, `reactivateUserAction`, `deleteUserAction` now call `adminGuard()`
+- `src/app/actions/admin-scenarios.ts` — guard added so future actions are protected from the start
+- `package.json` — fixed broken `lint` script (ESLint v9 flat config conflict with `eslint .`)
 
 ---
 

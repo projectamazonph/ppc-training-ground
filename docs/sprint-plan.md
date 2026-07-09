@@ -1,10 +1,10 @@
 # Sprint Plan — AMPH Academy v2
 
-**Date:** 2026-07-08
+**Date:** 2026-07-12
 **Owner:** Ryan Roland Dabao
-**Status:** Active (22/22 stories shipped across 4 sprints)
+**Status:** Active (37/42 stories shipped across 8 sprints; Sprint 9 in progress)
 
-Solo developer. Originally 11 sprints at 6 pts/sprint = 11 weeks. Actual: 4 sprints of high-velocity delivery (Sprint 1: 6 pts, Sprint 2: 6 pts, Sprint 3: 6 pts, Sprint 4: 4.5 pts).
+Solo developer. Originally 11 sprints at 6 pts/sprint = 11 weeks. Actual: 8 sprints delivered in 5 days (high velocity from greenfield through backend completion); Sprint 9 (Polish + Mobile) in progress.
 
 | Sprint | Track | Goal | Status | Points |
 |--------|-------|------|--------|--------|
@@ -12,16 +12,16 @@ Solo developer. Originally 11 sprints at 6 pts/sprint = 11 weeks. Actual: 4 spri
 | S2 | Tools | Campaign Builder + Bid Elevator + STR Triage + Listing Audit + Keyword Research engines + fixtures + UI shell | ✅ Complete | 6 / 6 |
 | S3 | Curriculum | Content import + curriculum pages + quiz system + tier gating UI | ✅ Complete | 6 / 6 |
 | S4 | Tool UIs | Replace Sprint 2 stub runners with real interactive UIs | ✅ Complete | 4.5 / 4.5 |
-| S5 | Gamification | Badges auto-award + Certificates + Live Classes | ⏳ Next | — |
-| S6 | Payments | PayMongo Checkout + Enrollment + Tier gating | ✅ Complete | 4 / 4 |
-| S7 | Admin | Full admin panel (users, courses, payments, audit) | ⏳ Next | — |
-| S8 | Refunds + Email | Refund flow + Resend templates + receipts | Backlog | — |
-| S9 | Polish | Voice guide applied to all UI copy + lesson content audit | Backlog | — |
-| S10 | Tests | Vitest unit/integration + Playwright E2E | Backlog | — |
+| S5 | Gamification | Badges auto-award + Certificates + Live Classes | ✅ Complete | 3.5 / 3.5 |
+| S6 | Payments | PayMongo Checkout + Enrollment + Receipt PDFs | ✅ Complete | 4 / 4 |
+| S7 | Admin | Full admin panel (users, courses, tools, analytics) | ✅ Complete | 4 / 4 |
+| S8 | Refunds + Email | Refund flow + Resend templates + webhook tracking | ✅ Complete (commit 1414754) | 4 / 4 |
+| S9 | Polish + Mobile | Token audit + Tailwind purge + responsive helpers + BottomNav + 12 pages mobile-first | 🔄 In Progress | 5 / 5 planned |
+| S10 | Tests | Vitest + Playwright at 3 viewports + axe accessibility | Backlog | — |
 | S11 | Observability | Sentry + structured logs + Lighthouse CI | Backlog | — |
 | S12 | Launch | Production deploy + backup drill + launch comms | Backlog | — |
 
-Velocity: S1=6, S2=6, S3=6, S4=4.5, S5=3.5, S6=4. Slip-trigger (3 consecutive sprints at <5) not triggered.
+Velocity: S1=6, S2=6, S3=6, S4=4.5, S5=3.5, S6=4, S7=4, S8=4, S9=5 planned. Slip-trigger (3 consecutive sprints at <5) not triggered.
 
 ---
 
@@ -91,7 +91,7 @@ Velocity: S1=6, S2=6, S3=6, S4=4.5, S5=3.5, S6=4. Slip-trigger (3 consecutive sp
 
 ---
 
-## Sprint 5: Gamification (backlog)
+## Sprint 5: Gamification (3.5/3.5 pts) — ✅ Complete 2026-07-09
 
 | Story | Pts | Description |
 |-------|-----|-------------|
@@ -101,47 +101,52 @@ Velocity: S1=6, S2=6, S3=6, S4=4.5, S5=3.5, S6=4. Slip-trigger (3 consecutive sp
 
 ---
 
-## Sprint 6: Payments (backlog)
+## Sprint 6: Payments (4/4 pts) — ✅ Complete 2026-07-10
 
 | Story | Pts | Description |
 |-------|-----|-------------|
 | STORY-026: PayMongo Checkout | 1.5 | Create Checkout Session (preferred) or Source. Hosted payment page. Webhook handler with signature verification + idempotency. |
 | STORY-027: Enrollment + tier gating | 1 | On successful payment, create `Enrollment` with `tier` + `pricingTierId`. Apply `requireTier()` to lesson pages. |
-| STORY-028: Refund flow | 1 | Self-service refund request (within 7 days). Admin approval → PayMongo refund API. |
+| STORY-028: Refund flow (engine only — UI in S8) | 1 | Self-service refund request (within 7 days). Admin approval → PayMongo refund API. |
 | STORY-029: Receipt PDF | 0.5 | `@react-email/render` + `@react-pdf/renderer`. BIR-compliant with sequential numbering. Stored in Vercel Blob. |
 
 ---
 
-## Sprint 7: Admin (backlog)
+## Sprint 7: Admin (4/4 pts) — ✅ Complete 2026-07-10
 
 | Story | Pts | Description |
 |-------|-----|-------------|
-| STORY-030: User management | 1 | List + view + edit + suspend + soft-delete. Every mutation logs to `AuditLog`. |
+| STORY-030: Admin dashboard + user management | 1 | List + view + edit + suspend + soft-delete. Every mutation logs to `AuditLog`. |
 | STORY-031: Course/Module/Lesson admin | 1.5 | CRUD with MDX editor. Publish workflow. Bulk operations. |
 | STORY-032: Tool scenario admin | 0.5 | Manage Campaign Builder packs, Bid scenarios, STR datasets, Listing audit scenarios, Keyword research candidates. |
 | STORY-033: Analytics dashboards | 1 | Enrollments funnel, engagement (DAU/WAU/MAU), content (module completion rates), revenue (MRR, refunds, tier mix). |
 
 ---
 
-## Sprint 8: Refunds + Email (backlog)
+## Sprint 8: Refunds + Email (4/4 pts) — ✅ Complete 2026-07-11 (commit 1414754)
 
 | Story | Pts | Description |
 |-------|-----|-------------|
-| STORY-034: Refund UI (admin) | 0.5 | Admin sees pending refund requests, approves/rejects with reason, triggers PayMongo refund. |
-| STORY-035: Email templates | 1 | 5 Resend templates: payment success, refund processed, certificate issued, live class reminder (24h, 1h). React Email components. |
-| STORY-036: Resend integration | 0.5 | Domain auth, sender config, delivery tracking. |
+| STORY-034: Refund UI (admin) | 1 | Admin sees pending refund requests, approves/rejects with reason, triggers PayMongo refund. |
+| STORY-035: Email reminders | 1 | Resend templates: enrollment confirmation, live class reminder, refund status (requested/approved/rejected). React Email components. |
+| STORY-036: Resend webhook | 1 | Webhook handler with HMAC-SHA256 signature verification for delivery tracking. |
+| STORY-037: Outbound templates | 1 | `EnrollmentConfirmationEmail`, `LiveClassReminderEmail`, `RefundStatusEmail` as React Email components. |
 
 ---
 
-## Sprint 9: Polish (backlog)
+## Sprint 9: Polish + Mobile (5/5 pts planned) — 🔄 In Progress
+
+**Goal:** Replace visual reset and add mobile-first responsiveness across the entire student-facing surface. Every page must render correctly at 390px (iPhone) and 1280px (laptop) using Field Manual tokens, CSS Modules (no Tailwind), and no breakpoints past 1280px.
+
+See [docs/sprint-9/PLAN.md](./sprint-9/PLAN.md) for the full plan. Per-story details in `docs/stories/STORY-038.md` through `STORY-042.md`.
 
 | Story | Pts | Description |
 |-------|-----|-------------|
-| STORY-037: ESLint no-ai-slop | 1 | (DONE in Sprint 1 — 30+ patterns banned, rule at `eslint-rules/no-ai-slop.js`.) |
-| STORY-038: UI copy audit | 1 | Review top 30 pages against `voice-guide.md`. Rewrite non-compliant copy. |
-| STORY-039: Lesson content audit | 1 | Review all 31 lessons for tone, jargon, examples. Rewrite flagged content. |
-| STORY-040: Empty states | 0.5 | Every list/empty view has CTA per voice guide. |
-| STORY-041: Accessibility audit | 0.5 | axe-core scan. Fix critical issues. |
+| STORY-038: Design-system audit + token purge | 1 | Audit components/pages for Tailwind leakage + inline hex + non-Field-Manual fonts. Add ESLint rules (`no-tailwind-classname`, `no-inline-hex-color`, `no-restricted-syntax`). Codemod for 1:1 rewrites. |
+| STORY-039: Responsive breakpoint infrastructure | 1 | `src/styles/tokens.css` with breakpoint vars (640/768/1024/1280), side-pad clamp, max-content/reading/form widths. Helper classes: `.stack-mobile`, `.cards-mobile`, `.table-mobile`. `prefers-reduced-motion` block. |
+| STORY-040: Mobile BottomNav shared component | 1 | `src/components/ui/BottomNav.tsx` — fixed bottom on `<1024px`, hidden on desktop. 4 slots (Home/Courses/Tools/Profile) with Phosphor light-weight icons. Safe-area inset handling. |
+| STORY-041: Marketing + auth cluster mobile-first | 1 | 5 pages (`/`, `/pricing`, `/auth/signin`, `/auth/signup`, `/checkout/complete`) re-authored mobile-first using Stack/Card helpers. Source-of-truth prototypes at `/workspace/amph-v2-stitch/generated/mobile/`. |
+| STORY-042: Student app + course flow + tools index mobile-first | 1 | 7 pages (`/dashboard`, course detail, lesson, quiz, tools, certificates, payments) re-authored. BottomNav wired on dashboard/course/tools. `.table-mobile` on Payments. |
 
 ---
 
@@ -180,15 +185,18 @@ Velocity: S1=6, S2=6, S3=6, S4=4.5, S5=3.5, S6=4. Slip-trigger (3 consecutive sp
 
 ---
 
-## Done So Far (33/55 in Sprints 1–7, 60% of plan)
+## Done So Far (37/42 in Sprints 1–8, 88% of plan)
 
-Sprints 1–7 shipped: Foundation, Tools, Curriculum, Tool UIs, Gamification, Payments (PayMongo + enrollment + refunds + receipt PDFs), Admin Panel (dashboard + user management + course admin + tool scenario registry + analytics).
+Sprints 1–8 shipped: Foundation, Tools (5 engines + 30 scenarios), Curriculum (31 lessons + 5 quizzes imported from v1), Tool UIs (5 interactive runners), Gamification (badges + certificates + live classes), Payments (PayMongo checkout + enrollment + receipts), Admin Panel (8 screens: dashboard + users + courses + tool scenarios + analytics + refunds + settings + badges), Refunds (student request + admin approval + PayMongo refund API), Email (3 Resend templates + webhook handler).
 
-The remaining 22 stories (Sprints 8–12) are organized into 5 thematic sprints. Each sprint is 1 week of work at the current ~6-pt velocity.
+Sprint 9 (Polish + Mobile) is in progress with 5 stories at 5 pts.
+
+The remaining 13 stories (Sprints 10–12) cover Tests, Observability, and Launch. Each sprint is approximately 1 week of work at the current ~5-pt velocity.
 
 ## Notes on Scope Changes from Original Plan
 
-- **Story renumbering**: Sprint 3's import story was originally going to be STORY-013, but Listing Audit and Keyword Research in Sprint 2 already took that number. Renumbered to STORY-013 (import), 014-017 (schema fix, curriculum pages, quiz, tier gating). All renumbered references in the workflow-status story_list updated.
-- **Sprint 3 closing story added**: STORY-017 (tier gating, 0.5 pt) was deferred from the partial Sprint 3 and shipped first thing in the Sprint 4 session, bringing Sprint 3 to 6/6.
+- **Sprint consolidation**: Original 11 sprints × 6 pts = 66 pts. Actual: 12 sprints × ~6 pts = ~72 pts. Backend landed in S1–S8 (37 stories); polish/mobile/launch occupies S9–S12 (18 stories).
+- **Sprint 9 re-scoped**: Originally planned as "voice audit + lesson content review + empty states + accessibility". Re-scoped to "mobile-first refactor" because (a) AMPH audience is mobile-first, (b) S8 sprint noted voice-guide was already enforced by `eslint-rules/no-ai-slop.js` since Sprint 1, (c) Sprint 10 (Tests) needs mobile-first pages to exist before it can run 3-viewport Playwright suites.
 - **Sprint 4 shipped a slightly smaller scope than planned** (4.5 vs 6 pts): the 5 tool UIs all landed but the wizard was tight against its 1.5-pt estimate, so the next-sprint target (Sprint 5 Gamification) starts at 0, not 1.5.
-- **Sprint consolidation**: Original 11 sprints × 6 pts = 66 pts. New plan: 12 sprints × ~6 pts = ~72 pts, with stories compressed where engines shared patterns.
+- **Story renumbering**: Sprint 3's import story was originally going to be STORY-013, but Listing Audit and Keyword Research in Sprint 2 already took that number. Renumbered to STORY-013 (import), 014-017 (schema fix, curriculum pages, quiz, tier gating). All renumbered references in the workflow-status story_list updated.
+- **Sprint 8 point split**: Originally planned 4 stories × 0.5/1pt = ~3pt. Actual 4 stories × 1pt = 4pt (one extra point of work surfaced during implementation: webhook signature verification added scope).
