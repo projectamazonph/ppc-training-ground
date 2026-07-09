@@ -358,3 +358,35 @@ pre {
     letter-spacing: 0.04em;
   }
 }
+
+/* .sticky-cta — fixed bottom CTA bar for quiz/lesson mobile */
+.sticky-cta {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-sticky);
+  background: var(--surface-1);
+  border-top: 1px solid var(--border);
+  padding: var(--space-3) var(--side-pad) calc(var(--space-3) + env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+@media (min-width: 1024px) {
+  .sticky-cta {
+    display: none;
+  }
+}
+
+.page-with-cta {
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 1024px) {
+  .page-with-cta {
+    padding-bottom: 0;
+  }
+}

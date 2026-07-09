@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { requireAuth } from '@/lib/auth';
 import { Card, CardHeader, CardTitle, CardDescription, Badge } from '@/components/ui';
 import { Icon, type PhosphorIconName } from '@/components/ui/Icon';
+import { BottomNav } from '@/components/ui/BottomNav';
 import { SCENARIOS as CB_SCENARIOS, BTV_SCENARIOS } from '@/engine/campaign-builder/scenarios';
 import { SCENARIOS as BE_SCENARIOS } from '@/engine/bid-elevator/scenarios';
 import { SCENARIOS as STR_SCENARIOS } from '@/engine/str-triage/scenarios';
@@ -89,6 +90,8 @@ export default async function ToolsIndexPage() {
           </Card>
         ))}
       </section>
+
+      <BottomNav active="tools" />
     </main>
   );
 }

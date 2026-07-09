@@ -1,38 +1,38 @@
 .page {
   max-width: 960px;
   margin: 0 auto;
-  padding: 32px 24px 96px;
+  padding: var(--space-8) var(--side-pad) 96px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-6);
 }
 
 .header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 24px;
+  gap: var(--space-6);
   flex-wrap: wrap;
 }
 
 .eyebrow {
-  font-size: 11px;
+  font-size: var(--text-xs);
   letter-spacing: 4px;
-  color: var(--color-text-muted, #888);
-  margin: 0 0 8px;
+  color: var(--ink-500);
+  margin: 0 0 var(--space-2);
   text-transform: uppercase;
 }
 
 .title {
-  font-size: 32px;
+  font-size: var(--text-2xl);
   font-weight: 700;
-  margin: 0 0 8px;
-  color: var(--color-text, #1a1a2e);
+  margin: 0 0 var(--space-2);
+  color: var(--ink-900);
 }
 
 .subtitle {
-  font-size: 15px;
-  color: var(--color-text-muted, #5a5a6e);
+  font-size: var(--text-base);
+  color: var(--ink-700);
   margin: 0;
   max-width: 56ch;
   line-height: 1.5;
@@ -40,11 +40,11 @@
 
 .emptyCard {
   text-align: center;
-  padding: 32px;
+  padding: var(--space-8);
 }
 
 .emptyCta {
-  margin-top: 24px;
+  margin-top: var(--space-6);
   display: flex;
   justify-content: center;
 }
@@ -55,14 +55,14 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .certCard {
   display: grid;
   grid-template-columns: 64px 1fr auto;
-  gap: 24px;
-  padding: 24px;
+  gap: var(--space-6);
+  padding: var(--space-6);
   align-items: center;
 }
 
@@ -72,42 +72,42 @@
   justify-content: center;
   width: 64px;
   height: 64px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  color: #92400e;
+  border-radius: var(--radius-lg);
+  background: var(--warning-soft);
+  color: var(--warning);
 }
 
 .certBody {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .certCourse {
-  font-size: 18px;
+  font-size: var(--text-lg);
   font-weight: 600;
   margin: 0;
-  color: var(--color-text, #1a1a2e);
+  color: var(--ink-900);
 }
 
 .certMeta {
-  font-size: 13px;
-  color: var(--color-text-muted, #5a5a6e);
+  font-size: var(--text-xs);
+  color: var(--ink-500);
   margin: 0;
   line-height: 1.4;
 }
 
 .certBadges {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   flex-wrap: wrap;
-  margin-top: 4px;
+  margin-top: var(--space-1);
 }
 
 .certActions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
   align-items: stretch;
 }
 

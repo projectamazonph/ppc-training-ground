@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { Card, CardHeader, CardTitle, CardDescription, Badge, Button } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
+import { BottomNav } from '@/components/ui/BottomNav';
 import { ProgressStatus } from '@/lib/enums';
 import styles from './dashboard.module.css';
 
@@ -137,6 +138,8 @@ export default async function DashboardPage() {
           Open the tools
         </Link>
       </section>
+
+      <BottomNav active="home" />
     </main>
   );
 }

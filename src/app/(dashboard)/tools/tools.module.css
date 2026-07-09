@@ -1,7 +1,19 @@
 .toolGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: 1fr;
   gap: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .toolGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .toolGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .toolLink {
