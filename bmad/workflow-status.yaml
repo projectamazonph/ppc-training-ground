@@ -70,9 +70,13 @@ phases:
         output_file: "docs/sprint-plan.md"
         completed_at: "2026-07-07"
       stories:
-        total: 33
-        completed: 33
+        total: 37
+        completed: 37
         in_progress: 0
+        sprint_8_notes: >
+          Sprint 8 completed 2026-07-11. Stories wire transactional emails (Resend + React Email):
+          enrollment confirmation on payment webhook, live class reminder on registration, refund status
+          notifications on request/approve/reject. Also created /api/resend/webhook for delivery tracking.
         story_list:
           - "STORY-001-scaffold"
           - "STORY-002-tokens"
@@ -107,11 +111,15 @@ phases:
           - "STORY-031-course-admin-crud"
           - "STORY-032-tool-scenario-admin"
           - "STORY-033-analytics-dashboards"
+          - "STORY-034-resend-email-infrastructure"
+          - "STORY-035-enrollment-confirmation-email"
+          - "STORY-036-live-class-reminder-email"
+          - "STORY-037-refund-status-email"
 
 metrics:
   total_workflows: 13
   completed_workflows: 10
   progress_percentage: 100
-  estimated_stories: 33
-  completed_stories: 33
-  last_updated: "2026-07-10T16:00:00Z"
+  estimated_stories: 37
+  completed_stories: 37
+  last_updated: "2026-07-11T00:00:00Z"

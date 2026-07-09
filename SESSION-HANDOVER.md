@@ -1,33 +1,25 @@
 # AMPH Academy v2 — Session Handover
 
-**Date:** 2026-07-10
-**Session end state:** Sprint 7 committed and pushed, docs updated, S8 next
+**Date:** 2026-07-11
+**Session end state:** Sprint 8 committed (NOT pushed — no GitHub credentials on this machine), docs updated
 **Project:** `/storage/emulated/0/Hermes Projects/projects/amph-v2`
 
 ---
 
 ## What Was Accomplished
 
-**Sprint 7 — Admin Panel (4 pts, all done)**
+**Sprint 8 — Email Infrastructure (4 pts, all done)**
 
-Committed as `15259ef` on `main`. 21 files changed, 1,667 insertions.
+Committed as `32e1784` on `main`. 5 files changed, 748 insertions.
 
-- **Admin dashboard** (`src/app/admin/page.tsx`) — real DB queries for 4 stat cards + recent payments table
-- **User management** (`src/app/admin/users/`) — list (search/filter/paginate), detail (enrollments/payments/badges/audit), suspend/reactivate/delete actions
-- **Course admin** (`src/app/admin/courses/`) — course list, course detail tree (modules → lessons), CRUD actions
-- **Tool scenario registry** (`src/app/admin/tool-scenarios/`) — read-only view via `TOOL_REGISTRY` (no DB model)
-- **Analytics** (`src/app/admin/analytics/page.tsx`) — enrollment funnel, MRR, engagement, top courses, activity feed
-- **Supporting:** `src/lib/admin-audit.ts`, CSS Modules for every new page
-
----
-
-## Critical Fixes Applied This Session
-
-1. **No `db.toolScenario` model** — scenarios are TypeScript code in `src/engine/registry.ts`. Admin is read-only view via `TOOL_REGISTRY`. Do not add server actions that write to a `toolScenario` DB model — it doesn't exist.
-
-2. **Valid Phosphor icon names** — only these are allowed: `House`, `User`, `Gear`, `SignOut`, `Rocket`, `Trophy`, `Flame`, `Sparkle`, `BookOpen`, `X`, `Check`, `Warning`, `Info`, `Lock`, `CaretDown`, `CaretRight`, `CaretLeft`, `CaretUp`, `Plus`, `Minus`, `MagnifyingGlass`, `List`, `ChartLine`, `ChartBar`, `CreditCard`, `Receipt`, `Calendar`, `Clock`, `GraduationCap`, `ArrowRight`, `Download`, `Video`, `Circle`. `Wrench`, `Files`, `Users`, `CurrencyPhp` are NOT valid and will fail `tsc`.
-
-3. **Icon import is named, not default** — always use `import { Icon } from '@/components/ui/Icon';`, never `import Icon from '@/components/ui/Icon';`.
+- **`src/lib/email.tsx`** (540 lines) — Resend client singleton + `sendEmail()` helper + 3 React Email templates
+  - `EnrollmentConfirmationEmail` — AMPH branded, Taglish kuya tone
+  - `LiveClassReminderEmail` — class title, instructor, scheduledAt, meetingUrl, durationMinutes
+  - `RefundStatusEmail` — 'requested'/'approved'/'rejected' variants with reviewer notes
+- **`src/lib/enrollment.ts`** — enrollment confirmation email wired in `handleCheckoutPaid()` after enrollment creation (best-effort)
+- **`src/app/actions/live-classes.ts`** — live class reminder wired in `registerForLiveClass()` after registration upsert (best-effort)
+- **`src/app/actions/refunds.ts`** — refund status emails wired on all 3 flows: create/approve/reject (best-effort)
+- **`src/app/api/resend/webhook/route.ts`** — email delivery tracking webhook with HMAC-SHA256 signature verification
 
 ---
 
@@ -35,25 +27,34 @@ Committed as `15259ef` on `main`. 21 files changed, 1,667 insertions.
 
 | | |
 |---|---|
-| **Stories complete** | 33 / 55 |
-| **Sprints done** | S1–S7 |
-| **Next sprint** | S8 — Refunds + Email |
-| **Velocity** | S1=6, S2=6, S3=6, S4=4.5, S5=3.5, S6=4, S7=4 |
-| **Last commit** | `15259ef` on `main` (pushed) |
+| **Stories complete** | 37 / 55 |
+| **Sprints done** | S1–S8 |
+| **Last commit** | `32e1784` on `main` (NOT pushed — push needs GitHub auth) |
 | **TypeScript** | `pnpm typecheck` exits 0 |
 
 ---
 
-## Sprint 8 — Refunds + Email (4 stories, 4 pts)
+## Sprint 8 Notes
 
-All 4 stories are in `bmad/sprint-status.yaml` as Sprint 8 next:
+- All email sending is **best-effort** — `.catch(() => {})` swallows errors, never blocks the calling code path
+- `RefundStatusEmail` uses `RefundStatusKind = 'requested' | 'approved' | 'rejected'` (lowercase) — NOT the Prisma enum values (PENDING/APPROVED/REJECTED)
+- `LiveClassReminderEmailProps.durationMinutes` — required field, fetch from `db.liveClass.durationMinutes`
+- `sendRefundStatusEmail` interface: `reason?` (requested), `paymongoRefundId?` (approved), `reviewerNotes?` (rejected)
+- Webhook secret verification is optional — works without `RESEND_WEBHOOK_SECRET` env var
+- **Prisma `String` type edge case:** `checkout.pricingTier?.name` returns a `String` object wrapper, not `string`. Always coerce with template literal `` `${value}` `` or `value ?? 'fallback'` before passing to email functions.
 
-| Story | Description |
-|-------|-------------|
-| STORY-034 | Refund flow — student request + admin approval |
-| STORY-035 | Email reminders — enrollment, live class, refund status |
-| STORY-036 | Resend webhook handler for delivery tracking |
-| STORY-037 | Outbound email templates |
+---
+
+## Resend Setup (Needed Before Production)
+
+Add to `.env.local`:
+
+```env
+RESEND_API_KEY=re_xxxxxxxxxxxxx
+RESEND_FROM_EMAIL=AMPH Academy <noreply@projectamazonph.com>
+# Optional: for webhook signature verification
+RESEND_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxx
+```
 
 ---
 
@@ -61,12 +62,12 @@ All 4 stories are in `bmad/sprint-status.yaml` as Sprint 8 next:
 
 | File | Purpose |
 |------|---------|
-| `bmad/sprint-status.yaml` | Sprint 8 is `in_progress`, velocity=0, 4 planned stories |
-| `bmad/workflow-status.yaml` | 33/33 stories complete, progress_percentage=100 |
-| `docs/sprint-plan.md` | Updated to S8 next, 33/55 done |
-| `src/engine/registry.ts` | Source of truth for tool scenarios — not DB |
-| `src/lib/admin-audit.ts` | AuditLog helper — use this on all admin mutations |
-| `prisma/schema.prisma` | 29 models — keep this open when writing admin actions |
+| `src/lib/email.tsx` | All email templates + `sendEnrollmentConfirmationEmail`, `sendLiveClassReminderEmail`, `sendRefundStatusEmail` |
+| `src/lib/enrollment.ts` | Enrollment webhook — email sent after `db.enrollment.create` |
+| `src/app/actions/live-classes.ts` | Live class registration — email sent after `db.liveClassRegistration.upsert` |
+| `src/app/actions/refunds.ts` | All 3 refund flows — emails sent after `revalidatePath` |
+| `src/app/api/resend/webhook/route.ts` | Resend delivery tracking webhook |
+| `bmad/workflow-status.yaml` | 37/37 stories complete, Sprint 8 done |
 
 ---
 
@@ -80,8 +81,8 @@ pnpm dev
 # Type check (required before commit)
 pnpm typecheck
 
-# Push
-git push "https://x-access-token:$(gh auth token)@github.com/projectamazonph/amph-v2.git" main
+# Push (run on machine with GitHub auth)
+git push
 ```
 
 ---
@@ -94,3 +95,4 @@ git push "https://x-access-token:$(gh auth token)@github.com/projectamazonph/amp
 - `auditLog()` from `@/lib/admin-audit` on every admin mutation
 - Always `revalidatePath` after mutations
 - Zero TypeScript errors before commit
+- Email sending: `.catch(() => {})` — never throw, never block
