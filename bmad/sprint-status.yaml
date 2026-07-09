@@ -3,15 +3,15 @@ project:
   level: 3
 
 sprint:
-  number: 9
-  name: "Polish + Mobile-First Refactor"
+  number: 10
+  name: "Tests + CI Hardening"
   start_date: "2026-07-12"
-  end_date: "2026-07-13"
-  status: "complete"
+  end_date: "2026-07-14"
+  status: "in_progress"
 
 capacity:
   planned_points: 5
-  velocity: 5
+  velocity: 0
   buffer_points: 0
 
 completed_stories:
@@ -268,7 +268,37 @@ completed_stories:
     epic: "Mobile"
     owner: "Ryan"
 
-planned_stories: []
+planned_stories:
+  - id: "STORY-043"
+    title: "CI environment fix + Playwright config"
+    points: 1
+    sprint: 10
+    epic: "Infrastructure"
+    owner: "Ryan"
+  - id: "STORY-044"
+    title: "Vitest unit tests — src/lib core"
+    points: 1.5
+    sprint: 10
+    epic: "Testing"
+    owner: "Ryan"
+  - id: "STORY-045"
+    title: "Server action integration tests"
+    points: 1
+    sprint: 10
+    epic: "Testing"
+    owner: "Ryan"
+  - id: "STORY-046"
+    title: "Playwright E2E — critical path"
+    points: 1
+    sprint: 10
+    epic: "Testing"
+    owner: "Ryan"
+  - id: "STORY-047"
+    title: "Coverage enforcement + CI polish"
+    points: 0.5
+    sprint: 10
+    epic: "Infrastructure"
+    owner: "Ryan"
 
 sprint_8_notes: >
   Sprint 8 closed 2026-07-11 (commit 1414754). Wired transactional emails (Resend + React Email):
@@ -284,3 +314,8 @@ sprint_9_notes: >
   (landing page rewrite, pricing grid, auth/checkout padding), student app shell refactor
   (dashboard stats grid, tools grid, certificates/payments token fixes, BottomNav on
   dashboard/tools). All pages render at 390px and 1280px. Lint clean. 7 commits.
+
+sprint_10_notes: >
+  Sprint 10 planned 2026-07-12. 5 stories / 5 pts. Goal: fix CI (PostgreSQL→SQLite),
+  establish real test coverage (Vitest unit + integration), add Playwright E2E for
+  critical student journey, enforce 70% coverage threshold. Story 043→044/045/046→047.

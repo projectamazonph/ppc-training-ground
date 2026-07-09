@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-12
 **Owner:** Ryan Roland Dabao
-**Status:** Active (37/42 stories shipped across 8 sprints; Sprint 9 in progress)
+**Status:** Active (37/55 stories shipped across 8 sprints; Sprint 9 in progress)
 
 Solo developer. Originally 11 sprints at 6 pts/sprint = 11 weeks. Actual: 8 sprints delivered in 5 days (high velocity from greenfield through backend completion); Sprint 9 (Polish + Mobile) in progress.
 
@@ -16,8 +16,8 @@ Solo developer. Originally 11 sprints at 6 pts/sprint = 11 weeks. Actual: 8 spri
 | S6 | Payments | PayMongo Checkout + Enrollment + Receipt PDFs | ✅ Complete | 4 / 4 |
 | S7 | Admin | Full admin panel (users, courses, tools, analytics) | ✅ Complete | 4 / 4 |
 | S8 | Refunds + Email | Refund flow + Resend templates + webhook tracking | ✅ Complete (commit 1414754) | 4 / 4 |
-| S9 | Polish + Mobile | Token audit + Tailwind purge + responsive helpers + BottomNav + 12 pages mobile-first | 🔄 In Progress | 5 / 5 planned |
-| S10 | Tests | Vitest + Playwright at 3 viewports + axe accessibility | Backlog | — |
+| S9 | Polish + Mobile | Token audit + Tailwind purge + responsive helpers + BottomNav + 12 pages mobile-first | ✅ Complete | 5 / 5 |
+| S10 | Tests + CI Hardening | Fix CI (SQLite), Vitest unit+integration, Playwright E2E, coverage enforcement | 🔄 In Progress | 5 / 5 planned |
 | S11 | Observability | Sentry + structured logs + Lighthouse CI | Backlog | — |
 | S12 | Launch | Production deploy + backup drill + launch comms | Backlog | — |
 
@@ -150,7 +150,19 @@ See [docs/sprint-9/PLAN.md](./sprint-9/PLAN.md) for the full plan. Per-story det
 
 ---
 
-## Sprint 10: Tests (backlog)
+## Sprint 10: Tests + CI Hardening (5/5 pts planned) — 🔄 In Progress
+
+**Goal:** Fix CI pipeline (PostgreSQL→SQLite), establish real test coverage, Playwright E2E, enforce 70% threshold.
+
+| Story | Pts | Description |
+|-------|-----|-------------|
+| STORY-043: CI fix + Playwright config | 1 | Remove PostgreSQL from CI, use SQLite. Add `playwright.config.ts`. |
+| STORY-044: Vitest unit tests — `src/lib` | 1.5 | Auth, validation, tier-gate, enums, format, pricing, badges. ≥70% line coverage. |
+| STORY-045: Server action integration tests | 1 | Auth, enrollment, tool session actions. Mocked Prisma. |
+| STORY-046: Playwright E2E — critical path | 1 | Signup → enroll → lesson → quiz. Chromium only. |
+| STORY-047: Coverage enforcement + CI polish | 0.5 | `scripts/check-coverage.js`, 70% threshold, CI passes clean. |
+
+**Done when:** `pnpm test` + `pnpm test:e2e` + `pnpm lint` all pass. CI green on GitHub.
 
 | Story | Pts | Description |
 |-------|-----|-------------|
@@ -185,7 +197,7 @@ See [docs/sprint-9/PLAN.md](./sprint-9/PLAN.md) for the full plan. Per-story det
 
 ---
 
-## Done So Far (37/42 in Sprints 1–8, 88% of plan)
+## Done So Far (37/55 in Sprints 1–8, 67% of plan)
 
 Sprints 1–8 shipped: Foundation, Tools (5 engines + 30 scenarios), Curriculum (31 lessons + 5 quizzes imported from v1), Tool UIs (5 interactive runners), Gamification (badges + certificates + live classes), Payments (PayMongo checkout + enrollment + receipts), Admin Panel (8 screens: dashboard + users + courses + tool scenarios + analytics + refunds + settings + badges), Refunds (student request + admin approval + PayMongo refund API), Email (3 Resend templates + webhook handler).
 

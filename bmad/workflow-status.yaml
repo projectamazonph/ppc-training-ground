@@ -72,7 +72,7 @@ phases:
       stories:
         total: 47
         completed: 42
-        in_progress: 0
+        in_progress: 5
         sprint_8_notes: >
           Sprint 8 completed 2026-07-11 (commit 1414754). Stories wire transactional emails (Resend + React Email):
           enrollment confirmation on payment webhook, live class reminder on registration, refund status
@@ -125,6 +125,11 @@ phases:
           - "STORY-040-bottom-nav"
           - "STORY-041-marketing-auth-mobile"
           - "STORY-042-student-flow-mobile"
+          - "STORY-043-ci-fix-playwright"
+          - "STORY-044-unit-tests-src-lib"
+          - "STORY-045-integration-tests"
+          - "STORY-046-e2e-critical-path"
+          - "STORY-047-coverage-enforcement"
 
 metrics:
   total_workflows: 13
@@ -132,4 +137,5 @@ metrics:
   progress_percentage: 100
   estimated_stories: 47
   completed_stories: 42
+  in_progress_stories: 5
   last_updated: "2026-07-12T00:00:00Z"
