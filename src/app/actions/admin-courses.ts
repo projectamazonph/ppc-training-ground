@@ -33,7 +33,7 @@ export async function addModuleAction(courseId: string, data: {
   });
   const moduleNumber = (lastModule?.moduleNumber ?? 0) + 1;
 
-  const module = await db.module.create({
+  const createdModule = await db.module.create({
     data: {
       courseId,
       moduleNumber,
@@ -43,6 +43,6 @@ export async function addModuleAction(courseId: string, data: {
       order: moduleNumber,
     },
   });
-  await auditLog({ action: 'ADD_MODULE', entityType: 'Module', entityId: module.id, metadata: { courseId } });
+  await auditLog({ action: 'ADD_MODULE', entityType: 'Module', entityId: createdModule.id, metadata: { courseId } });
   revalidatePath(`/admin/courses/${courseId}`);
 }

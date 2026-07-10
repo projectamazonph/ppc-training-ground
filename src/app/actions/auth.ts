@@ -14,6 +14,7 @@ import {
   clearAuthCookie,
   getSession,
 } from '@/lib/auth';
+import { logger } from '@/lib/logger';
 import {
   createSafeAction,
   signUpSchema,
@@ -97,13 +98,15 @@ export const signInAction = createSafeAction(signInSchema, async (data) => {
     throw new Error('Email or password is incorrect.');
   }
 
-  // Update last active (fire and forget)
-  db.user.update({
-    where: { id: user.id },
-    data: { lastActiveAt: new Date() },
-  }).catch(() => {
-    /* ignore — non-critical */
-  });
+  // Update last active on sign-in
+  try {
+    await db.user.update({
+      where: { id: user.id },
+      data: { lastActiveAt: new Date() },
+    });
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to update lastActiveAt on sign-in');
+  }
 
   const token = await signToken({
     sub: user.id,

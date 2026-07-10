@@ -316,6 +316,14 @@ sprint_9_notes: >
   dashboard/tools). All pages render at 390px and 1280px. Lint clean. 7 commits.
 
 sprint_10_notes: >
-  Sprint 10 planned 2026-07-12. 5 stories / 5 pts. Goal: fix CI (PostgreSQL→SQLite),
-  establish real test coverage (Vitest unit + integration), add Playwright E2E for
-  critical student journey, enforce 70% coverage threshold. Story 043→044/045/046→047.
+  Sprint 10 in progress (2026-07-13). Test infrastructure created: vitest.config.ts,
+  src/lib/__tests__/ (8 test files), src/app/actions/__tests__/ (3 test files),
+  playwright.config.ts, scripts/check-coverage.js. 50/53 tests passing; 3 broken mocks
+  in tool-actions.test.ts (requireAuth not mocked). CI workflow updated: tsc, lint,
+  vitest, playwright, lighthouse-ci, gitleaks. Remaining: coverage threshold enforcement,
+  Playwright E2E critical path, server action integration tests, fix broken tool-action mocks.
+
+sprint_11_notes: >
+  Sprint 11 — Observability (2026-07-15). 5 stories planned: Sentry setup, structured logging
+  (Pino), server action tracing, Lighthouse CI budgets, Slack alerting. Goal: production
+  error tracking + performance budgets before launch.

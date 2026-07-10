@@ -33,13 +33,6 @@ const config: NextConfig = {
   poweredByHeader: false,
   compress: true,
 
-  experimental: {
-    // Server actions are GA in Next.js 15+
-    serverActions: {
-      bodySizeLimit: '2mb',
-    },
-  },
-
   async headers() {
     return [
       {

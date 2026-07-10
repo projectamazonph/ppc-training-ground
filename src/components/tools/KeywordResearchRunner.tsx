@@ -222,7 +222,7 @@ export function KeywordResearchRunner({ sessionId, scenario, toolSlug }: Keyword
         </Button>
         <p className={styles.hint}>
           Tip: relevance + volume is a starting heuristic, not a rule. A high-volume keyword
-          that's only 5% relevant to the product is a negative, not a primary.
+          that&apos;s only 5% relevant to the product is a negative, not a primary.
         </p>
       </div>
     </div>

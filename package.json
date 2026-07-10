@@ -2,7 +2,7 @@
   "name": "amph-v2",
   "version": "0.1.0",
   "private": true,
-  "description": "Project Amazon PH AMPH Academy v2 — Amazon advertising training for Filipino VAs",
+  "description": "Project Amazon PH AMPH Academy v2 \u2014 Amazon advertising training for Filipino VAs",
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=9.0.0"
@@ -11,7 +11,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -25,7 +25,8 @@
     "prisma:seed": "tsx prisma/seed.ts",
     "gen:secret": "tsx scripts/gen-jwt-secret.ts",
     "format": "prettier --write \"**/*.{ts,tsx,md,json,yaml,yml}\"",
-    "prepare": "husky || true"
+    "prepare": "husky || true",
+    "lint:purge": "eslint ."
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.7",

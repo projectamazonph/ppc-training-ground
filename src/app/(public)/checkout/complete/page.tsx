@@ -85,9 +85,9 @@ function SuccessCard({ tierName }: { tierName: string }) {
           <Badge variant="success" className={styles.badge}>
             Payment received
           </Badge>
-          <CardTitle>You're in.</CardTitle>
+          <CardTitle>You&apos;re in.</CardTitle>
           <CardDescription>
-            Your {tierName} enrollment is active. We've sent a confirmation email with
+            Your {tierName} enrollment is active. We&apos;ve sent a confirmation email with
             your dashboard link.
           </CardDescription>
         </CardHeader>
@@ -115,10 +115,10 @@ function PendingCard({ checkoutId }: { checkoutId?: string } = {}) {
           <Badge variant="warning" className={styles.badge}>
             Processing payment
           </Badge>
-          <CardTitle>We're finalizing your enrollment.</CardTitle>
+          <CardTitle>We&apos;re finalizing your enrollment.</CardTitle>
           <CardDescription>
-            PayMongo confirmed payment and we're activating your access now.
-            This usually takes 5–10 seconds. Refresh this page if it doesn't update.
+            We received your payment. We&apos;re just waiting for PayMongo&apos;s webhook
+            to confirm the charge. This usually takes a few seconds.
           </CardDescription>
         </CardHeader>
         <div className={styles.actions}>
@@ -146,11 +146,11 @@ function FailedCard({ returnUrl }: { returnUrl?: string }) {
       <Card className={styles.card}>
         <CardHeader>
           <Badge variant="danger" className={styles.badge}>
-            Payment didn't go through
+            Payment didn&apos;t go through
           </Badge>
           <CardTitle>No money moved.</CardTitle>
           <CardDescription>
-            We didn't charge you. Most likely your card or e-wallet declined the
+            We didn&apos;t charge you. Most likely your card or e-wallet declined the
             transaction, or you closed the checkout page before completing it.
           </CardDescription>
         </CardHeader>

@@ -53,6 +53,7 @@ export default async function LiveClassDetailPage({ params }: PageProps) {
 
   const classStart = klass.scheduledAt.getTime();
   const classEnd = classStart + klass.durationMinutes * 60 * 1000;
+  // eslint-disable-next-line react-hooks/purity -- safe in server component; render once per request
   const now = Date.now();
   const hasStarted = now >= classStart;
   const hasEnded = now >= classEnd;

@@ -13,6 +13,7 @@
 import 'server-only';
 
 import { z, type ZodSchema } from 'zod';
+import { logger } from '@/lib/logger';
 
 export type ActionResult<T = unknown> =
   | { success: true; data: T }

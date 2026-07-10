@@ -16,18 +16,18 @@ Three courses. One outcome: the VA becomes the Amazon ads specialist clients ret
 | **Sprint 4** — Tool UIs | ✅ Complete (2026-07-08) | 5 / 5 |
 | **Sprint 5** — Gamification | ✅ Complete (2026-07-09) | 3 / 3 |
 | Sprint 6 — Payments | ✅ Complete (2026-07-10) | 4 / 4 |
-| Sprint 7 — Admin | Backlog | 0 / 4 |
-| Sprint 8 — Refunds + Email | Backlog | 0 / 3 |
-| Sprint 9 — Polish | Backlog | 1 / 5 (no-ai-slop done) |
-| Sprint 10 — Tests | Backlog | 0 / 5 |
-| Sprint 11 — Observability | Backlog | 0 / 5 |
-| Sprint 12 — Launch | Backlog | 0 / 4 |
-| **Total** | **37 / 55 stories (67%)** | |
+|| Sprint 7 — Admin | ✅ Complete (2026-07-10) | 4 / 4 |
+|| Sprint 8 — Refunds + Email | ✅ Complete (2026-07-11) | 3 / 3 |
+|| Sprint 9 — Polish + Mobile | ✅ Complete (2026-07-12) | 5 / 5 |
+|| Sprint 10 — Tests + CI Hardening | 🔄 In Progress | 0 / 5 |
+|| Sprint 11 — Observability | Planned | 0 / 5 |
+|| Sprint 12 — Launch | Planned | 0 / 4 |
+|| **Total** | **42 / 47 stories shipped (89%)** | |
 
 | Layer | Status |
 |-------|--------|
 | Architecture (16 ADRs) | ✅ Complete — `docs/decisions.md` |
-| Database schema (25 models) | ✅ Complete — `prisma/schema.prisma` |
+| Database schema (31 models) | ✅ Complete — `prisma/schema.prisma` |
 | Design system (Field Manual) | ✅ Complete — `src/styles/globals.css` |
 | UI component library (7 components + admin shell) | ✅ Complete — `src/components/ui/` |
 | JWT auth + RBAC | ✅ Complete — `src/lib/auth.ts` + `src/middleware.ts` |
@@ -39,8 +39,8 @@ Three courses. One outcome: the VA becomes the Amazon ads specialist clients ret
 | 5 tool interactive UIs | ✅ Complete — `src/components/tools/` (5 client runners + shared `ToolResult`) |
 | Business layer (PayMongo) | ⏳ Spec complete, code in Sprint 6 — `docs/business-layer.md` |
 | Admin panel (full surface) | ⏳ Layout only, full panels in Sprint 7 — `docs/admin-backend.md` |
-| Tests | ❌ Not started (Sprint 10) |
-| Observability | ❌ Not started (Sprint 11) |
+| Tests | 🔄 Sprint 10 in progress — 50/53 tests passing |
+| Observability | ⏳ Sprint 11 planned |
 
 This is a **greenfield rebuild**. v1 lives at `github.com/projectamazonph/AMPH-Academy` and is frozen. No code, schema, or commits from v1 carry over. Every architectural decision is made fresh.
 
@@ -133,7 +133,7 @@ amph-v2/
 │   └── styles/
 │       └── globals.css           Field Manual design tokens + dark mode
 ├── prisma/
-│   ├── schema.prisma             25 models per docs/db-schema.md
+│   ├── schema.prisma             31 models
 │   └── seed.ts                   Admin user + 3 pricing tiers + 5 badges
 ├── scripts/
 │   └── gen-jwt-secret.ts         HS256 secret generator
@@ -256,9 +256,9 @@ Every component imports a `.module.css` file that uses `var(--token)` references
 
 ## Sprint Status
 
-**37/55 stories shipped across Sprints 1–8 (67% of plan).** Sprints 1–5 shipped the foundation, all 5 tool engines + 30 scenarios, content import, curriculum pages, quiz system, tier gating, the 5 interactive tool UIs, and the full gamification stack: auto-awarded badges, PDF certificates with public verification, and live classes with tier-gated registration. **Sprint 6 — Payments** (2026-07-10): STORY-026/027/028/029 — PayMongo checkout + webhook, enrollment + tier gating, refund flow engine, BIR-compliant receipt PDFs. **Sprint 7 — Admin** (2026-07-10): STORY-030/031/032/033 — admin dashboard + user management, course/module/lesson CRUD with MDX editor, tool scenario admin, analytics dashboards. **Sprint 8 — Refunds + Email** (2026-07-11, commit `1414754`): STORY-034/035/036/037 — admin refund approval UI, 3 Resend React Email templates, webhook handler with HMAC signature verification.
+**42/47 stories shipped across Sprints 1–9 (89%).** Sprints 1–5 shipped the foundation, all 5 tool engines + 30 scenarios, content import, curriculum pages, quiz system, tier gating, the 5 interactive tool UIs, and the full gamification stack: auto-awarded badges, PDF certificates with public verification, and live classes with tier-gated registration. **Sprint 6 — Payments** (2026-07-10): STORY-026/027/028/029 — PayMongo checkout + webhook, enrollment + tier gating, refund flow engine, BIR-compliant receipt PDFs. **Sprint 7 — Admin** (2026-07-10): STORY-030/031/032/033 — admin dashboard + user management, course/module/lesson CRUD with MDX editor, tool scenario admin, analytics dashboards. **Sprint 8 — Refunds + Email** (2026-07-11, commit `1414754`): STORY-034/035/036/037 — admin refund approval UI, 3 Resend React Email templates, webhook handler with HMAC signature verification. **Sprint 9 — Polish + Mobile** (2026-07-12): STORY-038/039/040/041/042 — design-system audit + token purge, responsive breakpoint infrastructure, BottomNav component, marketing+auth mobile-first refactor, student app shell refactor. All pages verified at 390px and 1280px.
 
-**Next: Sprint 9 — Polish + Mobile.** Token audit + Tailwind purge, responsive breakpoint infrastructure, BottomNav shared component, mobile-first refactor of 12 student-facing pages. Plan at `docs/sprint-9/PLAN.md`. Stories at `docs/stories/STORY-038.md` through `STORY-042.md`.
+**Next: Sprint 10 — Tests + CI Hardening.** Vitest unit tests (src/lib core, badges, validation, enums, tier-gate), server action integration tests (auth, progress, live classes), Playwright E2E critical path, coverage enforcement. CI updated: tsc, lint, vitest, playwright, lighthouse-ci, gitleaks. Plan at `docs/sprint-11/PLAN.md`. Stories at `docs/stories/STORY-048.md` through `STORY-052.md`.
 
 - Next.js 16 scaffold with TypeScript strict
 - Field Manual design system (60+ tokens, full dark mode)

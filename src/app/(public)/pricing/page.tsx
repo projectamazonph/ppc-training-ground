@@ -29,9 +29,9 @@ export default async function PricingPage() {
         <p className={styles.eyebrow}>PRICING</p>
         <h1 className={styles.title}>Pick the tier that matches where you are.</h1>
         <p className={styles.subtitle}>
-          Three months from now you'll either be earning ₱60,000 a month doing Amazon PPC
-          work, or you'll be explaining to your family why that &ldquo;side hustle&rdquo;
-          didn't pan out. The tier doesn't change what we teach — it changes how fast
+          Three months from now you&apos;ll either be earning ₱60,000 a month doing Amazon PPC
+          work, or you&apos;ll be explaining to your family why that &ldquo;side hustle&rdquo;
+          didn&apos;t pan out. The tier doesn&apos;t change what we teach — it changes how fast
           you get unstuck.
         </p>
       </header>
@@ -91,7 +91,7 @@ export default async function PricingPage() {
         <details>
           <summary>Do you offer refunds?</summary>
           <p>
-            Yes. Request within 14 days of purchase; we'll review and process within five
+            Yes. Request within 14 days of purchase; we&apos;ll review and process within five
             business days. After 14 days, refunds are case-by-case.
           </p>
         </details>
@@ -103,10 +103,10 @@ export default async function PricingPage() {
           </p>
         </details>
         <details>
-          <summary>What if I don't have any Amazon ads experience yet?</summary>
+          <summary>What if I don&apos;t have any Amazon ads experience yet?</summary>
           <p>
             Start with PPC Foundations. The first three modules build the mental model
-            from scratch — you don't need prior campaign work to follow along.
+            from scratch — you don&apos;t need prior campaign work to follow along.
           </p>
         </details>
       </section>

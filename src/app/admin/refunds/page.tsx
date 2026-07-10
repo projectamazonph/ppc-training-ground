@@ -94,6 +94,7 @@ export default async function AdminRefundsPage() {
       ) : (
         <ul className={styles.list}>
           {requests.map((r) => {
+            // eslint-disable-next-line react-hooks/purity -- safe in server component; render once per request
             const ageMs = Date.now() - r.createdAt.getTime();
             const ageHours = Math.floor(ageMs / (60 * 60 * 1000));
             const ageLabel =
