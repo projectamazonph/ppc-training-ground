@@ -4,6 +4,11 @@
 
 Three courses. One outcome: the VA becomes the Amazon ads specialist clients retain at ₱60k–₱80k/month.
 
+
+## 📊 Codegraph
+
+See [codegraphs/amph-v2.md](./codegraphs/amph-v2.md) for the full dependency graph.
+
 ---
 
 ## Status
