@@ -1,0 +1,67 @@
+# Sentry → Slack alert cron (Sprint 11 / STORY-052)
+#
+# Split out of ci.yml on 2026-07-14 so the main CI pipeline no longer runs on
+# schedule. The alert job only ever needs to run on a timer, so it lives here
+# with its own schedule block.
+#
+# Cadence:
+#   * */30 * * *  → spike mode  — posts to #amph-alerts only when the last-hour
+#                                 event count breaches ALERT_THRESHOLD.
+#   * 0 1 * * *   → summary mode — PHT 09:00; posts a daily digest always.
+# The script self-disambiguates by inspecting the current UTC hour.
+
+name: Sentry → Slack Alert
+
+on:
+  schedule:
+    - cron: '0 1 * * *' # PHT 09:00 — daily summary
+    - cron: '*/30 * * * *' # spike detection every 30 minutes
+  workflow_dispatch: # manual trigger for ad-hoc runs
+
+jobs:
+  sentry-alert:
+    name: Sentry → Slack Alert
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Run Sentry → Slack alert
+        env:
+          SENTRY_HOST: ${{ secrets.SENTRY_HOST }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+          SENTRY_API_TOKEN: ${{ secrets.SENTRY_API_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          ALERT_THRESHOLD: ${{ secrets.ALERT_THRESHOLD }}
+          WINDOW_MINUTES: ${{ secrets.WINDOW_MINUTES }}
+        run: |
+          # PHT 09:00 = UTC 01:00 — run as daily summary; otherwise spike mode.
+          HOUR_UTC=$(date -u +%H)
+          if [ "$HOUR_UTC" = "01" ]; then
+            pnpm tsx scripts/sentry-slack-alert.ts --summary
+          else
+            pnpm tsx scripts/sentry-slack-alert.ts
+          fi
+
+      - name: Notify Slack on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": ":rotating_light: AMPH Sentry→Slack alert job FAILED at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            }
