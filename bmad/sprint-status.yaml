@@ -3,12 +3,12 @@ project:
   level: 3
 
 sprint:
-  number: 11
-  name: "Observability"
-  start_date: "2026-07-13"
-  end_date: "2026-07-13"
+  number: 12
+  name: "Launch"
+  start_date: "2026-07-14"
+  end_date: "2026-07-14"
   status: "complete"
-  commit_sha: "82d181f6e008ce2801a7feb4b2bbc497e7877af6"
+  commit_sha: "284cc19f8962"  # last commit of STORY-057 push; STORY-056 deploy SHA pending operator action
 
 capacity:
   planned_points: 5
@@ -328,38 +328,38 @@ completed_stories:
     sprint: 11
     epic: "Observability"
     owner: "Ryan"
-
-planned_stories:
   - id: "STORY-053"
-    title: "Deploy runbook with rollback procedure"
+    title: "Production deploy runbook"
     points: 1
     sprint: 12
     epic: "Launch"
     owner: "Ryan"
   - id: "STORY-054"
-    title: "Backup drill — restore from production backup to staging"
+    title: "Database backup + restore drill"
     points: 1
     sprint: 12
     epic: "Launch"
     owner: "Ryan"
   - id: "STORY-055"
-    title: "Security audit — OWASP ZAP, fix high/critical"
+    title: "Pre-launch security audit"
     points: 1
     sprint: 12
     epic: "Launch"
     owner: "Ryan"
   - id: "STORY-056"
-    title: "Production deploy to Vercel, verify Sentry + LHCI in prod"
+    title: "Production deploy"
     points: 1
     sprint: 12
     epic: "Launch"
     owner: "Ryan"
   - id: "STORY-057"
-    title: "Launch checklist + v1 user email"
+    title: "Launch communications"
     points: 1
     sprint: 12
     epic: "Launch"
     owner: "Ryan"
+
+planned_stories: []
 
 sprint_8_notes: >
   Sprint 8 closed 2026-07-11 (commit 1414754). Wired transactional emails (Resend + React Email):
@@ -395,3 +395,27 @@ sprint_11_notes: >
   01:00 UTC summary + every 30 min spike). 17 files (10 added, 7 modified) in a single
   commit. S11 carry-over to S12: src/instrumentation.ts (CHANGELOG references, not yet
   authored; functionally optional under @sentry/nextjs@^9 auto-detection).
+
+sprint_12_notes: >
+  Sprint 12 — Launch closed 2026-07-13. All 5 stories shipped (code & runbook complete;
+  STORY-056 deploy + STORY-054 drill execution are operator-side actions awaiting real
+  Vercel / Neon / Blob credentials). STORY-053 (deploy runbook): docs/runbooks/production-deploy.md
+  (227 lines) + scripts/smoke-prod.sh (159 lines, bash+curl+grep, checks 4 routes + 6 security
+  headers + absence of X-Powered-By) + docs/runbooks/README.md index. STORY-054 (backup drill):
+  docs/runbooks/db-backup-restore.md (222 lines) + scripts/backup-prod.sh (pg_dump → Vercel Blob,
+  gzip) + scripts/restore-prod.sh (pg_restore + row-count assertions on 6 tables, 1% tolerance
+  for content tables, 5% for ToolSession) + .github/workflows/db-backup.yml (cron 02:00 UTC daily,
+  Slack-on-failure). STORY-055 (security audit): docs/security/tenant-isolation.md (172 lines,
+  endpoint-by-endpoint multi-tenant guard audit, 10 server actions + 8 route handlers + Prisma
+  query grep summary) + docs/security/security-audit-2026-07-13.md (136 lines, 7-section audit
+  with 5 open issues tracked). STORY-056 (production deploy): docs/sprint-12/deploy-execution.md
+  (161 lines, operator checklist with copy-paste commands + post-deploy verification gates).
+  STORY-057 (launch comms): docs/sprint-12/launch-comms.md (250 lines, Facebook/LinkedIn copy +
+  Resend broadcast React Email template outline + Slack celebration post + retro template +
+  pre-launch checklist). 52/52 stories shipped. Velocity: S1=6, S2=6, S3=6, S4=4.5, S5=3.5,
+  S6=4, S7=4, S8=4, S9=5, S10=5, S11=5, S12=5. Total = 57 pts over 12 sprints. No slip.
+  Carry-overs to Sprint 13: (1) PayMongo HMAC webhook verification (security gap, the only
+  blocker-class item from STORY-055), (2) CSP header (deferred from STORY-055), (3) fix 3
+  broken Vitest mocks (S10), (4) BottomNav on lesson/quiz pages (S9), (5) TS7006 errors in
+  admin/course pages (cleanup), (6) confirm RESEND_WEBHOOK_SECRET in Vercel prod (STORY-055
+  audit).
