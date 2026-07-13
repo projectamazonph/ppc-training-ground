@@ -124,7 +124,7 @@ export default async function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {recentPayments.map((payment) => (
+                {recentPayments.map((payment: typeof recentPayments[number]) => (
                   <tr key={payment.id}>
                     <td>
                       <div className={styles.studentCell}>
