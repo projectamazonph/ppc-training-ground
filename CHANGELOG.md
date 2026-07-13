@@ -4,21 +4,23 @@ All notable changes to AMPH Academy v2 are documented here.
 
 ## [Unreleased]
 
-### Post-Launch Hotfix — Type Safety + Auth Load Bug (2026-07-14)
-- Fixed 19 TypeScript compile errors (`tsc --noEmit` now exits 0), unblocking
-  soft-deployment:
-  - Added missing runtime dependencies to `package.json`: `clsx`, `resend`,
-    `@react-pdf/renderer`, `@phosphor-icons/react`; regenerated `pnpm-lock.yaml`
-  - `src/lib/tracing.ts`: exported `trace(name, fn)` — previously referenced by
-    `getSession = trace(...)` in `src/lib/auth.ts`; the missing export would have
-    prevented the auth module from loading at all (critical runtime bug)
-  - `sentry.server.config.ts`: removed `Sentry.nodeProfilingIntegration?.()`
-    (removed in `@sentry/nextjs@9`)
-  - `src/app/api/paymongo/webhook/route.ts`: discriminated-union access for
-    `event.data.id` vs nested `event.data.data.id`
-  - `src/app/(public)/pricing/page.tsx`: explicit `TierDisplay` type import +
-    `.map` callback annotations
-- Verification: `pnpm typecheck` → `tsc --noEmit` → `TSC_EXIT=0`, 0 errors
+### 2026-07-14 — CI/CD hardening + type-safety hotfix (post-Sprint-12)
+- Type-safety hotfix `8012071` — fixed pre-existing TS7006 implicit-any errors in
+  admin/course pages; `pnpm typecheck` (`tsc --noEmit`) now passes clean (0 errors)
+- CI config fix (P0): removed `on.schedule` from `ci.yml` — the `*/30 * * * *`
+  trigger was running the full quality/e2e/lighthouse pipeline ~48×/day; CI now
+  triggers only on push/PR to `main`
+- Split Sentry→Slack alert out of `ci.yml` into its own scheduled workflow
+  `.github/workflows/sentry-alert.yml` (preserves 30-min spike + daily summary cadence)
+- Added `.github/dependabot.yml` — daily grouped npm updates, weekly GitHub Actions
+  updates (supply-chain hygiene)
+- Added deploy automation (manual-gated, not auto):
+  - `deploy-preview.yml` — Vercel preview per PR + smoke test + PR comment
+  - `deploy-prod.yml` — gated prod deploy (workflow_dispatch / Release) + Sentry
+    release + smoke + Slack
+  - `rollback.yml` — manual instant Vercel rollback (requires typing `ROLLBACK` to confirm)
+- Stale-doc cleanup: removed the "3 broken Vitest mocks in tool-actions.test.ts"
+  Sprint 13 item — the mocks (`requireAuth`) are present and the tests pass post-hotfix
 
 ### Sprint 12 — Launch (2026-07-13)
 - Production deploy runbook: `docs/runbooks/production-deploy.md` with
