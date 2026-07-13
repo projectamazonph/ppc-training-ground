@@ -80,7 +80,7 @@ budgets pass on production URL.
 **Acceptance**
 - [ ] Production URL returns 200 for `/`, `/dashboard`, `/pricing`, `/courses`. *(Operator runs `scripts/smoke-prod.sh`.)*
 - [ ] Sentry shows a release for the production deploy SHA.
-- [ ] Slack `#amph-alerts` receives the next 09:00 UTC summary.
+- [ ] Slack `#amph-alerts` receives the next 01:00 UTC (09:00 PHT) summary.
 - [ ] Lighthouse CI run on production passes all 6 budgets.
 
 ### STORY-057 — Launch communications (1 pt) ✅ (drafts ready, operator schedules)
