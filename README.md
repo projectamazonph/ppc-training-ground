@@ -4,6 +4,9 @@
 
 Three courses. One outcome: the VA becomes the Amazon ads specialist clients retain at ₱60k–₱80k/month.
 
+**Status:** 52/52 stories shipped (100%) · 12 sprints complete · Production deploy pending operator execution
+
+---
 
 ## 📊 Codegraph
 
@@ -13,39 +16,46 @@ See [codegraphs/amph-v2.md](./codegraphs/amph-v2.md) for the full dependency gra
 
 ## Status
 
-| Sprint | Status | Stories |
-|---|---|---|
-| **Sprint 1** — Foundation | ✅ Complete (2026-07-07) | 6 / 6 |
-| **Sprint 2** — Tools (5 engines + fixtures) | ✅ Complete (2026-07-07) | 6 / 6 |
-| **Sprint 3** — Curriculum + tier gating | ✅ Complete (2026-07-08) | 5 / 5 |
-| **Sprint 4** — Tool UIs | ✅ Complete (2026-07-08) | 5 / 5 |
-| **Sprint 5** — Gamification | ✅ Complete (2026-07-09) | 3 / 3 |
-| Sprint 6 — Payments | ✅ Complete (2026-07-10) | 4 / 4 |
-|| Sprint 7 — Admin | ✅ Complete (2026-07-10) | 4 / 4 |
-|| Sprint 8 — Refunds + Email | ✅ Complete (2026-07-11) | 3 / 3 |
-|| Sprint 9 — Polish + Mobile | ✅ Complete (2026-07-12) | 5 / 5 |
-|| Sprint 10 — Tests + CI Hardening | 🔄 In Progress | 0 / 5 |
-|| Sprint 11 — Observability | Planned | 0 / 5 |
-|| Sprint 12 — Launch | Planned | 0 / 4 |
-|| **Total** | **42 / 47 stories shipped (89%)** | |
+| Sprint | Track | Stories | Status |
+|--------|-------|---------|--------|
+| **S1** | Foundation | 6 / 6 | ✅ Complete (2026-07-07) |
+| **S2** | Tools (5 engines + fixtures) | 6 / 6 | ✅ Complete (2026-07-07) |
+| **S3** | Curriculum + tier gating | 5 / 5 | ✅ Complete (2026-07-08) |
+| **S4** | Tool UIs | 5 / 5 | ✅ Complete (2026-07-08) |
+| **S5** | Gamification | 3 / 3 | ✅ Complete (2026-07-09) |
+| **S6** | Payments | 4 / 4 | ✅ Complete (2026-07-10) |
+| **S7** | Admin | 4 / 4 | ✅ Complete (2026-07-10) |
+| **S8** | Refunds + Email | 4 / 4 | ✅ Complete (2026-07-11) |
+| **S9** | Polish + Mobile | 5 / 5 | ✅ Complete (2026-07-12) |
+| **S10** | Tests + CI Hardening | 5 / 5 | ✅ Complete (2026-07-13) |
+| **S11** | Observability | 5 / 5 | ✅ Complete (2026-07-13) |
+| **S12** | Launch | 5 / 5 | ✅ Complete (2026-07-13) |
+| | **Total** | **52 / 52** | **100% shipped** |
+
+Velocity: 57 points over 12 sprints. No slip.
+
+### System Status
 
 | Layer | Status |
 |-------|--------|
 | Architecture (16 ADRs) | ✅ Complete — `docs/decisions.md` |
-| Database schema (31 models) | ✅ Complete — `prisma/schema.prisma` |
+| Database schema (19 models) | ✅ Complete — `prisma/schema.prisma` |
 | Design system (Field Manual) | ✅ Complete — `src/styles/globals.css` |
-| UI component library (7 components + admin shell) | ✅ Complete — `src/components/ui/` |
-| JWT auth + RBAC | ✅ Complete — `src/lib/auth.ts` + `src/middleware.ts` |
+| UI component library (9 components + admin shell) | ✅ Complete — `src/components/ui/` |
+| JWT auth + RBAC + Edge middleware | ✅ Complete — `src/lib/auth.ts` + `src/middleware.ts` |
 | 5 tool engines + 30 scenarios + grading | ✅ Complete — `src/engine/` |
 | Tool session persistence (save/resume/submit) | ✅ Complete — `src/app/actions/tools.ts` |
 | AMPH v1 content imported (31 lessons, 5 quizzes) | ✅ Complete — `scripts/import-amph-content.ts` |
 | Curriculum pages (dashboard, course, lesson, quiz) | ✅ Complete — `src/app/(dashboard)/` |
-| Voice + copy guide | ✅ Spec complete — `docs/voice-guide.md` |
-| 5 tool interactive UIs | ✅ Complete — `src/components/tools/` (5 client runners + shared `ToolResult`) |
-| Business layer (PayMongo) | ⏳ Spec complete, code in Sprint 6 — `docs/business-layer.md` |
-| Admin panel (full surface) | ⏳ Layout only, full panels in Sprint 7 — `docs/admin-backend.md` |
-| Tests | 🔄 Sprint 10 in progress — 50/53 tests passing |
-| Observability | ⏳ Sprint 11 planned |
+| 5 tool interactive UIs | ✅ Complete — `src/components/tools/` |
+| Business layer (PayMongo + webhooks) | ✅ Complete — `src/lib/paymongo.ts` |
+| Admin panel (8 screens) | ✅ Complete — `src/app/admin/` |
+| Refunds + transactional email (3 templates) | ✅ Complete — `src/lib/refunds.ts` + `src/lib/email/` |
+| Tests (53/53 unit + integration, E2E scaffolded) | ✅ Verified by CI — `vitest.config.ts` |
+| CI/CD (GitHub Actions) | ✅ Complete — tsc, lint, vitest, playwright, lighthouse, gitleaks |
+| Observability (Sentry + Pino + Slack alerting) | ✅ Complete — `src/lib/logger.ts` + `src/lib/sentry.ts` |
+| Production deploy automation | ✅ Complete — deploy-preview, deploy-prod, rollback workflows |
+| Production deploy execution | ⏳ Operator-side pending — see `docs/sprint-12/deploy-execution.md` |
 
 This is a **greenfield rebuild**. v1 lives at `github.com/projectamazonph/AMPH-Academy` and is frozen. No code, schema, or commits from v1 carry over. Every architectural decision is made fresh.
 
@@ -80,7 +90,7 @@ A paid training platform where Filipino VAs learn Amazon advertising through str
 |-------|--------|-----|
 | Framework | Next.js 16 App Router | Server components, server actions, single deploy |
 | Language | TypeScript (strict) | Catch errors at compile time |
-| Database | PostgreSQL (dev + prod) | Managed in prod, consistent local+prod environment |
+| Database | PostgreSQL (Neon, dev + prod) | Managed in prod, consistent local+prod environment |
 | ORM | Prisma | Type-safe queries, migrations |
 | Auth | JWT in HttpOnly cookies (jose) | Stateless, works with middleware |
 | Styling | CSS Modules + design tokens | No Tailwind. Per design-brief. |
@@ -89,15 +99,19 @@ A paid training platform where Filipino VAs learn Amazon advertising through str
 | Payments | PayMongo | Native PHP, GCash/Maya/card/bank |
 | Email | Resend + React Email | Templates as React components |
 | File storage | Vercel Blob | Resources, certificates, receipts |
-| Error tracking | Sentry | Errors + performance |
+| Error tracking | Sentry (`@sentry/nextjs@^9`) | Errors + performance + source maps |
+| Logging | Pino + AsyncLocalStorage | Structured JSON logs with request context |
 | Testing | Vitest + Playwright | Unit/integration + E2E |
-| CI | GitHub Actions | tsc, eslint, vitest, playwright, gitleaks, lighthouse-ci |
+| CI/CD | GitHub Actions | tsc, lint, vitest, playwright, lighthouse-ci, gitleaks |
+| Alerting | Slack Incoming Webhook | Error spikes + daily summaries |
 
 **Design system:** Field Manual. Dense, scannable, utilitarian. Off-white surface (#FAFAF7), orange accent (#FF6B35), type-led hierarchy. See `docs/design-brief.md`.
 
 **Auth pattern:** Defense-in-depth. Edge middleware verifies JWT and gates `/admin/*` + `/dashboard/*`. Server Components and server actions re-verify via `getSession()` + `jose`. Never trust headers blindly.
 
 **Soft-delete pattern:** `src/lib/db.ts` Prisma middleware auto-injects `deletedAt: null` on every `find*` / `count` / `aggregate` query. Bypass only when caller genuinely needs deleted records.
+
+**Observability pattern:** Sentry for error tracking with source-map upload, Pino structured logging with redaction, `withActionTracing` HOC for server actions, Lighthouse CI with performance budgets, Slack alerts for error spikes.
 
 ---
 
@@ -107,63 +121,103 @@ A paid training platform where Filipino VAs learn Amazon advertising through str
 amph-v2/
 ├── src/
 │   ├── app/
-│   │   ├── (public)/             Public pages (auth pages live here)
+│   │   ├── (public)/              Public pages (auth, pricing)
 │   │   │   └── auth/
 │   │   │       ├── signin/        Sign-in page + form
 │   │   │       └── signup/        Sign-up page + form
-│   │   ├── actions/              Server actions
-│   │   │   └── auth.ts           signup/signin/signout actions
-│   │   ├── admin/                Admin panel (RBAC-gated)
-│   │   │   ├── layout.tsx        requireAdmin() + sidebar/topbar
-│   │   │   └── page.tsx          Dashboard with stats
-│   │   ├── layout.tsx            Root layout: fonts + header nav
-│   │   └── page.tsx              Landing page
+│   │   ├── (dashboard)/           Student dashboard, courses, tools, quizzes
+│   │   ├── admin/                 Admin panel (RBAC-gated)
+│   │   │   ├── layout.tsx         requireAdmin() + sidebar/topbar
+│   │   │   └── page.tsx           Dashboard with stats
+│   │   ├── api/
+│   │   │   └── paymongo/webhook/  HMAC-verified PayMongo webhook handler
+│   │   ├── actions/               Server actions (auth, progress, tools, refunds, etc.)
+│   │   ├── layout.tsx             Root layout: fonts + header nav
+│   │   └── page.tsx               Landing page
 │   ├── components/
-│   │   └── ui/                   Shared UI primitives (Field Manual)
-│   │       ├── Button.tsx        Primary/secondary/ghost/danger × sm/md/lg
-│   │       ├── Card.tsx          Default/interactive/outlined + sub-components
-│   │       ├── Input.tsx         Label + error/hint + left/right icon
-│   │       ├── Badge.tsx         Default/success/warning/danger/info
-│   │       ├── Modal.tsx         Native <dialog> with focus trap
-│   │       ├── Toast.tsx         Provider + auto-dismiss + stack ≤3
-│   │       ├── Icon.tsx          Phosphor wrapper (28 named icons)
-│   │       ├── NavSidebar.tsx    Admin nav with active state
-│   │       ├── TopBar.tsx        Admin top bar with sign-out
-│   │       └── index.ts          Barrel export
+│   │   ├── ui/                    Shared UI primitives (Field Manual)
+│   │   │   ├── Button.tsx         Primary/secondary/ghost/danger × sm/md/lg
+│   │   │   ├── Card.tsx           Default/interactive/outlined + sub-components
+│   │   │   ├── Input.tsx          Label + error/hint + left/right icon
+│   │   │   ├── Badge.tsx          Default/success/warning/danger/info
+│   │   │   ├── Modal.tsx          Native <dialog> with focus trap
+│   │   │   ├── Toast.tsx          Provider + auto-dismiss + stack ≤3
+│   │   │   ├── Icon.tsx           Phosphor wrapper (28 named icons)
+│   │   │   ├── NavSidebar.tsx     Admin nav with active state
+│   │   │   ├── TopBar.tsx         Admin top bar with sign-out
+│   │   │   ├── BottomNav.tsx      Student mobile nav (4-slot, safe-area-inset)
+│   │   │   └── index.ts           Barrel export
+│   │   └── tools/                 5 interactive tool runners + shared ToolResult
 │   ├── lib/
-│   │   ├── db.ts                 Prisma singleton + soft-delete middleware
-│   │   ├── auth.ts               JWT (jose) + scrypt + requireAuth/requireAdmin
+│   │   ├── db.ts                  Prisma singleton + soft-delete middleware
+│   │   ├── auth.ts                JWT (jose) + scrypt + requireAuth/requireAdmin
+│   │   ├── logger.ts             Pino structured logger with AsyncLocalStorage
+│   │   ├── sentry.ts             Sentry client init + captureException wrapper
+│   │   ├── sentry-shared.ts      Shared Sentry noop guard for non-browser
+│   │   ├── tracing.ts            withActionTracing HOC + trace() export
+│   │   ├── middleware-context.ts  ALS-based request context for edge middleware
+│   │   ├── tier-gate.ts          Enrollment + tier-gated access control
+│   │   ├── badges.ts             Badge auto-award engine (5 criteria types)
+│   │   ├── certificates.ts       PDF certificate generation + UUID verification
+│   │   ├── paymongo.ts           PayMongo API + HMAC webhook verification
+│   │   ├── refunds.ts            Refund flow engine (7-day window)
+│   │   ├── receipts.tsx          BIR-compliant receipt PDFs with VAT
 │   │   └── validation.ts         Zod schemas + createSafeAction wrapper
-│   ├── middleware.ts             Edge JWT verification + RBAC gating
+│   ├── engine/                    5 tool engines + 30 scenarios + grading
+│   ├── engine/registry.ts        Tool registry mapping slugs to engines
+│   ├── middleware.ts              Edge JWT verification + RBAC gating
 │   └── styles/
-│       └── globals.css           Field Manual design tokens + dark mode
+│       └── globals.css            Field Manual design tokens + dark mode
 ├── prisma/
-│   ├── schema.prisma             31 models
-│   └── seed.ts                   Admin user + 3 pricing tiers + 5 badges
+│   ├── schema.prisma              19 models
+│   └── seed.ts                    Admin user + 3 pricing tiers + 5 badges
 ├── scripts/
-│   └── gen-jwt-secret.ts         HS256 secret generator
+│   ├── gen-jwt-secret.ts          HS256 secret generator
+│   ├── import-amph-content.ts     AMPH v1 → v2 content importer
+│   ├── sentry-slack-alert.ts      Sentry error spike + daily summary → Slack
+│   ├── smoke-prod.sh              Production smoke test (bash + curl + grep)
+│   ├── backup-prod.sh             pg_dump → gzip → Vercel Blob
+│   └── restore-prod.sh            Download backup → pg_restore → assert counts
 ├── eslint-rules/
-│   └── no-ai-slop.js             Custom rule banning 30+ AI-generated patterns
-├── docs/                         Specifications (the plan)
-│   ├── build-spec.md             Why greenfield
-│   ├── product-brief.md          Audience + value prop
-│   ├── decisions.md              16 ADRs
-│   ├── design-brief.md           Field Manual design system
-│   ├── voice-guide.md            Copy rules + jargon buster
-│   ├── db-schema.md              Schema specification
-│   ├── admin-backend.md          Admin panel routes + RBAC
-│   ├── business-layer.md         PayMongo integration
-│   ├── ai-removal.md             Zero AI commitment
-│   ├── sprint-plan.md            11 sprints, 55 stories
-│   └── bmad/                     BMAD state files
-├── .omh/plans/                   Consensus plans (ralplan output)
-├── .github/workflows/ci.yml      tsc + lint + vitest + playwright + lighthouse + gitleaks
-├── AGENTS.md                     Agent conventions
+│   └── no-ai-slop.js              Custom rule banning 30+ AI-generated patterns
+├── docs/
+│   ├── sprint-plan.md             12 sprints, 52 stories — complete
+│   ├── decisions.md               16 ADRs
+│   ├── voice-guide.md             Copy rules + jargon buster
+│   ├── api-reference.md           Full API & schema reference
+│   ├── sprint-11/PLAN.md          Observability sprint (SHIPPED)
+│   ├── sprint-12/PLAN.md          Launch sprint (SHIPPED)
+│   ├── sprint-12/deploy-execution.md   Operator deploy checklist
+│   ├── sprint-12/launch-comms.md       Social copy + email template + retro
+│   ├── runbooks/
+│   │   ├── production-deploy.md   17-env-var deploy runbook
+│   │   └── db-backup-restore.md   Backup + restore drill runbook
+│   ├── security/
+│   │   ├── tenant-isolation.md    10 server actions + 8 route handlers audit
+│   │   └── security-audit-2026-07-13.md  npm audit, gitleaks, headers, auth
+│   ├── stories/                   STORY-001 through STORY-057 acceptance docs
+│   └── bmad/                      BMAD state files (sprint + workflow YAMLs)
+├── .github/
+│   ├── workflows/
+│   │   ├── ci.yml                 tsc + lint + vitest + playwright + lighthouse + gitleaks
+│   │   ├── sentry-alert.yml       30-min spike + 01:00 UTC daily summary → Slack
+│   │   ├── db-backup.yml          Daily 02:00 UTC pg_dump → Vercel Blob
+│   │   ├── deploy-preview.yml     Vercel preview per PR + smoke test + PR comment
+│   │   ├── deploy-prod.yml        Manual-gated prod deploy + Sentry release + smoke
+│   │   └── rollback.yml           Instant Vercel rollback (requires ROLLBACK confirm)
+│   └── dependabot.yml             Daily npm + weekly Actions updates
+├── sentry.client.config.ts        Sentry browser init
+├── sentry.server.config.ts        Sentry Node.js init
+├── sentry.edge.config.ts          Sentry Edge Runtime init
+├── .lighthouserc.json             Performance budgets (perf ≥0.85, a11y ≥0.95, etc.)
+├── AGENTS.md                      Agent conventions
+├── SESSION-HANDOVER.md            Project status + secrets + decisions log
+├── CHANGELOG.md                   Full changelog (S1–S12 + post-launch)
 ├── package.json
-├── tsconfig.json                 Strict + noUncheckedIndexedAccess + noImplicitOverride
-├── next.config.ts                Security headers + CSP-ready
-├── .eslintrc.json                Loads local/no-ai-slop rule
-├── .env.example                  All required env vars documented
+├── tsconfig.json                  Strict + noUncheckedIndexedAccess + noImplicitOverride
+├── next.config.ts                 Security headers + CSP-ready
+├── .eslintrc.json                 Loads local/no-ai-slop rule
+├── .env.example                   All required env vars documented
 └── README.md
 ```
 
@@ -210,12 +264,13 @@ pnpm dev              # Next.js dev server
 pnpm build            # Production build
 pnpm typecheck        # tsc --noEmit
 pnpm lint             # ESLint + no-ai-slop rule
-pnpm test             # Vitest unit + integration (Sprint 9)
-pnpm test:e2e         # Playwright E2E (Sprint 9)
-pnpm test:coverage    # Coverage report (Sprint 9)
+pnpm test             # Vitest unit + integration
+pnpm test:e2e         # Playwright E2E
+pnpm test:coverage    # Coverage report (70% threshold)
 pnpm prisma:studio    # Browse the database
 pnpm gen:secret       # Print a new JWT secret
 pnpm gen:secret --write  # Append to .env.local
+pnpm sentry:sourcemaps   # Upload source maps to Sentry
 ```
 
 ### Verifying Sprint 1 works
@@ -253,34 +308,48 @@ Both layers verify independently. The Edge middleware runs on every request to `
 
 Every mutable table has a `deletedAt DateTime?` column. The Prisma middleware in `src/lib/db.ts` auto-injects `deletedAt: null` on every read query (`findUnique`, `findFirst`, `findMany`, `count`, `aggregate`, `groupBy`). Soft-deleted records are invisible to app code by default.
 
+### Observability stack
+
+- **Sentry** (`@sentry/nextjs@^9`): client/server/edge configs, source maps, release tracking
+- **Pino** structured logging: `src/lib/logger.ts` with AsyncLocalStorage child-context, PII redaction
+- **Server-action tracing**: `withActionTracing` HOC in `src/lib/tracing.ts`
+- **Lighthouse CI**: performance budgets enforced in CI (perf ≥0.85, a11y ≥0.95, LCP ≤4000ms, TBT ≤300ms)
+- **Slack alerting**: error spike + daily summary via `sentry-alert.yml` cron (01:00 UTC / 09:00 PHT)
+
+### CI/CD pipeline
+
+- **ci.yml**: tsc → lint → vitest → playwright → lighthouse-ci → gitleaks (push/PR only, no schedule)
+- **sentry-alert.yml**: 30-min spike monitoring + 01:00 UTC daily summary
+- **db-backup.yml**: daily 02:00 UTC pg_dump → Vercel Blob
+- **deploy-preview.yml**: Vercel preview per PR + smoke test + PR comment
+- **deploy-prod.yml**: manual-gated prod deploy + Sentry release + smoke + Slack
+- **rollback.yml**: instant Vercel rollback (requires typing `ROLLBACK` to confirm)
+- **dependabot.yml**: daily grouped npm updates, weekly Actions updates
+
 ### CSS Modules + tokens (no Tailwind)
 
 Every component imports a `.module.css` file that uses `var(--token)` references. Tokens live in `src/styles/globals.css`. The `no-ai-slop` ESLint rule scans all source for AI-generated copy patterns.
 
 ---
 
-## Sprint Status
+## Sprint History
 
-**42/47 stories shipped across Sprints 1–9 (89%).** Sprints 1–5 shipped the foundation, all 5 tool engines + 30 scenarios, content import, curriculum pages, quiz system, tier gating, the 5 interactive tool UIs, and the full gamification stack: auto-awarded badges, PDF certificates with public verification, and live classes with tier-gated registration. **Sprint 6 — Payments** (2026-07-10): STORY-026/027/028/029 — PayMongo checkout + webhook, enrollment + tier gating, refund flow engine, BIR-compliant receipt PDFs. **Sprint 7 — Admin** (2026-07-10): STORY-030/031/032/033 — admin dashboard + user management, course/module/lesson CRUD with MDX editor, tool scenario admin, analytics dashboards. **Sprint 8 — Refunds + Email** (2026-07-11, commit `1414754`): STORY-034/035/036/037 — admin refund approval UI, 3 Resend React Email templates, webhook handler with HMAC signature verification. **Sprint 9 — Polish + Mobile** (2026-07-12): STORY-038/039/040/041/042 — design-system audit + token purge, responsive breakpoint infrastructure, BottomNav component, marketing+auth mobile-first refactor, student app shell refactor. All pages verified at 390px and 1280px.
+All 52 stories shipped across 12 sprints (57 points). No slip.
 
-**Next: Sprint 10 — Tests + CI Hardening.** Vitest unit tests (src/lib core, badges, validation, enums, tier-gate), server action integration tests (auth, progress, live classes), Playwright E2E critical path, coverage enforcement. CI updated: tsc, lint, vitest, playwright, lighthouse-ci, gitleaks. Plan at `docs/sprint-11/PLAN.md`. Stories at `docs/stories/STORY-048.md` through `STORY-052.md`.
-
-- Next.js 16 scaffold with TypeScript strict
-- Field Manual design system (60+ tokens, full dark mode)
-- 7 UI primitives + admin shell components
-- Full 25-model Prisma schema migrated and seeded
-- JWT auth with HttpOnly cookies, 7-day TTL
-- Edge middleware with RBAC for `/admin/*` and `/dashboard/*`
-- 5 tool engines with 30 scenarios (Campaign Builder SP/SB/SD/BTV, Bid Elevator, STR Triage, Listing Audit, Keyword Research)
-- Tool session persistence (save/resume/submit/grade)
-- AMPH v1 content imported (1 course, 9 modules, 31 lessons, 5 quizzes, 30 questions) with $USD→₱PHP currency refactor
-- Curriculum pages: dashboard, course detail, lesson reader, quiz
-- Tier-gated course access (enroll-aware): TierLock screen on lesson/quiz pages, lock icons on course index, server actions enforce the gate
-- 5 interactive tool UIs: Listing Audit form, Keyword Research categorizer, Bid Elevator table, STR Triage triager, Campaign Builder 5-step wizard (BTV-aware)
-- 1 admin + 3 pricing tiers + 5 badges seeded
-- Admin panel: 8 screens (dashboard + user mgmt + course CRUD + tool scenarios + analytics + refunds + settings + badges)
-- Refund flow: student request → admin approve/reject → PayMongo refund API + email
-- Email: enrollment confirmation, live class reminder, refund status (3 templates) + Resend webhook handler
+| Sprint | Track | Key Deliverables |
+|--------|-------|------------------|
+| S1 | Foundation | Next.js scaffold, Field Manual design system, JWT auth, Prisma schema (19 models), admin layout |
+| S2 | Tools | 5 engine cores (Campaign Builder, Bid Elevator, STR Triage, Listing Audit, Keyword Research) + 30 scenarios + grading |
+| S3 | Curriculum | Content import (31 lessons, 5 quizzes), curriculum pages, quiz system, tier gating |
+| S4 | Tool UIs | 5 interactive runners: Campaign Builder wizard, Bid Elevator table, STR Triage grid, Listing Audit form, Keyword Research categorizer |
+| S5 | Gamification | Auto-awarded badges (5 criteria), PDF certificates with verification UUID, live classes with tier-gated registration |
+| S6 | Payments | PayMongo checkout + webhook, enrollment management, refund engine, BIR-compliant receipt PDFs |
+| S7 | Admin | 8 admin screens: dashboard, user CRUD, course/module/lesson management, tool scenarios, analytics, refunds, badges |
+| S8 | Refunds + Email | Admin refund approval UI, 3 Resend React Email templates, webhook handler with HMAC verification |
+| S9 | Polish + Mobile | Design-system audit, responsive breakpoints, BottomNav component, mobile-first page refactor |
+| S10 | Tests + CI Hardening | 53/53 unit + integration tests, Playwright E2E scaffolded, 70% coverage threshold, CI pipeline aligned to PostgreSQL |
+| S11 | Observability | Sentry setup, Pino structured logging, server-action tracing, Lighthouse CI, Slack alerting |
+| S12 | Launch | Deploy runbook, backup drill scripts, security audit, production deploy automation, launch communications |
 
 See `docs/sprint-plan.md` for the full roadmap and `bmad/sprint-status.yaml` for current state.
 
