@@ -2,16 +2,11 @@
   "name": "amph-v2",
   "version": "0.1.0",
   "private": true,
-  "description": "Project Amazon PH AMPH Academy v2 \u2014 Amazon advertising training for Filipino VAs",
-  "engines": {
-    "node": ">=20.0.0",
-    "pnpm": ">=9.0.0"
-  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint .",
+    "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -22,44 +17,49 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
-    "prisma:seed": "tsx prisma/seed.ts",
-    "gen:secret": "tsx scripts/gen-jwt-secret.ts",
-    "format": "prettier --write \"**/*.{ts,tsx,md,json,yaml,yml}\"",
-    "prepare": "husky || true",
-    "lint:purge": "eslint ."
+    "prisma:format": "prisma format",
+    "prisma:validate": "prisma validate",
+    "gen:secret": "node scripts/gen-secret.js",
+    "format": "prettier --write .",
+    "prepare": "husky",
+    "lint:purge": "node scripts/lint-purge.js",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject .next && sentry-cli sourcemaps upload"
   },
   "dependencies": {
-    "@phosphor-icons/react": "^2.1.7",
     "@prisma/client": "^5.22.0",
-    "@react-email/components": "^0.0.32",
-    "@react-email/render": "^1.0.3",
-    "@react-pdf/renderer": "^4.1.5",
-    "clsx": "^2.1.1",
+    "@sentry/nextjs": "^9.0.0",
     "jose": "^5.9.6",
     "next": "^16.0.0",
-    "paymongo": "^1.0.0",
     "pino": "^9.5.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "resend": "^4.0.1",
-    "zod": "^3.23.8",
-    "zustand": "^5.0.2"
+    "server-only": "^0.0.1",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@playwright/test": "^1.49.0",
-    "@types/node": "^22.10.0",
+    "@playwright/test": "^1.48.0",
+    "@sentry/cli": "^2.39.1",
+    "@testing-library/jest-dom": "^6.5.0",
+    "@testing-library/react": "^16.0.1",
+    "@types/node": "^22.7.5",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.18.0",
-    "@typescript-eslint/parser": "^8.18.0",
-    "@vitest/coverage-v8": "^2.1.8",
-    "eslint": "^9.17.0",
+    "@vitejs/plugin-react": "^4.3.2",
+    "@vitest/coverage-v8": "^2.1.2",
+    "eslint": "^9.12.0",
     "eslint-config-next": "^16.0.0",
-    "husky": "^9.1.7",
-    "prettier": "^3.4.2",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3",
     "prisma": "^5.22.0",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
   }
 }

@@ -4,6 +4,13 @@ All notable changes to AMPH Academy v2 are documented here.
 
 ## [Unreleased]
 
+### Sprint 11 — Observability (2026-07-13)
+- Sentry setup: `@sentry/nextjs` wired in, sentry.{client,server,edge}.config.ts + instrumentation.ts, source-map upload via `pnpm sentry:sourcemaps` (STORY-048)
+- Structured logging: Pino-based logger (`src/lib/logger.ts`) with redaction of PII fields; all `console.*` in critical paths replaced with structured `log.*` (STORY-049)
+- Server-action tracing: `withActionTracing()` wrapper around server actions; per-request logger context via `src/lib/middleware-context.ts` (STORY-050)
+- Lighthouse CI: `.lighthouserc.json` with assertions for performance/a11y/best-practices/SEO; CI job blocks merges on failure (STORY-051)
+- Alerting to Slack: `scripts/sentry-slack-alert.ts` posts error spike + daily summary to Slack Incoming Webhook; cron job in CI (STORY-052)
+
 ### Sprint 10 — Tests + CI Hardening (2026-07-13, in progress)
 - Vitest config + 11 test files (auth, progress, tools, badges, validation, enums, tier-gate, format, pricing, smoke ×2)
 - Playwright E2E config scaffolded

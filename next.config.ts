@@ -1,5 +1,6 @@
-// Next.js config — strict, security-hardened
+// Next.js config — strict, security-hardened, Sentry-instrumented (Sprint 11 / STORY-048)
 import type { NextConfig } from 'next';
+import { withSentryConfig } from '@sentry/nextjs';
 
 const securityHeaders = [
   {
@@ -55,6 +56,34 @@ const config: NextConfig = {
       { protocol: 'https', hostname: '*.blob.vercel-storage.com' },
     ],
   },
+
+  // Sentry tunnel route — bypasses ad-blockers for Sentry ingest endpoints.
+  // Sprint 11 / STORY-048
+  async rewrites() {
+    return [
+      {
+        source: '/monitoring',
+        destination: process.env.SENTRY_HOST
+          ? `${process.env.SENTRY_HOST}/api/0/envelope/`
+          : 'https://sentry.io/api/0/envelope/',
+      },
+    ];
+  },
 };
 
-export default config;
+// Sentry build-time source-map configuration. Disabled by default in dev.
+// Enable by setting SENTRY_AUTH_TOKEN in the deploy environment.
+const sentryBuildOptions = {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !process.env.CI,
+  hideSourceMaps: true,
+  disableLogger: true,
+  widenClientFileUpload: true,
+  dryRun: !process.env.SENTRY_AUTH_TOKEN,
+};
+
+export default process.env.SENTRY_AUTH_TOKEN
+  ? withSentryConfig(config, sentryBuildOptions)
+  : config;

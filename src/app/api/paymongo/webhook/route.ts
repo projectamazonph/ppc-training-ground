@@ -4,6 +4,7 @@
  * Endpoint: POST /api/paymongo/webhook
  *
  * Sprint 6 — STORY-026 PayMongo Checkout.
+ * Sprint 11 — STORY-049: structured logger replaces console.*
  *
  * PayMongo sends six event types we care about:
  *   - checkout_session.payment.paid
@@ -27,6 +28,7 @@
  */
 
 import { type NextRequest } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import {
   verifyPayMongoSignature,
   PAYMONGO_SIGNATURE_HEADER,
@@ -39,6 +41,7 @@ import {
   type CheckoutFailedEvent,
   type PaymentRefundedEvent,
 } from '@/lib/enrollment';
+import { log } from '@/lib/logger';
 
 export const runtime = 'nodejs'; // Node runtime — uses node crypto + Prisma
 export const dynamic = 'force-dynamic';
@@ -72,9 +75,9 @@ export async function POST(request: NextRequest): Promise<Response> {
   // 2. Verify signature. Always 401 on mismatch.
   const verified = verifyPayMongoSignature(body, signatureHeader);
   if (!verified.valid) {
-    console.warn(
-      `[paymongo-webhook] rejected: reason=${verified.reason ?? 'unknown'}, ` +
-      `sigLen=${signatureHeader?.length ?? 0}`,
+    log.warn(
+      { component: 'paymongo-webhook', reason: verified.reason ?? 'unknown', sigLen: signatureHeader?.length ?? 0 },
+      'rejected signature',
     );
     return new Response('Invalid signature.', { status: 401 });
   }
@@ -82,9 +85,17 @@ export async function POST(request: NextRequest): Promise<Response> {
   // 3. Parse and dispatch.
   const event = pickEvent(body);
   if (!event) {
-    console.warn('[paymongo-webhook] no event parsed, acking 200');
+    log.warn({ component: 'paymongo-webhook' }, 'no event parsed, acking 200');
     return new Response('No event.', { status: 200 });
   }
+
+  // Sentry breadcrumb for every received event — easy to correlate.
+  Sentry.addBreadcrumb({
+    category: 'paymongo',
+    message: event.type,
+    level: 'info',
+    data: { eventId: event.data.id ?? null },
+  });
 
   try {
     switch (event.type) {
@@ -101,13 +112,14 @@ export async function POST(request: NextRequest): Promise<Response> {
       // the Source-based flow (legacy). Handled in STORY-027/Sprint 8 if we
       // ship that path; for now we acknowledge and skip.
       default:
-        console.info(`[paymongo-webhook] unhandled event type: ${event.type}`);
+        log.info({ component: 'paymongo-webhook', eventType: event.type }, 'unhandled event type');
     }
   } catch (err) {
     // Log but ack 200 — idempotent retry by PayMongo would otherwise
     // 10x our handler error rate. Real alert comes from the ProcessedWebhook
     // log + the absence of side-effects.
-    console.error('[paymongo-webhook] handler error', err);
+    log.error({ component: 'paymongo-webhook', err, eventType: event.type }, 'handler error');
+    Sentry.captureException(err, { tags: { source: 'paymongo-webhook', eventType: event.type } });
   }
 
   return new Response('OK', { status: 200 });

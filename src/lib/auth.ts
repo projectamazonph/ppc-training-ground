@@ -8,6 +8,8 @@
  *     verification is cheap and avoids trusting headers blindly.
  *   - `requireAuth()` and `requireAdmin()` are the canonical entry points
  *     for protected code paths.
+ *
+ * Sprint 11 / STORY-050: tracing + structured logging around session helpers.
  */
 
 import 'server-only';
@@ -18,6 +20,8 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { db } from './db';
 import { type UserRole } from './enums';
+import { log } from './logger';
+import { trace } from './tracing';
 
 const AUTH_COOKIE = 'amph_auth';
 const TOKEN_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
@@ -40,7 +44,7 @@ function getSecret(): Uint8Array {
 export function hashPassword(password: string): string {
   const salt = randomBytes(16).toString('hex');
   const hash = scryptSync(password, salt, 64).toString('hex');
-  return `scrypt\$${salt}\$${hash}`;
+  return `scrypt$${salt}$${hash}`;
 }
 
 export function verifyPassword(password: string, stored: string): boolean {
@@ -125,12 +129,18 @@ export interface SessionUser {
   streakDays: number;
 }
 
-export async function getSession(): Promise<SessionUser | null> {
+export const getSession = trace('auth.getSession', async (): Promise<SessionUser | null> => {
   const token = await getAuthToken();
-  if (!token) return null;
+  if (!token) {
+    log.debug({ component: 'auth' }, 'no auth cookie present');
+    return null;
+  }
 
   const payload = await verifyToken(token);
-  if (!payload) return null;
+  if (!payload) {
+    log.warn({ component: 'auth' }, 'invalid or expired token');
+    return null;
+  }
 
   // Fetch gamification fields from DB (not in JWT to keep token small)
   const user = await db.user.findUnique({
@@ -147,21 +157,26 @@ export async function getSession(): Promise<SessionUser | null> {
     level: user?.level ?? 1,
     streakDays: user?.streakDays ?? 0,
   };
-}
+});
 
 export async function requireAuth(): Promise<SessionUser> {
   const user = await getSession();
   if (!user) {
+    // redirect() throws NEXT_REDIRECT — must NOT be wrapped in try/catch
+    log.info({ component: 'auth' }, 'unauthenticated → redirect /auth/signin');
     redirect('/auth/signin');
   }
+  log.debug({ component: 'auth', userId: user.id, role: user.role }, 'requireAuth ok');
   return user;
 }
 
 export async function requireAdmin(): Promise<SessionUser> {
   const user = await requireAuth();
   if (user.role !== 'ADMIN') {
+    log.warn({ component: 'auth', userId: user.id, role: user.role }, 'non-admin → redirect /');
     redirect('/');
   }
+  log.debug({ component: 'auth', userId: user.id }, 'requireAdmin ok');
   return user;
 }
 
