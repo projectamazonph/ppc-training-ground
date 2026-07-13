@@ -1,0 +1,75 @@
+# Instant production rollback via Vercel.
+#
+# MANUAL ONLY. `vercel rollback` re-points the production alias to a previous
+# deployment — no rebuild, typically < 30s. Always follow up with a `git revert`
+# so `main` reflects reality (see docs/runbooks/production-deploy.md §7).
+#
+# If `deployment_id` is left blank, Vercel rolls back to the *previous*
+# production deployment.
+#
+# Required repo secrets:
+#   VERCEL_TOKEN (and optionally VERCEL_ORG_ID / VERCEL_PROJECT_ID)
+#   SLACK_WEBHOOK_URL
+#
+# Safety: the dispatch requires typing ROLLBACK into the confirm field.
+
+name: Rollback Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_id:
+        description: "Vercel deployment ID/URL to roll back to (blank = previous)"
+        required: false
+        default: ""
+        type: string
+      confirm:
+        description: 'Type ROLLBACK to confirm'
+        required: true
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  rollback:
+    name: Vercel Rollback
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: production
+    if: ${{ inputs.confirm == 'ROLLBACK' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Roll back
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          # Best-effort link so subsequent CLI calls know the project; safe to
+          # skip if the project is already resolved via the linked git repo.
+          vercel link --yes --token "$VERCEL_TOKEN" \
+            ${VERCEL_ORG_ID:+--scope "$VERCEL_ORG_ID"} \
+            ${VERCEL_PROJECT_ID:+--project "$VERCEL_PROJECT_ID"} || true
+
+          vercel rollback ${{ inputs.deployment_id }} \
+            --token "$VERCEL_TOKEN" \
+            --yes \
+            ${VERCEL_ORG_ID:+--scope "$VERCEL_ORG_ID"} \
+            ${VERCEL_PROJECT_ID:+--project "$VERCEL_PROJECT_ID"}
+
+      - name: Notify Slack
+        if: always()
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "${{ job.status == 'success' && '↩️' || '⚠️' }} AMPH prod rollback ${{ inputs.deployment_id || 'to previous' }} — ${{ job.status }}"
+            }
