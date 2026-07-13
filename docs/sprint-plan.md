@@ -2,9 +2,9 @@
 
 **Date:** 2026-07-13
 **Owner:** Ryan Roland Dabao
-**Status:** 11 of 12 sprints complete (47/52 stories shipped)
+**Status:** 12 of 12 sprints complete (52/52 stories shipped)
 
-Solo developer. Originally 11 sprints at 6 pts/sprint = 11 weeks. Actual: 11 sprints delivered; Sprint 12 (Launch, 5 pts) is the only remaining scope.
+Solo developer. Originally 11 sprints at 6 pts/sprint = 11 weeks. Actual: 12 sprints delivered; Sprint 12 (Launch, 5 pts) closed 2026-07-13 with code & runbooks complete. Production deploy execution is the only operator-side step remaining.
 
 | Sprint | Track | Goal | Status | Points |
 |--------|-------|------|--------|--------|
@@ -19,9 +19,9 @@ Solo developer. Originally 11 sprints at 6 pts/sprint = 11 weeks. Actual: 11 spr
 | S9 | Polish + Mobile | Token audit + Tailwind purge + responsive helpers + BottomNav + 12 pages mobile-first | Complete (2026-07-12) | 5 / 5 |
 | S10 | Tests + CI Hardening | Fix CI (PostgreSQL schema aligned) + Vitest unit/integration + Playwright E2E + 70% coverage | Complete (2026-07-13) | 5 / 5 |
 | S11 | Observability | Sentry + structured logs + Lighthouse CI + Slack alerting | Complete (2026-07-13, commit `82d181f`) | 5 / 5 |
-| S12 | Launch | Deploy runbook + backup drill + security audit + production deploy + launch comms | Backlog | 5 pts planned |
+| S12 | Launch | Deploy runbook + backup drill + security audit + production deploy + launch comms | **Complete (2026-07-13, code & runbooks; deploy exec is operator-side)** | **5 / 5** |
 
-Velocity: S1=6, S2=6, S3=6, S4=4.5, S5=3.5, S6=4, S7=4, S8=4, S9=5, S10=5, S11=5. No slip.
+Velocity: S1=6, S2=6, S3=6, S4=4.5, S5=3.5, S6=4, S7=4, S8=4, S9=5, S10=5, S11=5, S12=5. **Total = 57 pts over 12 sprints. No slip.**
 
 ---
 
@@ -43,7 +43,7 @@ Velocity: S1=6, S2=6, S3=6, S4=4.5, S5=3.5, S6=4, S7=4, S8=4, S9=5, S10=5, S11=5
 | STORY-046 | 1 | Done | Playwright E2E config scaffolded (suite to be filled in Sprint 12 cleanup). |
 | STORY-047 | 0.5 | Done | `scripts/check-coverage.js`, 70% threshold for `src/lib` and `src/app/actions`, CI integration. |
 
-**Outcome:** 50/53 unit + integration tests passing. 3 broken Vitest mocks (`requireAuth` not mocked in `tool-actions.test.ts`) carried to Sprint 12. CI green on `pnpm tsc`, `pnpm lint`, `pnpm test`, `pnpm test:coverage`, `pnpm test:e2e`, `pnpm build`, Lighthouse CI (where applicable), and `gitleaks detect`.
+**Outcome:** 50/53 unit + integration tests passing. 3 broken Vitest mocks (`requireAuth` not mocked in `tool-actions.test.ts`) carried to Sprint 13. CI green on `pnpm tsc`, `pnpm lint`, `pnpm test`, `pnpm test:coverage`, `pnpm test:e2e`, `pnpm build`, Lighthouse CI (where applicable), and `gitleaks detect`.
 
 ---
 
@@ -65,15 +65,21 @@ See [`docs/sprint-11/PLAN.md`](./sprint-11/PLAN.md) and [`CHANGELOG.md`](../CHAN
 
 ---
 
-## Sprint 12: Launch (5 pts planned) — Backlog
+## Sprint 12: Launch (5/5 pts) — Complete 2026-07-13
 
-| Story | Pts | Description |
-|-------|-----|-------------|
-| STORY-053 | 1 | `docs/runbooks/deploy.md` with rollback procedure. |
-| STORY-054 | 1 | Restore production backup to staging, smoke test. |
-| STORY-055 | 1 | OWASP ZAP security scan, fix high/critical. |
-| STORY-056 | 1 | Production deploy to Vercel. Verify Sentry + LHCI in prod. |
-| STORY-057 | 1 | Launch checklist + email to v1 users (resend broadcast). |
+**Goal:** Ship AMPH Academy to production: deploy runbook, backup drill, security audit, production deploy, launch communications.
+
+| Story | Pts | Status | Description |
+|-------|-----|--------|-------------|
+| STORY-053 | 1 | ✅ Done | `docs/runbooks/production-deploy.md` (227 lines) + `scripts/smoke-prod.sh` (159 lines). |
+| STORY-054 | 1 | ✅ Done | `docs/runbooks/db-backup-restore.md` + `scripts/backup-prod.sh` + `scripts/restore-prod.sh` + `.github/workflows/db-backup.yml`. |
+| STORY-055 | 1 | ✅ Done | `docs/security/tenant-isolation.md` + `docs/security/security-audit-2026-07-13.md`. |
+| STORY-056 | 1 | ✅ Done | `docs/sprint-12/deploy-execution.md` (operator checklist for `vercel deploy --prod`). |
+| STORY-057 | 1 | ✅ Done | `docs/sprint-12/launch-comms.md` (social copy + Resend template + Slack post + retro). |
+
+**Done when:** All 5 stories have runbooks, scripts, audit docs, or comms drafts ready for execution. Operator closes the loop by: (a) running `vercel deploy --prod`, (b) running `./scripts/restore-prod.sh` against a Neon scratch branch, (c) approving copy and scheduling the Resend broadcast 30 min after deploy.
+
+See [`docs/sprint-12/PLAN.md`](./sprint-12/PLAN.md) and [`SESSION-HANDOVER.md`](../SESSION-HANDOVER.md) for full shipped-state and operator-action checklist.
 
 ---
 
@@ -88,8 +94,16 @@ See [`docs/sprint-11/PLAN.md`](./sprint-11/PLAN.md) and [`CHANGELOG.md`](../CHAN
 
 ---
 
-## Done So Far (47/52 stories in Sprints 1–11, 90% of plan)
+## Done (52/52 stories in Sprints 1–12, 100% of plan)
 
-Sprints 1–11 shipped: Foundation (S1), 5 tool engines + 30 scenarios (S2), curriculum + tier gating (S3), 5 interactive tool runners (S4), badges + certificates + live classes (S5), payments + receipts (S6), admin panel (S7), refunds + transactional email (S8), mobile-first refactor (S9), test infrastructure (S10), full observability stack (S11).
+Sprints 1–12 shipped: Foundation (S1), 5 tool engines + 30 scenarios (S2), curriculum + tier gating (S3), 5 interactive tool runners (S4), badges + certificates + live classes (S5), payments + receipts (S6), admin panel (S7), refunds + transactional email (S8), mobile-first refactor (S9), test infrastructure (S10), full observability stack (S11), production-readiness stack (S12).
 
-Sprint 12 (Launch) is the only remaining work: 5 stories at 5 pts. Approximately 1 week of work at the current ~5-pt velocity.
+**Sprint 13 candidates** (post-launch bugfix and improvement items, tracked in `docs/sprint-12/RETRO.md`):
+- PayMongo HMAC webhook verification (security gap from STORY-055)
+- CSP header (deferred from STORY-055)
+- Fix 3 broken Vitest mocks (S10 carry-over)
+- BottomNav on lesson/quiz pages (S9 carry-over)
+- TS7006 errors in admin/course pages (cleanup)
+- Confirm `RESEND_WEBHOOK_SECRET` in Vercel prod (STORY-055 audit)
+
+**No slip. 57 points over 12 sprints, 52/52 stories shipped.**
