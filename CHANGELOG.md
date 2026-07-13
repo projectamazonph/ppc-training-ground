@@ -4,15 +4,59 @@ All notable changes to AMPH Academy v2 are documented here.
 
 ## [Unreleased]
 
+### Sprint 12 — Launch (2026-07-13)
+- Production deploy runbook: `docs/runbooks/production-deploy.md` with
+  17-env-var checklist, Vercel CLI + dashboard deploy/rollback paths,
+  post-deploy verification (Sentry, Slack, Lighthouse) (STORY-053)
+- Production smoke script: `scripts/smoke-prod.sh` — pure bash + curl + grep;
+  asserts 4 routes return 2xx, 6 security headers present, no `X-Powered-By`
+  leak; exit codes 0/1/2 (STORY-053)
+- Runbooks index: `docs/runbooks/README.md` (STORY-053)
+- DB backup runbook: `docs/runbooks/db-backup-restore.md` — pg_dump strategy,
+  Vercel Blob storage, restore drill procedure, emergency-restore decision
+  tree (STORY-054)
+- DB backup script: `scripts/backup-prod.sh` — pg_dump → gzip → Vercel Blob
+  PUT; requires `DATABASE_URL` and `BLOB_READ_WRITE_TOKEN` (STORY-054)
+- Restore drill script: `scripts/restore-prod.sh` — downloads backup, runs
+  pg_restore into scratch DB, asserts row counts on 6 tables within tolerance
+  (1% for content, 5% for write-heavy ToolSession) (STORY-054)
+- `db-backup` GitHub Actions cron: `.github/workflows/db-backup.yml` — daily
+  02:00 UTC, Slack notification on failure (STORY-054)
+- Tenant isolation audit: `docs/security/tenant-isolation.md` — 10 server
+  actions + 8 route handlers + Prisma query grep, all guarded (STORY-055)
+- Pre-launch security audit: `docs/security/security-audit-2026-07-13.md` —
+  7 sections covering npm audit, gitleaks, security headers, multi-tenant
+  audit, auth primitives, 5 open issues tracked (STORY-055)
+- Production deploy operator checklist: `docs/sprint-12/deploy-execution.md` —
+  copy-paste commands, post-deploy verification gates, rollback (STORY-056)
+- Launch communications: `docs/sprint-12/launch-comms.md` — Facebook/LinkedIn
+  copy, Resend broadcast React Email template outline, internal Slack
+  celebration post, retro template, pre-launch checklist (STORY-057)
+- Sprint 12 acceptance docs: `docs/stories/STORY-053.md` through
+  `docs/stories/STORY-057.md`
+- BMad state updated: `sprint.number: 12`, `completed_stories: 52/52`,
+  `sprint_12_notes` paragraph added, `story_list` extended with STORY-053
+  through STORY-057
+- `SESSION-HANDOVER.md` rewritten to mark Sprint 12 closed, list the 17
+  production env vars, surface the 5 operator-side actions, and document the
+  6 Sprint 13 candidates
+
 ### Sprint 11 — Observability (2026-07-13)
-- Sentry setup: `@sentry/nextjs` wired in, sentry.{client,server,edge}.config.ts + instrumentation.ts, source-map upload via `pnpm sentry:sourcemaps` (STORY-048)
-- Structured logging: Pino-based logger (`src/lib/logger.ts`) with redaction of PII fields; all `console.*` in critical paths replaced with structured `log.*` (STORY-049)
-- Server-action tracing: `withActionTracing()` wrapper around server actions; per-request logger context via `src/lib/middleware-context.ts` (STORY-050)
-- Lighthouse CI: `.lighthouserc.json` with assertions for performance/a11y/best-practices/SEO; CI job blocks merges on failure (STORY-051)
-- Alerting to Slack: `scripts/sentry-slack-alert.ts` posts error spike + daily summary to Slack Incoming Webhook; cron job in CI (STORY-052)
+- Sentry setup: `@sentry/nextjs` wired in, sentry.{client,server,edge}.config.ts
+  + instrumentation.ts, source-map upload via `pnpm sentry:sourcemaps` (STORY-048)
+- Structured logging: Pino-based logger (`src/lib/logger.ts`) with redaction
+  of PII fields; all `console.*` in critical paths replaced with structured
+  `log.*` (STORY-049)
+- Server-action tracing: `withActionTracing()` wrapper around server actions;
+  per-request logger context via `src/lib/middleware-context.ts` (STORY-050)
+- Lighthouse CI: `.lighthouserc.json` with assertions for
+  performance/a11y/best-practices/SEO; CI job blocks merges on failure (STORY-051)
+- Alerting to Slack: `scripts/sentry-slack-alert.ts` posts error spike +
+  daily summary to Slack Incoming Webhook; cron job in CI (STORY-052)
 
 ### Sprint 10 — Tests + CI Hardening (2026-07-13, in progress)
-- Vitest config + 11 test files (auth, progress, tools, badges, validation, enums, tier-gate, format, pricing, smoke ×2)
+- Vitest config + 11 test files (auth, progress, tools, badges, validation,
+  enums, tier-gate, format, pricing, smoke, …)
 - Playwright E2E config scaffolded
 - `scripts/check-coverage.js` added
 - CI workflow: tsc, lint, vitest, playwright, lighthouse-ci, gitleaks
@@ -20,14 +64,18 @@ All notable changes to AMPH Academy v2 are documented here.
 
 ### Sprint 9 — Polish + Mobile (2026-07-12)
 - Design-system audit + token purge pass (STORY-038)
-- Responsive breakpoint infrastructure: `--bp-sm/md/lg/xl`, `--side-pad`, `--max-width` tokens (STORY-039)
+- Responsive breakpoint infrastructure: `--bp-sm/md/lg/xl`, `--side-pad`,
+  `--max-width` tokens (STORY-039)
 - BottomNav shared component: 4-slot, mobile-only, safe-area-inset (STORY-040)
-- Marketing + auth cluster mobile-first refactor: landing page rewrite, pricing grid, auth/checkout padding (STORY-041)
-- Student app shell refactor: dashboard stats grid, tools grid, certificates/payments token fixes, BottomNav on dashboard/tools (STORY-042)
+- Marketing + auth cluster: mobile-first refactor (landing page rewrite,
+  pricing grid, auth/checkout padding) (STORY-041)
+- Student app shell refactor: dashboard stats grid, tools grid,
+  certificates/payments token fixes, BottomNav on dashboard/tools (STORY-042)
 - All pages verified at 390px and 1280px; lint clean; 7 commits
 
 ### Sprint 8 — Refunds + Email (2026-07-11, commit `1414754`)
-- Refund flow: student request → admin approve/reject → PayMongo refund API + email (STORY-034)
+- Refund flow: student request → admin approve/reject → PayMongo refund API
+  + email (STORY-034)
 - Email reminders: enrollment confirmation, live class reminder, refund status (STORY-035)
 - Resend webhook handler for transactional email delivery tracking (STORY-036)
 - 3 Resend React Email templates: enrollment, live class reminder, refund (STORY-037)
@@ -50,7 +98,7 @@ All notable changes to AMPH Academy v2 are documented here.
 - Live Classes with tier-gated registration + capacity check (STORY-025)
 
 ### Sprint 4 — Tool UIs (2026-07-08)
-- Campaign Builder 5-step wizard (SP/SB/SD/BTV-aware) (STORY-018)
+- Campaign Builder 5-step wizard (SP/SB/SD/BTW-aware) (STORY-018)
 - Bid Elevator table with live bid suggestions (STORY-019)
 - STR Triage triager with prioritized keyword queue (STORY-020)
 - Listing Audit form with scored checklist (STORY-021)
@@ -64,7 +112,7 @@ All notable changes to AMPH Academy v2 are documented here.
 - Tier gating: enroll-aware access control on lesson/quiz/tool pages (STORY-017)
 
 ### Sprint 2 — Tools (2026-07-07)
-- Campaign Builder engine + SP/SB/SD/BTV scenario packs (STORY-007)
+- Campaign Builder engine + SP/SB/SD/BTW scenario packs (STORY-007)
 - Bid Elevator engine + 6 scenarios (STORY-008)
 - STR Triage engine + 7 scenarios (STORY-009)
 - Tool UI shell with shared ToolResult component (STORY-010)
