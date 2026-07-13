@@ -207,7 +207,7 @@ Save as `docs/sprint-12/RETRO.md` within 48 hours of launch. Template:
 ## Sprint 13 candidates
 - [ ] PayMongo HMAC verification (security gap from STORY-055)
 - [ ] CSP header (deferred from STORY-055)
-- [ ] Fix 3 broken Vitest mocks (S10 carry-over)
+- [ ] ~~Fix 3 broken Vitest mocks~~ — **stale**; disproven 2026-07-14 (verified by CI)
 - [ ] BottomNav on lesson/quiz pages (S9 carry-over)
 - [ ] TS7006 errors in admin/course pages (cleanup)
 - [ ] Resend webhook secret env var confirmation
