@@ -122,7 +122,7 @@ Verified by reading `src/lib/auth.ts`:
 | 1 | PayMongo webhook HMAC not verified | High | **Conditional** — only if live payments enabled at launch |
 | 2 | CSP header missing | Medium | No (defer to S13) |
 | 3 | Resend webhook `RESEND_WEBHOOK_SECRET` env var must be set in Vercel prod | Medium | Conditional — block if unset |
-| 4 | 3 broken Vitest mocks (test coverage, not runtime security) | Low | No (post-launch bugfix) |
+| 4 | ~~3 broken Vitest mocks~~ — **stale claim** (removed 2026-07-14; `requireAuth` *is* mocked at `tool-actions.test.ts:21–24`). Test status **verified by CI**. | Low | No (post-launch bugfix) |
 | 5 | Pre-existing TS7006 errors in admin/course pages | Low | No (out of scope) |
 
 ---
