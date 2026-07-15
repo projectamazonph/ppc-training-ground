@@ -19,6 +19,7 @@ import { db } from './db';
 import { CheckoutStatus, EnrollmentStatus, PaymentMethod, PaymentStatus } from './enums';
 import { issueInvoiceForPayment } from './receipts';
 import { sendEnrollmentConfirmationEmail } from './email';
+import { logger } from './logger';
 import { randomUUID } from 'node:crypto';
 
 export interface CheckoutPaidEvent {
@@ -195,7 +196,7 @@ export async function handleCheckoutPaid(
     include: { pricingTier: true },
   });
   if (!checkout) {
-    console.error(`[webhook] CheckoutSession not found for paymongo id ${csId}`);
+    logger.error({ paymongoId: csId }, 'CheckoutSession not found');
     return null;
   }
 
@@ -205,7 +206,7 @@ export async function handleCheckoutPaid(
     select: { id: true },
   });
   if (!course) {
-    console.error(`[webhook] No course found for pricing tier ${checkout.pricingTierId}`);
+    logger.error({ pricingTierId: checkout.pricingTierId }, 'No course found for pricing tier');
     return null;
   }
 
@@ -277,7 +278,7 @@ export async function handleCheckoutPaid(
   try {
     await issueInvoiceForPayment(result.paymentId);
   } catch (err) {
-    console.error(`[webhook] Failed to issue invoice for payment ${result.paymentId}:`, err);
+    logger.error({ err, paymentId: result.paymentId }, 'Failed to issue invoice');
   }
 
   // Send enrollment confirmation email — non-durable, best-effort
@@ -291,7 +292,7 @@ export async function handleCheckoutPaid(
       to: user.email,
       studentName: user.name ?? user.email.split('@')[0],
       tierName: tierName as string,
-    }).catch((err) => console.error('[webhook] enrollment email failed:', err));
+    }).catch((err) => logger.error({ err }, 'Enrollment confirmation email failed'));
   }
 
   return result;
