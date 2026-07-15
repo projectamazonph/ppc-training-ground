@@ -15,7 +15,7 @@
 import { z } from 'zod';
 import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
-import { createSafeAction, type ActionResult } from '@/lib/validation';
+import { createSafeAction } from '@/lib/validation';
 import { type ToolType } from '@/lib/enums';
 import { evaluateBadges } from '@/lib/badges';
 
@@ -207,6 +207,3 @@ export async function loadToolSession(sessionId: string): Promise<unknown | null
     return null;
   }
 }
-
-// Re-export ActionResult for callers
-export type { ActionResult };

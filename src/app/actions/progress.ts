@@ -236,6 +236,3 @@ export const submitQuizAction = createSafeAction(submitQuizSchema, async (data) 
     passThreshold: lesson.quiz.passThreshold,
   };
 });
-
-// Re-export ActionResult
-export type { ActionResult };
