@@ -9,18 +9,24 @@
  *   3. Update CheckoutSession status
  *   4. Handle failure/expiry
  *
- * All handlers are pure and idempotent-safe — they check the
- * ProcessedWebhook log before doing any work.
+ * Idempotency contract: the ProcessedWebhook row is created INSIDE the same
+ * transaction as the handler's writes. If the handler fails, the row rolls
+ * back too, so PayMongo's retry gets a clean slate — an event can never be
+ * consumed without its side effects being committed.
  */
 
 import 'server-only';
 
+import type { Prisma, PrismaClient } from '@prisma/client';
 import { db } from './db';
 import { CheckoutStatus, EnrollmentStatus, PaymentMethod, PaymentStatus } from './enums';
 import { issueInvoiceForPayment } from './receipts';
 import { sendEnrollmentConfirmationEmail } from './email';
 import { logger } from './logger';
 import { randomUUID } from 'node:crypto';
+
+/** Either the global client or a transaction scope. */
+type DbClient = PrismaClient | Prisma.TransactionClient;
 
 export interface CheckoutPaidEvent {
   data: {
@@ -96,9 +102,10 @@ export async function markWebhookProcessed(
   resourceId: string | null,
   result?: string,
   httpStatus = 200,
+  client: DbClient = db,
 ): Promise<boolean> {
   try {
-    await db.processedWebhook.create({
+    await client.processedWebhook.create({
       data: {
         paymongoEventId: eventId,
         eventType,
@@ -125,8 +132,9 @@ export async function markWebhookProcessed(
 export async function findOrCreateUserByEmail(
   email: string,
   name?: string | null,
+  client: DbClient = db,
 ): Promise<{ id: string; isNew: boolean }> {
-  const existing = await db.user.findUnique({
+  const existing = await client.user.findUnique({
     where: { email },
     select: { id: true },
   });
@@ -134,12 +142,12 @@ export async function findOrCreateUserByEmail(
 
   // Create placeholder user. They'll complete signup via /auth/signup
   // which will update passwordHash + name + emailVerified.
-  const placeholder = await db.user.create({
+  const placeholder = await client.user.create({
     data: {
       email,
       name: name ?? email.split('@')[0],
       emailVerified: null,
-      passwordHash: `placeholder_${crypto.randomUUID()}`,
+      passwordHash: `placeholder_${randomUUID()}`,
       role: 'STUDENT',
       status: 'ACTIVE',
     },
@@ -180,44 +188,54 @@ export async function handleCheckoutPaid(
   const method = event.data.attributes.data.attributes.payment_method_type;
   const metadata = event.data.attributes.data.attributes.metadata;
 
-  // Idempotency
-  const firstTime = await markWebhookProcessed(
-    eventId,
-    'checkout_session.payment.paid',
-    'checkout_session',
-    csId,
-    `payment_id=${paymentIdPm}`,
-  );
-  if (!firstTime) return null;
-
-  // Find our CheckoutSession
-  const checkout = await db.checkoutSession.findUnique({
-    where: { paymongoSourceId: csId },
-    include: { pricingTier: true },
-  });
-  if (!checkout) {
-    logger.error({ paymongoId: csId }, 'CheckoutSession not found');
-    return null;
-  }
-
-  const course = await db.course.findFirst({
-    where: { pricingTierId: checkout.pricingTierId, deletedAt: null },
-    orderBy: { isPublished: 'desc' },
-    select: { id: true },
-  });
-  if (!course) {
-    logger.error({ pricingTierId: checkout.pricingTierId }, 'No course found for pricing tier');
-    return null;
-  }
-
-  // Wrap the critical write path in a single transaction so Payment,
-  // Enrollment, and CheckoutSession updates are atomic. Invoice PDF
-  // generation happens after the transaction commits (lazy render on
-  // first GET) — it's non-durable and can be retried independently.
+  // All durable writes — including the idempotency row — happen in ONE
+  // transaction. If anything fails, the ProcessedWebhook row rolls back
+  // with the rest and PayMongo's retry starts clean. Invoice PDF + email
+  // are non-durable and run best-effort after commit.
   const result = await db.$transaction(async (tx) => {
+    const firstTime = await markWebhookProcessed(
+      eventId,
+      'checkout_session.payment.paid',
+      'checkout_session',
+      csId,
+      `payment_id=${paymentIdPm}`,
+      200,
+      tx,
+    );
+    if (!firstTime) return null;
+
+    const checkout = await tx.checkoutSession.findUnique({
+      where: { paymongoSourceId: csId },
+      include: { pricingTier: true },
+    });
+    if (!checkout) {
+      // Consume the event — a session that doesn't exist won't appear on retry.
+      logger.error({ paymongoId: csId }, 'CheckoutSession not found');
+      return null;
+    }
+
+    const course = await tx.course.findFirst({
+      where: { pricingTierId: checkout.pricingTierId, deletedAt: null },
+      orderBy: { isPublished: 'desc' },
+      select: { id: true },
+    });
+    if (!course) {
+      logger.error({ pricingTierId: checkout.pricingTierId }, 'No course found for pricing tier');
+      return null;
+    }
+
+    // Resolve the user FIRST (guest checkout support) so the Payment is
+    // never created with a dangling FK. Uses the tx client so a rollback
+    // doesn't leave an orphaned placeholder user.
+    const { id: userId } = await findOrCreateUserByEmail(
+      checkout.email,
+      metadata?.name ?? null,
+      tx,
+    );
+
     const payment = await tx.payment.create({
       data: {
-        userId: checkout.userId ?? '',
+        userId,
         pricingTierId: checkout.pricingTierId,
         checkoutSessionId: checkout.id,
         paymongoPaymentId: paymentIdPm,
@@ -233,28 +251,57 @@ export async function handleCheckoutPaid(
       },
     });
 
-    // Find or create user (guest checkout support)
-    const { id: userId, isNew } = await findOrCreateUserByEmail(checkout.email, metadata.name ?? null);
-
-    // If guest, link payment to user
-    if (isNew) {
-      await tx.payment.update({
-        where: { id: payment.id },
-        data: { userId },
+    // A limited-use discount only counts once the payment completes —
+    // abandoned checkouts no longer burn uses (moved from
+    // createCheckoutSessionAtomic).
+    if (checkout.discountCodeId) {
+      await tx.discountCode.update({
+        where: { id: checkout.discountCodeId },
+        data: { currentUses: { increment: 1 } },
       });
     }
 
-    const enrollment = await tx.enrollment.create({
-      data: {
-        userId,
-        courseId: course.id,
-        pricingTierId: checkout.pricingTierId,
-        tier: checkout.pricingTier.tier,
-        status: EnrollmentStatus.ACTIVE,
-        payment: { connect: { id: payment.id } },
-        enrolledAt: new Date(),
-      },
+    // Repeat purchase of the same course reactivates the enrollment
+    // instead of crashing into @@unique([userId, courseId]).
+    const existingEnrollment = await tx.enrollment.findUnique({
+      where: { userId_courseId: { userId, courseId: course.id } },
+      select: { id: true },
     });
+    const enrollment = existingEnrollment
+      ? await tx.enrollment.update({
+          where: { id: existingEnrollment.id },
+          data: {
+            status: EnrollmentStatus.ACTIVE,
+            pricingTierId: checkout.pricingTierId,
+            tier: checkout.pricingTier.tier,
+            cancelledAt: null,
+            cancellationReason: null,
+            deletedAt: null,
+          },
+        })
+      : await tx.enrollment.create({
+          data: {
+            userId,
+            courseId: course.id,
+            pricingTierId: checkout.pricingTierId,
+            tier: checkout.pricingTier.tier,
+            status: EnrollmentStatus.ACTIVE,
+            enrolledAt: new Date(),
+          },
+        });
+
+    // Payment.enrollmentId is @unique — only link if no earlier payment
+    // already points at this enrollment (repeat purchase case).
+    const alreadyLinked = await tx.payment.findFirst({
+      where: { enrollmentId: enrollment.id },
+      select: { id: true },
+    });
+    if (!alreadyLinked) {
+      await tx.payment.update({
+        where: { id: payment.id },
+        data: { enrollmentId: enrollment.id },
+      });
+    }
 
     await tx.checkoutSession.update({
       where: { id: checkout.id },
@@ -262,17 +309,19 @@ export async function handleCheckoutPaid(
         status: CheckoutStatus.PAID,
         paymongoPaymentId: paymentIdPm,
         paidAt: new Date(),
-        userId: isNew ? userId : checkout.userId,
+        userId: checkout.userId ?? userId,
       },
     });
 
-    await tx.payment.update({
-      where: { id: payment.id },
-      data: { enrollmentId: enrollment.id },
-    });
-
-    return { enrollmentId: enrollment.id, paymentId: payment.id, userId };
+    return {
+      enrollmentId: enrollment.id,
+      paymentId: payment.id,
+      userId,
+      tierName: checkout.pricingTier?.name ?? 'your course',
+    };
   });
+
+  if (!result) return null;
 
   // Invoice issuance — non-durable, best-effort, outside transaction
   try {
@@ -286,16 +335,15 @@ export async function handleCheckoutPaid(
     where: { id: result.userId },
     select: { email: true, name: true },
   });
-  const tierName = `${checkout.pricingTier?.name ?? 'your course'}`;
   if (user?.email) {
     sendEnrollmentConfirmationEmail({
       to: user.email,
-      studentName: user.name ?? user.email.split('@')[0],
-      tierName: tierName as string,
+      studentName: user.name ?? user.email.split('@')[0] ?? user.email,
+      tierName: result.tierName,
     }).catch((err) => logger.error({ err }, 'Enrollment confirmation email failed'));
   }
 
-  return result;
+  return { enrollmentId: result.enrollmentId, paymentId: result.paymentId, userId: result.userId };
 }
 
 /**
@@ -308,22 +356,27 @@ export async function handleCheckoutFailed(
   const csId = event.data.attributes.data.id;
   const reason = event.data.attributes.data.attributes.failure_reason ?? 'unknown';
 
-  const firstTime = await markWebhookProcessed(
-    eventId,
-    'checkout_session.payment.failed',
-    'checkout_session',
-    csId,
-    `reason=${reason}`,
-  );
-  if (!firstTime) return;
+  await db.$transaction(async (tx) => {
+    const firstTime = await markWebhookProcessed(
+      eventId,
+      'checkout_session.payment.failed',
+      'checkout_session',
+      csId,
+      `reason=${reason}`,
+      200,
+      tx,
+    );
+    if (!firstTime) return;
 
-  await db.checkoutSession.update({
-    where: { paymongoSourceId: csId },
-    data: {
-      status: CheckoutStatus.FAILED,
-      failedAt: new Date(),
-      failureReason: reason,
-    },
+    // updateMany: a missing session is a no-op, not a thrown P2025.
+    await tx.checkoutSession.updateMany({
+      where: { paymongoSourceId: csId },
+      data: {
+        status: CheckoutStatus.FAILED,
+        failedAt: new Date(),
+        failureReason: reason,
+      },
+    });
   });
 }
 
@@ -337,22 +390,24 @@ export async function handlePaymentRefunded(
   const paymentIdPm = event.data.attributes.data.attributes.payment_id;
   const amount = event.data.attributes.data.attributes.amount;
 
-  const firstTime = await markWebhookProcessed(
-    eventId,
-    'payment.refunded',
-    'payment',
-    paymentIdPm,
-    `amount=${amount}`,
-  );
-  if (!firstTime) return;
-
-  const payment = await db.payment.findUnique({
-    where: { paymongoPaymentId: paymentIdPm },
-    include: { enrollment: true },
-  });
-  if (!payment) return;
-
   await db.$transaction(async (tx) => {
+    const firstTime = await markWebhookProcessed(
+      eventId,
+      'payment.refunded',
+      'payment',
+      paymentIdPm,
+      `amount=${amount}`,
+      200,
+      tx,
+    );
+    if (!firstTime) return;
+
+    const payment = await tx.payment.findUnique({
+      where: { paymongoPaymentId: paymentIdPm },
+      select: { id: true },
+    });
+    if (!payment) return;
+
     await tx.payment.update({
       where: { id: payment.id },
       data: {

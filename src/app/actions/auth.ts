@@ -15,6 +15,7 @@ import {
   getSession,
 } from '@/lib/auth';
 import { logger } from '@/lib/logger';
+import { rateLimit } from '@/lib/rate-limit';
 import {
   createSafeAction,
   signUpSchema,
@@ -27,6 +28,11 @@ import {
 // ---------------------------------------------------------------------------
 
 export const signUpAction = createSafeAction(signUpSchema, async (data) => {
+  const rl = rateLimit(`signup:${data.email.toLowerCase()}`, 5, 60_000);
+  if (!rl.allowed) {
+    throw new Error(`Too many attempts. Try again in ${rl.retryAfterSeconds}s.`);
+  }
+
   const existing = await db.user.findUnique({ where: { email: data.email } });
 
   // Two sign-up cases:
@@ -86,6 +92,13 @@ export const signUpAction = createSafeAction(signUpSchema, async (data) => {
 // ---------------------------------------------------------------------------
 
 export const signInAction = createSafeAction(signInSchema, async (data) => {
+  // Rate-limit BEFORE any DB or scrypt work — the sync scrypt verify is
+  // exactly what an attacker would use to burn the event loop.
+  const rl = rateLimit(`signin:${data.email.toLowerCase()}`, 5, 60_000);
+  if (!rl.allowed) {
+    throw new Error(`Too many attempts. Try again in ${rl.retryAfterSeconds}s.`);
+  }
+
   const user = await db.user.findUnique({ where: { email: data.email } });
   if (!user || !user.passwordHash) {
     throw new Error('Email or password is incorrect.');
@@ -99,9 +112,11 @@ export const signInAction = createSafeAction(signInSchema, async (data) => {
     throw new Error('Email or password is incorrect.');
   }
 
-  if (!user.emailVerified) {
-    throw new Error('Please verify your email before signing in. Check your inbox for the verification link.');
-  }
+  // NOTE: do NOT gate sign-in on emailVerified until a real verification
+  // flow exists (send + verify endpoint + backfill for pre-existing users).
+  // The 2026-07-15 gate locked out all users created before it while
+  // pointing at a verification email that is never sent — see
+  // docs/security/code-audit-2026-07-15.md (H5).
 
   // Update last active on sign-in
   try {

@@ -75,8 +75,16 @@ export function createSafeAction<TSchema extends ZodSchema, TResult>(
       const data = await handler(parsed.data);
       return { success: true, data };
     } catch (e) {
-      const message = e instanceof Error ? e.message : 'Something went wrong.';
-      console.error('Action handler error:', e);
+      // Only intentional, user-facing errors (plain `new Error(...)` thrown
+      // by action handlers) surface their message. Anything subclassed —
+      // PrismaClientKnownRequestError, TypeError, fetch failures — is an
+      // internal fault whose text must not reach the client.
+      const isUserFacing =
+        e instanceof Error && (e.constructor === Error || e.name === 'Error');
+      const message = isUserFacing
+        ? (e as Error).message
+        : 'Something went wrong. Please try again.';
+      logger.error({ err: e }, 'Action handler error');
       return { success: false, error: message };
     }
   };

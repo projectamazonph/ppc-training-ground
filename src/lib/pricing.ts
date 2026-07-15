@@ -120,22 +120,14 @@ export interface CheckoutSessionData {
 }
 
 /**
- * Atomically create a CheckoutSession and (if a discount code was used)
- * increment its currentUses. Both happen in a single transaction so
- * concurrent checkouts can't double-spend a limited-use code.
+ * Create a CheckoutSession. Discount `currentUses` is NOT incremented here —
+ * a use only counts when the payment completes (see handleCheckoutPaid),
+ * so abandoned checkouts don't burn limited-use codes.
  */
 export async function createCheckoutSessionAtomic(
   data: CheckoutSessionData,
 ): Promise<{ checkoutSessionId: string; paymongoSourceId?: string; paymongoPaymentIntentId?: string }> {
   const result = await db.$transaction(async (tx) => {
-    // If discount code present, increment usage count atomically.
-    if (data.discountCodeId) {
-      await tx.discountCode.update({
-        where: { id: data.discountCodeId },
-        data: { currentUses: { increment: 1 } },
-      });
-    }
-
     const checkout = await tx.checkoutSession.create({
       data: {
         userId: data.userId,

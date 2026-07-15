@@ -183,7 +183,7 @@ export async function sendRefundStatusEmail({
   const amount = new Intl.NumberFormat('en-PH', {
     style: 'currency',
     currency: 'PHP',
-  }).format(amountPhp);
+  }).format(amountPhp / 100); // money fields store centavos
 
   const subject =
     status === 'requested'

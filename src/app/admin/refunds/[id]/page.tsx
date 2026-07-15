@@ -40,7 +40,7 @@ export default async function AdminRefundDetailPage({ params }: PageProps) {
       style: 'currency',
       currency: 'PHP',
       maximumFractionDigits: 2,
-    }).format(amount);
+    }).format(amount / 100); // money fields store centavos
 
   const dateLong = (date: Date | null) =>
     date

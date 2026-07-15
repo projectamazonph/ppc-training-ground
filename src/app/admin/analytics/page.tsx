@@ -25,16 +25,16 @@ export default async function AdminAnalyticsPage() {
     db.user.count({ where: { status: { not: 'DELETED' } } }),
     db.user.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
     db.user.count({ where: { lastActiveAt: { gte: sevenDaysAgo } } }),
-    db.payment.aggregate({ where: { status: 'PAID' }, _sum: { amountPhp: true } }),
-    db.payment.aggregate({ where: { status: 'PAID', paidAt: { gte: thirtyDaysAgo } }, _sum: { amountPhp: true } }),
+    db.payment.aggregate({ where: { status: 'COMPLETED' }, _sum: { amountPhp: true } }),
+    db.payment.aggregate({ where: { status: 'COMPLETED', paidAt: { gte: thirtyDaysAgo } }, _sum: { amountPhp: true } }),
     db.enrollment.count(),
-    db.payment.count({ where: { status: 'PAID' } }),
+    db.payment.count({ where: { status: 'COMPLETED' } }),
   ]);
 
   // Revenue by tier
   const revenueByTier = await db.payment.groupBy({
     by: ['pricingTierId'],
-    where: { status: 'PAID' },
+    where: { status: 'COMPLETED' },
     _sum: { amountPhp: true },
     _count: true,
   });

@@ -28,11 +28,11 @@ export default async function AdminDashboardPage() {
     db.course.count({ where: { publishedAt: { not: null } } }),
     db.userBadge.count(),
     db.payment.aggregate({
-      where: { status: 'PAID' },
+      where: { status: 'COMPLETED' },
       _sum: { amountPhp: true },
     }),
     db.payment.findMany({
-      where: { status: 'PAID' },
+      where: { status: 'COMPLETED' },
       include: {
         user: { select: { id: true, name: true, email: true } },
         pricingTier: { select: { name: true } },

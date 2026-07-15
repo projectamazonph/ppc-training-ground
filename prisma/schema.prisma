@@ -784,7 +784,8 @@ model ProcessedWebhook {
 
 model Invoice {
   id                  String    @id @default(cuid())
-  // Sequential number formatted as zero-padded 5-digit string ("00001", "00002").
+  // Sequential per-year number stored as "<year>-<5-digit seq>" ("2026-00001").
+  // Legacy rows may use the old dashless format ("000012026").
   number              String    @unique
   paymentId           String    @unique
   userId              String

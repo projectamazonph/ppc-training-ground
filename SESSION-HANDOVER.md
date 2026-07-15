@@ -164,20 +164,28 @@ All Sprint 11 additions are listed in `.env.example`.
 
 ## Open Issues
 
+> **2026-07-15 audit note:** the "PayMongo HMAC not verified" items below are
+> **stale** — verification is implemented in `src/lib/webhook-signature.ts`
+> and wired in the webhook route. The authoritative launch-blocker list is now
+> `docs/security/code-audit-2026-07-15.md` (money-unit bug, invoice numbering,
+> SQLite migration lock, guest-checkout enrollment loss — fixes applied same
+> day, see that doc's status table).
+
 ### Operator-side (close before/during launch)
 
-1. **PayMongo webhook HMAC not verified** — STORY-055 finding #1. Pre-launch security gap. If launching with live payments, fix before STORY-056; otherwise post-launch bugfix.
-2. **Confirm `RESEND_WEBHOOK_SECRET` set in Vercel prod** — STORY-055 finding #3.
+1. ~~PayMongo webhook HMAC not verified~~ — **stale**; implemented + verified 2026-07-15.
+2. **Confirm `RESEND_WEBHOOK_SECRET` set in Vercel prod** — STORY-055 finding #3. Also note the webhook now requires real Svix headers (fixed 2026-07-15).
 3. **Run the restore drill** — STORY-054 acceptance bullet #3.
-4. **Execute the production deploy** — STORY-056 acceptance.
+4. **Execute the production deploy** — STORY-056 acceptance. Prisma migrations regenerated for PostgreSQL 2026-07-16 (squashed init, `migration_lock.toml` now `postgresql`) — existing dev DBs need `prisma migrate reset`.
 5. **Approve launch copy + build React Email template + schedule broadcasts** — STORY-057 acceptance.
 
 ### Post-launch (Sprint 13 candidates)
 
-1. PayMongo HMAC verification (security gap — STORY-055 finding #1)
+1. ~~PayMongo HMAC verification~~ — stale, done (see above)
 2. CSP header (deferred from STORY-055)
 3. BottomNav on lesson/quiz pages (S9 carry-over)
 4. Verify Resend webhook secret env var set in Vercel prod (STORY-055 finding #3 / S12 audit)
+5. Audit follow-ups O1–O6 in `docs/security/code-audit-2026-07-15.md` (field renames, async scrypt, distributed rate limiting, email-verification flow, CSP, Blob receipt storage)
 
 ---
 

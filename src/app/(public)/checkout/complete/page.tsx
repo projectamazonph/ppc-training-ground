@@ -47,7 +47,11 @@ async function resolveCheckout(
 }
 
 export default async function CheckoutCompletePage({ searchParams }: PageProps) {
-  const { status, returnUrl, id } = await searchParams;
+  const { status, returnUrl: rawReturnUrl, id } = await searchParams;
+  // Defense in depth against open redirects: only same-app relative paths
+  // survive ("/foo" yes, "//evil.example" and "https://…" no).
+  const returnUrl =
+    rawReturnUrl?.startsWith('/') && !rawReturnUrl.startsWith('//') ? rawReturnUrl : undefined;
   const checkout = await resolveCheckout(id, returnUrl);
 
   if (status === 'failed') {
