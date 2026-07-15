@@ -1,4 +1,4 @@
-// AMPH Academy v2 — Prisma Schema
+// Project Amazon PH Academy v2 — Prisma Schema
 // Source of truth: docs/db-schema.md
 // Day-1 design: no orgId, no legacy tables, all mutable tables have
 // deletedAt + createdById + updatedById (ADR-012, ADR-014).
@@ -790,7 +790,7 @@ model Invoice {
   userId              String
   // BIR-required fields.
   businessTin         String    @default("000-000-000-000")
-  businessName        String    @default("AMPH Academy")
+  businessName        String    @default("Project Amazon PH Academy")
   businessAddress     String    @default("Philippines")
   // Amounts stored as centavos.
   grossAmountCentavos Int
