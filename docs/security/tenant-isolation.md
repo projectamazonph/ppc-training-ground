@@ -9,7 +9,7 @@ This document enumerates every server-side data access that touches the
 in place to prevent one student or admin from reading or mutating another
 student's data.
 
-AMPH Academy v2 is a multi-tenant application where each `User` row is the
+Project Amazon PH Academy v2 is a multi-tenant application where each `User` row is the
 boundary. There are three roles (`STUDENT`, `ADMIN`, `SUPER_ADMIN`) but only
 one tenant boundary: the `User.id`.
 

@@ -1,4 +1,4 @@
-# Sprint Plan — AMPH Academy v2
+# Sprint Plan — Project Amazon PH Academy v2
 
 **Date:** 2026-07-13
 **Owner:** Ryan Roland Dabao
@@ -67,7 +67,7 @@ See [`docs/sprint-11/PLAN.md`](./sprint-11/PLAN.md) and [`CHANGELOG.md`](../CHAN
 
 ## Sprint 12: Launch (5/5 pts) — Complete 2026-07-13
 
-**Goal:** Ship AMPH Academy to production: deploy runbook, backup drill, security audit, production deploy, launch communications.
+**Goal:** Ship Project Amazon PH Academy to production: deploy runbook, backup drill, security audit, production deploy, launch communications.
 
 | Story | Pts | Status | Description |
 |-------|-----|--------|-------------|

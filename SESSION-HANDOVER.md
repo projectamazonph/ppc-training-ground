@@ -40,7 +40,7 @@
 
 ## Sprint 12 — Launch (DONE — code & runbook complete; deploy execution is operator-side)
 
-**Goal:** Ship AMPH Academy to production: deploy runbook, backup drill, security audit, production deploy, launch communications.
+**Goal:** Ship Project Amazon PH Academy to production: deploy runbook, backup drill, security audit, production deploy, launch communications.
 
 | Story | Pts | Status | Description |
 |-------|-----|--------|-------------|

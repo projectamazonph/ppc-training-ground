@@ -1,4 +1,4 @@
-# Database Schema — AMPH Academy v2
+# Database Schema — Project Amazon PH Academy v2
 
 **Date:** 2026-07-07
 **Owner:** Ryan Roland Dabao

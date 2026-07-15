@@ -1,4 +1,4 @@
-# Design Brief — AMPH Academy v2
+# Design Brief — Project Amazon PH Academy v2
 
 **Taste direction:** Field Manual
 **Owner:** Ryan Roland Dabao

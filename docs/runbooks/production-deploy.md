@@ -4,7 +4,7 @@
 **Audience:** Ryan (and any future operator)
 **Last verified:** 2026-07-13
 
-This runbook takes AMPH Academy v2 from a clean `main` to a stable production deployment on Vercel. It is written to be runnable top-to-bottom by someone who did not write it. Every command is copy-pasteable; every gate has a clear pass/fail signal.
+This runbook takes Project Amazon PH Academy v2 from a clean `main` to a stable production deployment on Vercel. It is written to be runnable top-to-bottom by someone who did not write it. Every command is copy-pasteable; every gate has a clear pass/fail signal.
 
 ---
 

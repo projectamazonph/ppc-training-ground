@@ -1,6 +1,6 @@
-# Project Brief — AMPH Academy v2
+# Project Brief — Project Amazon PH Academy v2
 
-**Project:** Project Amazon PH AMPH Academy v2 (v2)
+**Project:** Project Amazon PH Academy v2 (v2)
 **Owner:** Ryan Roland Dabao
 **Date:** 2026-07-07
 **Status:** Approved (build phase)
