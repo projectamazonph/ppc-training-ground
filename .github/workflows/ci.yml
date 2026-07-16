@@ -37,6 +37,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          # gitleaks diffs the PR commit against its parent (`git log <sha>^..<sha>`),
+          # which needs that parent to exist locally. The default shallow
+          # (depth-1) checkout omits it, so gitleaks fails with "unknown
+          # revision" on every PR regardless of what changed.
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
 
