@@ -12,10 +12,11 @@ import { Card, CardHeader, CardTitle, CardDescription, Badge } from '@/component
 import { getTierDisplay, type TierDisplay } from '@/lib/pricing';
 import { getSession } from '@/lib/auth';
 import { CheckoutButton } from './CheckoutButton';
+import { BRAND_NAME } from '@/lib/brand';
 import styles from './pricing.module.css';
 
 export const metadata = {
-  title: 'Pricing — AMPH Academy',
+  title: `Pricing — ${BRAND_NAME}`,
   description:
     'Three Amazon PPC coaching tiers for Filipino virtual assistants. Pick the path that matches where you are now.',
 };
@@ -29,10 +30,9 @@ export default async function PricingPage() {
         <p className={styles.eyebrow}>PRICING</p>
         <h1 className={styles.title}>Pick the tier that matches where you are.</h1>
         <p className={styles.subtitle}>
-          Three months from now you&apos;ll either be earning ₱60,000 a month doing Amazon PPC
-          work, or you&apos;ll be explaining to your family why that &ldquo;side hustle&rdquo;
-          didn&apos;t pan out. The tier doesn&apos;t change what we teach — it changes how fast
-          you get unstuck.
+          Every tier teaches the same core skill — the difference is how much support and
+          speed you want. Pick based on how you learn best, not how fast you think you need
+          to move.
         </p>
       </header>
 

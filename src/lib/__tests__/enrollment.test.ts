@@ -3,17 +3,21 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const mockDb = vi.hoisted(() => {
   const fn = () => vi.fn();
   return {
-    processedWebhook: { findUnique: fn(), create: fn() },
+    processedWebhook: { create: fn() },
     user: { findUnique: fn(), create: fn() },
-    checkoutSession: { findUnique: fn(), update: fn() },
-    payment: { create: fn(), findUnique: fn(), update: fn() },
+    checkoutSession: { findUnique: fn(), update: fn(), updateMany: fn() },
+    payment: { create: fn(), findUnique: fn(), findFirst: fn(), update: fn() },
     course: { findFirst: fn() },
-    enrollment: { create: fn(), findFirst: fn(), update: fn() },
+    enrollment: { create: fn(), findUnique: fn(), findFirst: fn(), update: fn() },
+    discountCode: { update: fn() },
     $transaction: vi.fn(),
   };
 });
 
 vi.mock('@/lib/db', () => ({ db: mockDb }));
+
+// Prisma is imported for the TransactionClient type only; stub the value import.
+vi.mock('@prisma/client', () => ({ Prisma: {}, PrismaClient: class {} }));
 
 const mockEnums = vi.hoisted(() => ({
   CheckoutStatus: { PAID: 'PAID', FAILED: 'FAILED' },
@@ -25,6 +29,9 @@ vi.mock('@/lib/enums', () => mockEnums);
 
 vi.mock('@/lib/receipts', () => ({ issueInvoiceForPayment: vi.fn() }));
 vi.mock('@/lib/email', () => ({ sendEnrollmentConfirmationEmail: vi.fn(() => Promise.resolve()) }));
+vi.mock('@/lib/logger', () => ({
+  logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() },
+}));
 
 vi.mock('node:crypto', () => ({ randomUUID: () => 'mock-uuid' }));
 
@@ -40,6 +47,13 @@ import {
   type CheckoutFailedEvent,
   type PaymentRefundedEvent,
 } from '@/lib/enrollment';
+
+/** Error shaped like Prisma's unique-constraint violation. */
+function p2002(): Error {
+  const err = new Error('Unique constraint failed') as Error & { code: string };
+  err.code = 'P2002';
+  return err;
+}
 
 function makePaidEvent(overrides: Record<string, unknown> = {}): CheckoutPaidEvent {
   return {
@@ -98,15 +112,45 @@ function makeRefundedEvent(): PaymentRefundedEvent {
   };
 }
 
+const checkoutRow = {
+  id: 'cs-1',
+  email: 'juan@example.com',
+  finalAmountPhp: 299900,
+  userId: null,
+  discountCodeId: null,
+  pricingTierId: 'pt-1',
+  pricingTier: { tier: 'PREMIUM', name: 'PPC Pro' },
+};
+
+/** Wire the happy-path mocks for handleCheckoutPaid (guest, new user). */
+function wireHappyPath() {
+  mockDb.processedWebhook.create.mockResolvedValue({ id: 'pw-1' });
+  mockDb.checkoutSession.findUnique.mockResolvedValue(checkoutRow);
+  mockDb.course.findFirst.mockResolvedValue({ id: 'c-1' });
+  mockDb.user.findUnique
+    .mockResolvedValueOnce(null) // findOrCreateUserByEmail: not found
+    .mockResolvedValueOnce({ id: 'u-new', email: 'juan@example.com', name: 'Juan' }); // post-commit email lookup
+  mockDb.user.create.mockResolvedValue({ id: 'u-new' });
+  mockDb.payment.create.mockResolvedValue({ id: 'pay-1' });
+  mockDb.enrollment.findUnique.mockResolvedValue(null); // no prior enrollment
+  mockDb.enrollment.create.mockResolvedValue({ id: 'enr-1' });
+  mockDb.payment.findFirst.mockResolvedValue(null); // enrollment not yet linked
+  mockDb.payment.update.mockResolvedValue({});
+  mockDb.checkoutSession.update.mockResolvedValue({});
+}
+
 describe('enrollment.ts', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    console.error = vi.fn();
+    // The handlers run everything through db.$transaction(cb). Passing the
+    // mockDb itself as the tx client keeps assertions on one set of spies.
+    mockDb.$transaction.mockImplementation(
+      async (cb: (tx: typeof mockDb) => Promise<unknown>) => cb(mockDb),
+    );
   });
 
   describe('markWebhookProcessed', () => {
     it('returns true and creates record on first process', async () => {
-      mockDb.processedWebhook.findUnique.mockResolvedValue(null);
       mockDb.processedWebhook.create.mockResolvedValue({ id: 'pw-1' });
 
       const result = await markWebhookProcessed('evt-1', 'payment.paid', 'checkout_session', 'cs_1');
@@ -122,13 +166,20 @@ describe('enrollment.ts', () => {
       });
     });
 
-    it('returns false when event already processed', async () => {
-      mockDb.processedWebhook.findUnique.mockResolvedValue({ id: 'pw-1' });
+    it('returns false when event already processed (unique violation)', async () => {
+      mockDb.processedWebhook.create.mockRejectedValue(p2002());
 
       const result = await markWebhookProcessed('evt-1', 'payment.paid', 'checkout_session', 'cs_1');
 
       expect(result).toBe(false);
-      expect(mockDb.processedWebhook.create).not.toHaveBeenCalled();
+    });
+
+    it('rethrows non-unique-violation errors', async () => {
+      mockDb.processedWebhook.create.mockRejectedValue(new Error('connection lost'));
+
+      await expect(
+        markWebhookProcessed('evt-1', 'payment.paid', 'checkout_session', 'cs_1'),
+      ).rejects.toThrow('connection lost');
     });
   });
 
@@ -174,33 +225,20 @@ describe('enrollment.ts', () => {
   });
 
   describe('handleCheckoutPaid', () => {
-    beforeEach(() => {
-      mockDb.processedWebhook.findUnique.mockResolvedValue(null);
-      mockDb.processedWebhook.create.mockResolvedValue({ id: 'pw-1' });
-    });
-
     it('creates payment, user, enrollment and links them', async () => {
-      const checkout = {
-        id: 'cs-1',
-        email: 'juan@example.com',
-        finalAmountPhp: 299900,
-        userId: null,
-        pricingTierId: 'pt-1',
-        pricingTier: { tier: 'PREMIUM', name: 'PPC Pro' },
-      };
-      mockDb.checkoutSession.findUnique.mockResolvedValue(checkout);
-      mockDb.payment.create.mockResolvedValue({ id: 'pay-1' });
-      mockDb.user.findUnique
-        .mockResolvedValueOnce(null) // findOrCreateUserByEmail: not found
-        .mockResolvedValueOnce({ id: 'u-new', email: 'juan@example.com', name: 'Juan' }); // email lookup
-      mockDb.user.create.mockResolvedValue({ id: 'u-new' });
-      mockDb.course.findFirst.mockResolvedValue({ id: 'c-1' });
-      mockDb.enrollment.create.mockResolvedValue({ id: 'enr-1' });
+      wireHappyPath();
 
       const result = await handleCheckoutPaid(makePaidEvent());
 
       expect(result).toEqual({ enrollmentId: 'enr-1', paymentId: 'pay-1', userId: 'u-new' });
       expect(mockDb.user.create).toHaveBeenCalled();
+      // Regression guard for the guest-checkout FK bug: the Payment must be
+      // created with the resolved user id, never '' (audit finding C4).
+      expect(mockDb.payment.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ userId: 'u-new' }),
+        }),
+      );
       expect(mockDb.enrollment.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           userId: 'u-new',
@@ -210,16 +248,22 @@ describe('enrollment.ts', () => {
           status: 'ACTIVE',
         }),
       });
+      expect(mockDb.payment.update).toHaveBeenCalledWith({
+        where: { id: 'pay-1' },
+        data: { enrollmentId: 'enr-1' },
+      });
     });
 
     it('returns null on duplicate webhook event', async () => {
-      mockDb.processedWebhook.findUnique.mockResolvedValue({ id: 'pw-old' });
+      mockDb.processedWebhook.create.mockRejectedValue(p2002());
 
       const result = await handleCheckoutPaid(makePaidEvent());
       expect(result).toBeNull();
+      expect(mockDb.payment.create).not.toHaveBeenCalled();
     });
 
     it('returns null when CheckoutSession not found', async () => {
+      mockDb.processedWebhook.create.mockResolvedValue({ id: 'pw-1' });
       mockDb.checkoutSession.findUnique.mockResolvedValue(null);
 
       const result = await handleCheckoutPaid(makePaidEvent());
@@ -227,36 +271,59 @@ describe('enrollment.ts', () => {
     });
 
     it('returns null when no course found for pricing tier', async () => {
-      mockDb.checkoutSession.findUnique.mockResolvedValue({
-        id: 'cs-1', email: 'juan@example.com', finalAmountPhp: 299900,
-        userId: null, pricingTierId: 'pt-1', pricingTier: { tier: 'BASIC', name: 'PPC 101' },
-      });
-      mockDb.payment.create.mockResolvedValue({ id: 'pay-1' });
-      mockDb.user.findUnique.mockResolvedValue(null);
-      mockDb.user.create.mockResolvedValue({ id: 'u-new' });
+      mockDb.processedWebhook.create.mockResolvedValue({ id: 'pw-1' });
+      mockDb.checkoutSession.findUnique.mockResolvedValue(checkoutRow);
       mockDb.course.findFirst.mockResolvedValue(null);
 
       const result = await handleCheckoutPaid(makePaidEvent());
       expect(result).toBeNull();
+      expect(mockDb.payment.create).not.toHaveBeenCalled();
+    });
+
+    it('reactivates an existing enrollment instead of creating a duplicate', async () => {
+      wireHappyPath();
+      mockDb.enrollment.findUnique.mockResolvedValue({ id: 'enr-old' });
+      mockDb.enrollment.update.mockResolvedValue({ id: 'enr-old' });
+      mockDb.payment.findFirst.mockResolvedValue({ id: 'pay-earlier' }); // already linked
+
+      const result = await handleCheckoutPaid(makePaidEvent());
+
+      expect(result).toEqual({ enrollmentId: 'enr-old', paymentId: 'pay-1', userId: 'u-new' });
+      expect(mockDb.enrollment.create).not.toHaveBeenCalled();
+      expect(mockDb.enrollment.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'enr-old' },
+          data: expect.objectContaining({ status: 'ACTIVE', cancelledAt: null }),
+        }),
+      );
+      // enrollmentId is @unique on Payment — must not re-link.
+      expect(mockDb.payment.update).not.toHaveBeenCalledWith(
+        expect.objectContaining({ data: { enrollmentId: 'enr-old' } }),
+      );
+    });
+
+    it('increments discount usage when the checkout used a code', async () => {
+      wireHappyPath();
+      mockDb.checkoutSession.findUnique.mockResolvedValue({
+        ...checkoutRow,
+        discountCodeId: 'dc-1',
+      });
+      mockDb.discountCode.update.mockResolvedValue({});
+
+      await handleCheckoutPaid(makePaidEvent());
+
+      expect(mockDb.discountCode.update).toHaveBeenCalledWith({
+        where: { id: 'dc-1' },
+        data: { currentUses: { increment: 1 } },
+      });
     });
 
     it('does not fail when invoice issuance throws', async () => {
       (issueInvoiceForPayment as unknown as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Invoice failed'));
-
-      mockDb.checkoutSession.findUnique.mockResolvedValue({
-        id: 'cs-1', email: 'juan@example.com', finalAmountPhp: 299900,
-        userId: null, pricingTierId: 'pt-1', pricingTier: { tier: 'PREMIUM', name: 'PPC Pro' },
-      });
-      mockDb.payment.create.mockResolvedValue({ id: 'pay-1' });
-      mockDb.user.findUnique.mockResolvedValue(null);
-      mockDb.user.create.mockResolvedValue({ id: 'u-new' });
-      mockDb.course.findFirst.mockResolvedValue({ id: 'c-1' });
-      mockDb.enrollment.create.mockResolvedValue({ id: 'enr-1' });
-      mockDb.user.findUnique.mockResolvedValue({ id: 'u-new', email: 'juan@example.com', name: 'Juan' });
+      wireHappyPath();
 
       const result = await handleCheckoutPaid(makePaidEvent());
       expect(result).not.toBeNull();
-      expect(console.error).toHaveBeenCalled();
     });
 
     it('maps different payment methods (paymaya, grabpay, card, dob, unknown)', async () => {
@@ -269,19 +336,10 @@ describe('enrollment.ts', () => {
         ['unknown_foo', 'OTHER'],
       ] as const) {
         vi.clearAllMocks();
-        mockDb.processedWebhook.findUnique.mockResolvedValue(null);
-        mockDb.processedWebhook.create.mockResolvedValue({ id: 'pw-1' });
-        mockDb.checkoutSession.findUnique.mockResolvedValue({
-          id: 'cs-1', email: 'juan@example.com', finalAmountPhp: 299900,
-          userId: null, pricingTierId: 'pt-1', pricingTier: { tier: 'PREMIUM', name: 'PPC Pro' },
-        });
-        mockDb.payment.create.mockResolvedValue({ id: 'pay-1' });
-        mockDb.user.findUnique
-          .mockResolvedValueOnce(null)
-          .mockResolvedValueOnce({ id: 'u-new', email: 'juan@example.com', name: 'Juan' });
-        mockDb.user.create.mockResolvedValue({ id: 'u-new' });
-        mockDb.course.findFirst.mockResolvedValue({ id: 'c-1' });
-        mockDb.enrollment.create.mockResolvedValue({ id: 'enr-1' });
+        mockDb.$transaction.mockImplementation(
+          async (cb: (tx: typeof mockDb) => Promise<unknown>) => cb(mockDb),
+        );
+        wireHappyPath();
 
         const event = makePaidEvent({ payment_method_type: pmt });
         await handleCheckoutPaid(event);
@@ -296,17 +354,7 @@ describe('enrollment.ts', () => {
 
     it('sends confirmation email and does not fail on email error', async () => {
       (sendEnrollmentConfirmationEmail as unknown as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Email fail'));
-
-      mockDb.checkoutSession.findUnique.mockResolvedValue({
-        id: 'cs-1', email: 'juan@example.com', finalAmountPhp: 299900,
-        userId: null, pricingTierId: 'pt-1', pricingTier: { tier: 'PREMIUM', name: 'PPC Pro' },
-      });
-      mockDb.payment.create.mockResolvedValue({ id: 'pay-1' });
-      mockDb.user.findUnique.mockResolvedValue(null);
-      mockDb.user.create.mockResolvedValue({ id: 'u-new' });
-      mockDb.course.findFirst.mockResolvedValue({ id: 'c-1' });
-      mockDb.enrollment.create.mockResolvedValue({ id: 'enr-1' });
-      mockDb.user.findUnique.mockResolvedValue({ id: 'u-new', email: 'juan@example.com', name: 'Juan' });
+      wireHappyPath();
 
       const result = await handleCheckoutPaid(makePaidEvent());
       expect(result).not.toBeNull();
@@ -315,65 +363,65 @@ describe('enrollment.ts', () => {
 
   describe('handleCheckoutFailed', () => {
     it('updates checkout session to FAILED on first event', async () => {
-      mockDb.processedWebhook.findUnique.mockResolvedValue(null);
       mockDb.processedWebhook.create.mockResolvedValue({ id: 'pw-1' });
-      mockDb.checkoutSession.update.mockResolvedValue({ id: 'cs-1' });
+      mockDb.checkoutSession.updateMany.mockResolvedValue({ count: 1 });
 
       await handleCheckoutFailed(makeFailedEvent());
 
-      expect(mockDb.checkoutSession.update).toHaveBeenCalledWith({
+      expect(mockDb.checkoutSession.updateMany).toHaveBeenCalledWith({
         where: { paymongoSourceId: 'cs_test_456' },
         data: expect.objectContaining({ status: 'FAILED', failureReason: 'insufficient_funds' }),
       });
     });
 
     it('skips update on duplicate event', async () => {
-      mockDb.processedWebhook.findUnique.mockResolvedValue({ id: 'pw-old' });
+      mockDb.processedWebhook.create.mockRejectedValue(p2002());
 
       await handleCheckoutFailed(makeFailedEvent());
 
-      expect(mockDb.checkoutSession.update).not.toHaveBeenCalled();
+      expect(mockDb.checkoutSession.updateMany).not.toHaveBeenCalled();
     });
   });
 
   describe('handlePaymentRefunded', () => {
-    it('updates payment and enrollment within transaction', async () => {
-      mockDb.processedWebhook.findUnique.mockResolvedValue(null);
+    it('updates payment and enrollment within the transaction', async () => {
       mockDb.processedWebhook.create.mockResolvedValue({ id: 'pw-1' });
-      mockDb.payment.findUnique.mockResolvedValue({
-        id: 'pay-1',
-        enrollment: { id: 'enr-1' },
-      });
-      mockDb.$transaction.mockImplementation(async (cb: (tx: Record<string, unknown>) => Promise<void>) => {
-        const tx = {
-          payment: { update: vi.fn().mockResolvedValue({}) },
-          enrollment: { findFirst: vi.fn().mockResolvedValue({ id: 'enr-1' }), update: vi.fn().mockResolvedValue({}) },
-        };
-        await cb(tx);
-      });
+      mockDb.payment.findUnique.mockResolvedValue({ id: 'pay-1' });
+      mockDb.enrollment.findFirst.mockResolvedValue({ id: 'enr-1' });
+      mockDb.payment.update.mockResolvedValue({});
+      mockDb.enrollment.update.mockResolvedValue({});
 
       await handlePaymentRefunded(makeRefundedEvent());
 
-      expect(mockDb.processedWebhook.create).toHaveBeenCalled();
-      expect(mockDb.$transaction).toHaveBeenCalled();
+      expect(mockDb.payment.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'pay-1' },
+          data: expect.objectContaining({ status: 'REFUNDED' }),
+        }),
+      );
+      expect(mockDb.enrollment.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'enr-1' },
+          data: expect.objectContaining({ status: 'REFUNDED' }),
+        }),
+      );
     });
 
     it('skips on duplicate event', async () => {
-      mockDb.processedWebhook.findUnique.mockResolvedValue({ id: 'pw-old' });
+      mockDb.processedWebhook.create.mockRejectedValue(p2002());
 
       await handlePaymentRefunded(makeRefundedEvent());
 
-      expect(mockDb.$transaction).not.toHaveBeenCalled();
+      expect(mockDb.payment.update).not.toHaveBeenCalled();
     });
 
     it('skips when payment not found', async () => {
-      mockDb.processedWebhook.findUnique.mockResolvedValue(null);
       mockDb.processedWebhook.create.mockResolvedValue({ id: 'pw-1' });
       mockDb.payment.findUnique.mockResolvedValue(null);
 
       await handlePaymentRefunded(makeRefundedEvent());
 
-      expect(mockDb.$transaction).not.toHaveBeenCalled();
+      expect(mockDb.payment.update).not.toHaveBeenCalled();
     });
   });
 });

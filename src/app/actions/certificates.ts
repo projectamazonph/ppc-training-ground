@@ -16,7 +16,7 @@
 import { z } from 'zod';
 import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
-import { createSafeAction, type ActionResult } from '@/lib/validation';
+import { createSafeAction } from '@/lib/validation';
 import { evaluateCourseAccess } from '@/lib/tier-gate';
 import {
   issueCertificate,
@@ -95,5 +95,3 @@ export async function listMyCertificatesAction(): Promise<CertificateSummary[]> 
     course: c.course,
   }));
 }
-
-export type { ActionResult };

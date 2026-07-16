@@ -2,10 +2,18 @@ import { describe, it, expect, vi } from 'vitest';
 
 vi.mock('@prisma/client', () => ({
   PrismaClient: class FakePrismaClient {
-    $use() {}
     constructor() {}
+    $extends() {
+      return this;
+    }
   },
   Prisma: {},
+}));
+
+vi.mock('@prisma/adapter-pg', () => ({
+  PrismaPg: class FakePrismaPg {
+    constructor() {}
+  },
 }));
 
 // Re-import after the mock is in place so PrismaClient doesn't throw

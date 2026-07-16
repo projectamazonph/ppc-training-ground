@@ -12,6 +12,13 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
+vi.mock('@/lib/auth', () => ({
+  requireAuth: vi.fn().mockResolvedValue({
+    id: 'u1', email: 'a@b.com', name: 'A', role: 'STUDENT',
+    xp: 0, level: 1, streakDays: 0,
+  }),
+}));
+
 vi.mock('next/headers', () => ({
   cookies: () => ({
     get: () => undefined,

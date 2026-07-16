@@ -3,10 +3,11 @@ import { requireAuth } from '@/lib/auth';
 import { listMyCertificatesAction } from '@/app/actions/certificates';
 import { Card, CardHeader, CardTitle, CardDescription, Badge, Button } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
+import { BRAND_NAME, BRAND_CERT_PREFIX } from '@/lib/brand';
 import styles from './certificates.module.css';
 
 export const metadata = {
-  title: 'My Certificates — AMPH Academy',
+  title: `My Certificates — ${BRAND_NAME}`,
 };
 
 export default async function CertificatesPage() {
@@ -60,7 +61,7 @@ export default async function CertificatesPage() {
                   <p className={styles.certCourse}>{cert.course.title}</p>
                   <p className={styles.certMeta}>
                     Issued {issuedDateFmt.format(cert.issuedAt)} · Certificate no.{' '}
-                    AMPH-{cert.verificationHash.replace(/-/g, '').slice(0, 8).toUpperCase()}
+                    {`${BRAND_CERT_PREFIX}-${cert.verificationHash.replace(/-/g, '').slice(0, 8).toUpperCase()}`}
                   </p>
                   <div className={styles.certBadges}>
                     <Badge variant="success">{cert.course.estimatedHours} hours</Badge>

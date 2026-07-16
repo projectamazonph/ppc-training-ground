@@ -2,13 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { formatPhp, formatDate, formatDateTime, formatReceiptNumber } from '@/lib/format';
 
 describe('format.ts', () => {
-  it('formatPhp returns PHP currency string', () => {
-    expect(formatPhp(2999)).toBe('₱2,999.00');
+  it('formatPhp takes centavos and returns PHP currency string', () => {
+    expect(formatPhp(299900)).toBe('₱2,999.00');
   });
 
-  it('formatPhp handles zero and decimals', () => {
+  it('formatPhp handles zero and sub-peso amounts', () => {
     expect(formatPhp(0)).toBe('₱0.00');
-    expect(formatPhp(99.5)).toBe('₱99.50');
+    expect(formatPhp(9950)).toBe('₱99.50');
   });
 
   it('formatDate returns short en-PH date', () => {

@@ -17,10 +17,11 @@ import { requireAuth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { isWithinRefundWindow, hasBlockingRefundRequest, daysRemainingInWindow, REFUND_WINDOW_DAYS } from '@/lib/refunds';
 import { RequestRefundForm } from './RequestRefundForm';
+import { BRAND_NAME } from '@/lib/brand';
 import styles from './request-refund.module.css';
 
 export const metadata = {
-  title: 'Request a refund — AMPH Academy',
+  title: `Request a refund — ${BRAND_NAME}`,
   robots: { index: false },
 };
 

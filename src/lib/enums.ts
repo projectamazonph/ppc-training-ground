@@ -1,5 +1,5 @@
 /**
- * Application-layer enum values for AMPH Academy v2.
+ * Application-layer enum values for Project Amazon PH Academy v2.
  *
  * Prisma with String fields (enums are not used in schema), so the schema uses
  * String columns for fields that conceptually hold enum values. The valid

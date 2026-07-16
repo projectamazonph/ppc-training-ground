@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { BRAND_NAME, BRAND_NAME_UPPER } from '@/lib/brand';
 import styles from './home.module.css';
 
 export default function HomePage() {
@@ -7,13 +8,13 @@ export default function HomePage() {
       {/* ── Hero ─────────────────────────────────────────────── */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
-          <p className={styles.heroEyebrow}>AMPH ACADEMY</p>
+          <p className={styles.heroEyebrow}>{BRAND_NAME_UPPER}</p>
           <h1 className={styles.heroTitle}>
             Three courses. One outcome: become the Amazon ads specialist clients retain.
           </h1>
           <p className={styles.heroSub}>
-            AMPH Academy teaches Filipino VAs the Amazon advertising work that pays
-            ₱60,000 to ₱80,000 a month. Practice with real campaign tools, not just theory.
+            {`${BRAND_NAME} teaches the Amazon advertising skills Filipino VAs are charging `}
+            ₱60,000–₱80,000/month for. Practice with real campaign tools, not just theory.
           </p>
           <div className={styles.heroActions}>
             <Link
@@ -46,7 +47,10 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
-        <div className={styles.heroDecorative}>₱80k/mo</div>
+        <div className={styles.heroDecorative}>
+          ₱60k–₱80k/mo
+          <span className={styles.heroDecorativeCaption}>market rate, specialist Amazon PPC VAs</span>
+        </div>
       </section>
 
       {/* ── What You Learn ───────────────────────────────────── */}
@@ -101,9 +105,10 @@ export default function HomePage() {
 
       {/* ── CTA ──────────────────────────────────────────────── */}
       <section className={styles.ctaSection}>
-        <h2>Ready to start earning?</h2>
+        <h2>Ready to learn the Amazon PPC work that&apos;s in demand right now?</h2>
         <p>
-          Join hundreds of Filipino VAs who turned Amazon PPC into a real career.
+          Structured courses, real campaign tools, and a certificate that&apos;s part of the
+          ProjectAmazonPH hiring pipeline.
         </p>
         <Link
           href="/auth/signup"
@@ -125,14 +130,14 @@ export default function HomePage() {
       <footer className={styles.footer}>
         <div className={styles.footerGrid}>
           <div className={styles.footerBrand}>
-            <strong>AMPH Academy</strong>
+            <strong>{BRAND_NAME}</strong>
             <p>
-              Amazon PPC coaching for Filipino virtual assistants.
-              Learn the work that pays ₱60k–₱80k/month.
+              Amazon PPC training for Filipino virtual assistants.
+              Learn the skill agencies and brands pay ₱60k–₱80k/month for.
             </p>
           </div>
           <div className={styles.footerCol}>
-            <h4>Platform</h4>
+            <h3>Platform</h3>
             <ul>
               <li><Link href="/pricing">Pricing</Link></li>
               <li><Link href="/tools/campaign-builder">Tools</Link></li>
@@ -140,7 +145,7 @@ export default function HomePage() {
             </ul>
           </div>
           <div className={styles.footerCol}>
-            <h4>Account</h4>
+            <h3>Account</h3>
             <ul>
               <li><Link href="/auth/signin">Sign in</Link></li>
               <li><Link href="/auth/signup">Sign up</Link></li>

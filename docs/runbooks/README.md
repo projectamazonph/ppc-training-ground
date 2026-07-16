@@ -1,6 +1,6 @@
 # Runbooks
 
-Operational procedures for AMPH Academy v2. Each runbook is a step-by-step
+Operational procedures for Project Amazon PH Academy v2. Each runbook is a step-by-step
 guide written to be runnable by someone who did not write it.
 
 | Runbook | Sprint / Story | Use when… |

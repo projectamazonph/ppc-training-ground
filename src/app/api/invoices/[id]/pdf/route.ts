@@ -17,9 +17,8 @@ import { requireAuth } from '@/lib/auth';
 import {
   getInvoiceForUser,
   renderInvoicePdf,
+  RECEIPTS_DIR,
 } from '@/lib/receipts';
-
-const PUBLIC_RECEIPTS_DIR = path.join(process.cwd(), 'public', 'receipts');
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -41,9 +40,9 @@ export async function GET(_request: Request, { params }: RouteContext) {
     pdfPath = result.pdfPath;
   }
 
-  // Read from local storage. (Swap point for Vercel Blob fetch.)
+  // Read from the temp-dir cache. (Swap point for Vercel Blob fetch.)
   const fileName = `${invoice.id}.pdf`;
-  const absPath = path.join(PUBLIC_RECEIPTS_DIR, fileName);
+  const absPath = path.join(RECEIPTS_DIR, fileName);
   let buffer: Buffer;
   try {
     buffer = await fs.readFile(absPath);

@@ -58,7 +58,7 @@ export function RequestRefundForm({ paymentId, amountPhp }: FormProps) {
               style: 'currency',
               currency: 'PHP',
               maximumFractionDigits: 2,
-            }).format(amountPhp)}
+            }).format(amountPhp / 100)}
           </span>
           <span className={styles.amountNote}>Full refund only at this stage.</span>
         </div>

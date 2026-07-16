@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to AMPH Academy v2 are documented here.
+All notable changes to Project Amazon PH Academy v2 are documented here.
 
 ## [Unreleased]
 
@@ -72,13 +72,13 @@ All notable changes to AMPH Academy v2 are documented here.
 - Alerting to Slack: `scripts/sentry-slack-alert.ts` posts error spike +
   daily summary to Slack Incoming Webhook; cron job in CI (STORY-052)
 
-### Sprint 10 — Tests + CI Hardening (2026-07-13, in progress)
+### Sprint 10 — Tests + CI Hardening (2026-07-13)
 - Vitest config + 11 test files (auth, progress, tools, badges, validation,
   enums, tier-gate, format, pricing, smoke, …)
 - Playwright E2E config scaffolded
 - `scripts/check-coverage.js` added
 - CI workflow: tsc, lint, vitest, playwright, lighthouse-ci, gitleaks
-- 50/53 tests passing; 3 broken mocks in `tool-actions.test.ts`
+- 53/53 tests passing (verified by CI)
 
 ### Sprint 9 — Polish + Mobile (2026-07-12)
 - Design-system audit + token purge pass (STORY-038)

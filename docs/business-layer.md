@@ -1,4 +1,4 @@
-# Business Layer — AMPH Academy v2
+# Business Layer — Project Amazon PH Academy v2
 
 **Status:** Approved
 **Owner:** Ryan Roland Dabao
@@ -8,7 +8,7 @@
 
 ## Purpose
 
-The business layer is what turns AMPH Academy from "free course site" into "paid product business." It covers pricing tiers, the enrollment flow, payment processing via PayMongo, refunds, receipts, and tier-based content gating.
+The business layer is what turns Project Amazon PH Academy from "free course site" into "paid product business." It covers pricing tiers, the enrollment flow, payment processing via PayMongo, refunds, receipts, and tier-based content gating.
 
 This spec assumes PayMongo as the payment provider. PayMongo is the right choice because:
 - Native Philippine peso (PHP) support, no currency conversion fees
@@ -576,7 +576,7 @@ Generated server-side using `@react-pdf/renderer`. Includes BIR-compliant fields
 
 ### Philippine Tax Compliance
 
-- AMPH Academy is a Philippine business. BIR requires:
+- Project Amazon PH Academy is a Philippine business. BIR requires:
   - Receipts with sequential numbering
   - TIN displayed
   - VAT breakdown (12% VAT on digital services)
@@ -585,11 +585,11 @@ Generated server-side using `@react-pdf/renderer`. Includes BIR-compliant fields
 
 ## Email Notifications
 
-Using Resend (free tier covers AMPH Academy scale):
+Using Resend (free tier covers Project Amazon PH Academy scale):
 
 | Trigger | Template |
 |---------|----------|
-| Payment successful | "Welcome to AMPH Academy. Your access is live." |
+| Payment successful | "Welcome to Project Amazon PH Academy. Your access is live." |
 | Payment failed | "Payment didn't go through. Try again here." |
 | Refund approved | "Your refund of ₱X has been processed." |
 | Certificate issued | "You earned a certificate. View it here." |
@@ -632,7 +632,7 @@ If a recurring subscription (future) fails:
 3. Day 7: Final charge attempt, user notified, account downgraded to read-only on next day
 4. Day 14: Account suspended
 
-For v2, AMPH Academy is one-time purchase only. No recurring billing. Dunning applies only to subscription billing (deferred to v2.1 or later).
+For v2, Project Amazon PH Academy is one-time purchase only. No recurring billing. Dunning applies only to subscription billing (deferred to v2.1 or later).
 
 ## PayMongo Test Mode
 

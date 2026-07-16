@@ -6,6 +6,7 @@
  */
 
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { BRAND_NAME, BRAND_NAME_UPPER, BRAND_CERT_PREFIX } from '@/lib/brand';
 
 const styles = StyleSheet.create({
   page: {
@@ -175,14 +176,14 @@ export function CertificatePdf(props: CertificatePdfProps) {
   return (
     <Document
       title={`Certificate - ${props.recipientName} - ${props.courseTitle}`}
-      author="AMPH Academy"
+      author={BRAND_NAME}
       subject="Certificate of Completion"
     >
       <Page size="A4" orientation="landscape" style={styles.page}>
         <View style={styles.outerBorder}>
           <View style={styles.innerBorder}>
             <View>
-              <Text style={styles.eyebrow}>AMPH ACADEMY</Text>
+              <Text style={styles.eyebrow}>{BRAND_NAME_UPPER}</Text>
               <Text style={styles.title}>Certificate of Completion</Text>
               <Text style={styles.subtitle}>Amazon PPC Mastery for Filipino Virtual Assistants</Text>
 
@@ -208,7 +209,7 @@ export function CertificatePdf(props: CertificatePdfProps) {
 
               <View style={styles.footerCol}>
                 <Text style={styles.certificateNumberLabel}>CERTIFICATE NO.</Text>
-                <Text style={styles.certificateNumber}>AMPH-{refNumber}</Text>
+                <Text style={styles.certificateNumber}>{`${BRAND_CERT_PREFIX}-${refNumber}`}</Text>
                 <Text style={styles.issuedDate}>Issued {issuedFormatted}</Text>
                 <Text style={styles.verifyLabel}>VERIFY AT</Text>
                 <Text style={styles.verifyHash}>{props.verificationUrl}</Text>

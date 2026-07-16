@@ -1,4 +1,4 @@
-# Admin Backend Specification — AMPH Academy v2
+# Admin Backend Specification — Project Amazon PH Academy v2
 
 **Status:** Approved
 **Owner:** Ryan Roland Dabao

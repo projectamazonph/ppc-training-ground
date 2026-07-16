@@ -2,6 +2,7 @@ import { renderToBuffer } from '@react-pdf/renderer';
 import { requireAuth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { CertificatePdf } from '@/lib/cert-pdf';
+import { BRAND_CERT_PREFIX } from '@/lib/brand';
 
 /**
  * GET /dashboard/certificates/[hash]/pdf
@@ -37,7 +38,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
     return new Response('Forbidden.', { status: 403 });
   }
 
-  const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://amph-academy.com'}/verify/${cert.verificationHash}`;
+  const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://projectamazonph.com'}/verify/${cert.verificationHash}`;
 
   const pdfBuffer = await renderToBuffer(
     CertificatePdf({
@@ -50,7 +51,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
     }),
   );
 
-  const filename = `AMPH-Certificate-${cert.course.title.replace(/[^a-zA-Z0-9]+/g, '-')}.pdf`;
+  const filename = `${BRAND_CERT_PREFIX}-Certificate-${cert.course.title.replace(/[^a-zA-Z0-9]+/g, '-')}.pdf`;
 
   return new Response(pdfBuffer as unknown as ArrayBuffer, {
     status: 200,
