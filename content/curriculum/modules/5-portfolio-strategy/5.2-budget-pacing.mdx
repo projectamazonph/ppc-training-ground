@@ -24,29 +24,28 @@ First, understand the rules of the game:
 
 | Rule | What It Means | Impact on Pacing |
 |------|---------------|------------------|
-| **Daily budget = average** | Your daily budget is a 7-day average, not a hard cap | Can spend up to 2x in one day if it balances out within the week |
-| **Over-delivery** | Amazon may overspend your daily budget by up to 25% | You're not charged more than your daily budget — Amazon covers the difference |
+| **Daily budget, with over-delivery** | Amazon can spend somewhat above your daily budget on a given day, then reconciles your charges over a longer billing window | You can see single days above your daily budget on the dashboard without your total charges necessarily exceeding budget × days for the period, but confirm the exact reconciliation window and cap in your account before you plan around it |
 | **Lifetime budget** | Not available for Sponsored Products | Only for Sponsored Brands campaigns with end dates |
 | **Portfolio budget** | Spend cap across campaigns, where eligible | Prevents single-campaign cap issues |
 | **Budget rule** | Increase/decrease based on performance triggers | Automate pacing adjustments |
 
-### The 7-Day Average in Practice
+### What a week of spend might look like
 
 ```
-Monday:    Budget ₱1,000 → Spent ₱1,200 (over-delivery possible)
-Tuesday:   Budget ₱1,000 → Spent ₱800 (Amazon adjusts)
-Wednesday: Budget ₱1,000 → Spent ₱1,000 (on track)
-Thursday:  Budget ₱1,000 → Spent ₱900 (conservative)
-Friday:    Budget ₱1,000 → Spent ₱1,100 (weekend ramp-up)
-Saturday:  Budget ₱1,000 → Spent ₱600 (low traffic)
-Sunday:    Budget ₱1,000 → Spent ₱400 (low traffic)
+Monday:    Budget ₱1,000 → Spent ₱1,200 (over-delivery day)
+Tuesday:   Budget ₱1,000 → Spent ₱800
+Wednesday: Budget ₱1,000 → Spent ₱1,000
+Thursday:  Budget ₱1,000 → Spent ₱900
+Friday:    Budget ₱1,000 → Spent ₱1,100
+Saturday:  Budget ₱1,000 → Spent ₱600
+Sunday:    Budget ₱1,000 → Spent ₱400
 ────────────────────────────────────────────────
-Total: ₱7,000 budget → ₱6,000 spent → OK, under budget
+Sum of daily budgets: ₱7,000. Sum of daily spend shown: ₱6,000.
 ```
 
-If Amazon spends ₱1,200 on Monday, you still only pay ₱1,000. Amazon eats the extra ₱200. This averages out over the 7-day window.
+The daily spend figures above are what the dashboard shows for each day, including the over-delivery day. Whether you're actually billed the full ₱1,200 for Monday, or something less once Amazon's reconciliation applies, depends on the specific mechanic in your account. Don't assume a fixed rule (a flat 25% cap, a 7-day averaging window, or anything else) without checking your account's current billing statement against its daily spend history. The fact card below has the official source to check.
 
-> 💡 **Tip**: If you're consistently hitting your daily budget by midday, INCREASE your daily budget. You're leaving sales on the table. A good pacing target is 80-90% of daily budget spent by end of day. If you're hitting 100% by lunch, raise the budget.
+> 💡 **Tip**: If you're consistently hitting your daily budget by midday, consider increasing the daily budget. You're likely leaving sales on the table. A good pacing target is 80 to 90% of daily budget spent by end of day. If you're hitting 100% by lunch, that's a signal to raise the budget, not just a curiosity.
 
 ---
 
@@ -179,7 +178,7 @@ OPTIONS:
 Keep this tracker in a spreadsheet. Update daily. It takes 2 minutes and saves you from discovering mid-month that you're on track to blow your budget.
 
 > 📌 **Key Takeaways:**
-> - Amazon's daily budget is a **7-day average** — you can spend up to 2x in one day
+> - Amazon's daily budget allows some over-delivery on a given day. Confirm the exact reconciliation window and cap on your account before assuming a specific rule.
 > - **Burn rate** tells you how fast you're spending per hour — check it daily
 > - **Scheduled bid rules, where available,** align your bids with peak shopping hours (8PM-12AM PHT) — confirm the control exists on your account, and fall back to manual bid checks if it doesn't
 > - If you hit budget by midday, **increase the budget or use portfolio pooling**
@@ -187,6 +186,19 @@ Keep this tracker in a spreadsheet. Update daily. It takes 2 minutes and saves y
 > - Track daily pacing in a **simple spreadsheet** — 2 minutes/day saves thousands
 
 ---
+
+## Amazon Ads Fact Card
+
+```text
+Product or feature: Daily budget over-delivery and reconciliation
+What the learner can do: Expect some days to show spend above the set daily budget, then check the account's actual billing statement rather than assuming a fixed averaging window or percentage cap
+Who can access it: Any Sponsored Products or Sponsored Brands advertiser; exact mechanics can change and should be verified in-console
+Retailer or marketplace scope: Amazon Advertising Console; do not assume parity across marketplaces
+Official source URL: https://advertising.amazon.com/help/GTGPQGUXNCTHE2DS
+Last verified: [content owner to fill in at rewrite time]
+Next review due: [content owner to fill in at rewrite time]
+Owner: [content owner]
+```
 
 ## Amazon Ads Fact Card
 

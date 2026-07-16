@@ -4,7 +4,9 @@ slug: "8.2-share-of-voice"
 moduleNumber: 8
 lessonNumber: 2
 description: "Understand Share of Voice (SOV) metrics, how to calculate them, and use competitive impression data to position your campaigns strategically."
-xpreward: 60
+type: "reading"
+estimatedMinutes: 9
+xpReward: 60
 ---
 
 ## 🎯 The Why
@@ -25,34 +27,33 @@ Share of Voice (SOV) measures your brand's share of total ad impressions in a gi
 SOV = Your Brand's Ad Impressions ÷ Total Category Ad Impressions × 100
 ```
 
-Amazon doesn't give you total category impression data directly. Instead, you calculate **Impression Share** from your campaign reports:
+Amazon doesn't give you total category impression data directly, and Sponsored Products reporting doesn't expose a pullable "eligible impressions" field the way some other ad platforms do. Treat SOV as an **estimate you build**, not a report you pull:
 
 ```
-Impression Share = Your Impressions ÷ Eligible Impressions × 100
+Estimated SOV ≈ Your impressions for a keyword or category ÷ your best estimate of total category impressions
 ```
 
-Where **Eligible Impressions** = the total number of times your ad could have shown based on your targeting.
+The rest of this lesson covers where that estimate for "total category impressions" actually comes from.
 
 ---
 
 ## 📊 The SOV Spectrum
 
+This lesson uses one three-tier scale throughout. Use it to classify any SOV estimate you calculate:
+
 ```
-SOV < 10%:    🟥 Fragmented — many competitors, no dominant player
-SOV 10-30%:   🟧 Contested — competitive category, opportunities exist
-SOV 30-50%:   🟨 Established — you're a significant player
-SOV 50-70%:   🟩 Dominant — you lead the category
-SOV > 70%:    🟦 Monopoly — you ARE the category (rare on Amazon)
+SOV < 15%:    Contender — many competitors, no dominant player, room to grow
+SOV 15-35%:   Established — a significant, defensible position
+SOV > 35%:    Dominant — you lead the category
 ```
 
-### SOV vs. Market Share Correlation
+### SOV and strategy
 
-| SOV Range | Typical Market Share | Strategy |
-|-----------|:-------------------:|----------|
-| 0-15% | 0-5% | Grow aggressively, test new segments |
-| 15-30% | 5-15% | Defend share, optimize for profitability |
-| 30-50% | 15-30% | Balance growth and efficiency |
-| 50%+ | 30%+ | Maximize ROAS, milk profitability |
+| SOV Range | Position | Strategy |
+|-----------|----------|----------|
+| Under 15% | Contender | Grow aggressively, test new segments |
+| 15-35% | Established | Defend share, optimize for profitability |
+| Over 35% | Dominant | Maximize ROAS, shift budget to new segments |
 
 ---
 
@@ -75,12 +76,12 @@ Step 5: Estimate total category impressions from ABA Search Frequency
 Step 6: SOV ≈ Your impressions ÷ Estimated total impressions
 ```
 
-### Method 3: Bid Simulator (Quick Check)
+### Method 3: A bid-ceiling test (quick check)
 
-Use the Bid Simulator in your campaign manager:
-- At infinite budget, how much impression share could you capture?
-- The gap between current and max = addressable SOV
-- Calculate the cost to close that gap
+Amazon Ads doesn't offer a self-serve bid simulator for Sponsored Products. You can still estimate addressable SOV without one:
+- Raise bids on a small, contained set of relevant keywords for a short test window and watch impression volume move.
+- The gap between your current impressions and the new, higher-bid impressions is a rough read on addressable SOV for that keyword set.
+- Calculate the added spend against that gain before deciding whether closing it is worth it.
 
 ---
 
@@ -143,6 +144,21 @@ Track SOV monthly and look for trends:
 - **Use SOV to set bids** — Higher SOV terms can often sustain lower bids due to brand familiarity and repeat purchases.
 
 ---
+
+## Fact card
+
+```text
+Product or feature: listing and ad relevance signals in the Sponsored Products auction
+What the learner can do: treat CTR, CVR, and search-term relevance as observable proxies for how competitively a listing converts, not a named inspectable score
+Who can access it: any Sponsored Products advertiser, through standard performance reports
+Retailer or marketplace scope: Amazon Advertising, Sponsored Products (US marketplace examples used in this lesson)
+Official source URL: https://advertising.amazon.com/help/GCU2BUWJH2W3A8Z7
+Last verified: pending content-owner review
+Next review due: pending content-owner review
+Owner: Ryan Roland Dabao
+```
+
+Amazon does not publish a single named "Quality Score." When this lesson says a competitor's listings "converted better," that's read from CVR and relevance signals in your own reports, not a score you can look up directly.
 
 ## 📌 Key Takeaways
 
