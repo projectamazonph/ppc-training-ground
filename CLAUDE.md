@@ -10,7 +10,7 @@ Read `AGENTS.md` first — it's the terse rules file this document expands on. `
 
 ## Curriculum & content
 
-The learning content is planned and audited in `docs/`. Source lessons are NOT yet versioned inside this repo — `scripts/import-amph-content.ts` currently reads from a hard-coded Android path outside the repository (see the P0 finding in `docs/CONTENT-AUDIT-2026-07-16.md`). Before authoring the next content release, move curriculum source into `content/curriculum/` and replace legacy product/feature references.
+The learning content is planned and audited in `docs/`. The 31 legacy MDX lessons and the quiz fixture now live in `content/curriculum/` (`modules/` + `quiz-questions.json`), and `scripts/import-amph-content.ts` reads from that repo-relative path. This legacy content still describes a different product (AdCraft, AI Mentor, three simulations) — see the P0 findings in `docs/CONTENT-AUDIT-2026-07-16.md` — and must be rewritten to match v2 before the next content release ships.
 
 Key content docs:
 - `docs/CONTENT-AUDIT-2026-07-16.md` — content audit: critical P0/P1 issues, release plan.

@@ -406,6 +406,36 @@ With TS fixed, `pnpm lint` crashed twice more, both ESLint-10-specific:
 ### Net effect
 All six pre-existing breaks on `main` are fixed. The 9 open Dependabot PRs can now be re-run against a green base. Note for future triage: any Dependabot PR bumping `typescript` to 7.x or `eslint` to 10.x must be declined until typescript-eslint/eslint-config-next support them (the dependabot.yml ignores now prevent these PRs from opening).
 
+## 2026-07-16 — Content track kickoff: curriculum source moved into the repo (P0 #1 of 4, PR #26)
+
+**Owner of this section:** the agent that ran `/whats-next`, then handed off content-fix work here for whoever picks up the next P0. **Context for the next agent:** the code side of v2 is fully shipped (12/12 sprints, see Project Status above); the only active work now is the **content track** described in `docs/CONTENT-AUDIT-2026-07-16.md` and `docs/CURRICULUM-REDESIGN.md`. Read those two docs first — they are the spec for everything below.
+
+### What was asked
+User said "What's next" with no other context. Repo state showed the launch checklist complete and a content audit sitting unactioned since it was authored the same day. Asked the user which P0 to start on; they picked **P0 #1 — move curriculum source into the repo** (of four P0s: #1 content not versioned, #2 MDX renderer can't render tables/links/images, #3 legacy copy describes a dead product (AdCraft/AI Mentor/Formula Calculator), #4 course-to-tier model not decided in code).
+
+### Root cause
+`scripts/import-amph-content.ts` had `SOURCE_ROOT` hard-coded to `/storage/emulated/0/Hermes Projects/projects/AMPH-Academy/project` — a path that only exists on the developer's Android device, per the AGENTS.md Memoria Protocol note about "Atlas on phone OpenClaw, Vader on phone Hermes." This is **not actually the only copy** — the real source lives in the GitHub repo `projectamazonph/AMPH-Academy` (the frozen v1 platform, see `docs/build-spec.md:13`), which was reachable via `add_repo` + clone. The Android path just happened to be where the previous author's device had it synced.
+
+### What was done
+1. Added `projectamazonph/AMPH-Academy` to session GitHub scope, cloned to `/workspace/amph-academy` (that clone is ephemeral — gone once this session ends; do not depend on it existing).
+2. Copied `project/content/modules/` (9 module dirs, 31 `.mdx` files) → `content/curriculum/modules/` in amph-v2, and `project/fixtures/quiz-questions.json` → `content/curriculum/quiz-questions.json`. Byte-for-byte copy, no content edits.
+3. Rewrote `scripts/import-amph-content.ts`'s `SOURCE_ROOT`/`MODULES_DIR`/`QUIZ_FIXTURE` to resolve from `import.meta.url` (repo-relative), replacing the device path.
+4. Updated `CLAUDE.md`, `AGENTS.md`, and `docs/CONTENT-AUDIT-2026-07-16.md` (added a "Status: resolved" note under the P0 #1 finding, left the finding text itself intact as historical record).
+5. Opened PR #26 (`claude/whats-next-4hf0yp` → `main`), subscribed this session to its activity, scheduled a 60-minute fallback check-in via `send_later`.
+
+**Verified locally (not yet by CI at time of writing):** `pnpm install` (fresh, no `node_modules` existed before this), `DATABASE_URL=<dummy> npx prisma generate`, `DATABASE_URL=<dummy> npx tsc --noEmit -p .` — zero errors project-wide (not just the touched file). `npx eslint scripts/import-amph-content.ts` — zero errors. **Check PR #26's CI run before trusting this further** — this session's local run used a dummy `DATABASE_URL`, no real Postgres, so anything requiring an actual DB connection (migrations, seed, the import script's actual execution) was not exercised.
+
+### Explicitly NOT done
+- **The imported content was not rewritten.** It is still the raw legacy text: refers to AdCraft, AI Mentor, Formula Calculator, "three simulations" — none of which exist in v2. This is P0 #3 in the audit, separate work.
+- **The import script was not run against a real database.** Nobody has verified `pnpm tsx scripts/import-amph-content.ts` actually populates Postgres correctly from the new path — only that it typechecks and lints.
+- **No quiz-data restructuring.** The audit's fix text says "version quiz data beside the lesson" (implying per-module or per-lesson files); this pass kept the single `quiz-questions.json` fixture as-is to minimize risk. If a future pass splits it, update the importer's `importQuizzes()` parsing to match.
+- P0 #2 (MDX renderer: `src/lib/mdx.ts` has no table/ordered-list/link/image/video support) and P0 #4 (course-to-tier model: three real courses vs. module entitlements — audit recommends three real courses) are both still fully open.
+
+### Next steps for whoever picks this up
+1. **Confirm PR #26 merged clean.** Check `mcp__github__pull_request_read` (method `get_status`/`get_check_runs`) for `projectamazonph/amph-v2#26` — if this session's fallback check-in already landed it, this doc should say so above; if not, something stalled and needs a look.
+2. Pick the next P0 from the audit. The audit's own "Immediate next actions" ordering (docs/CONTENT-AUDIT-2026-07-16.md, bottom) says: approve the three-course structure (product decision, not code) → then rewrite legacy copy → ship the Big Six lesson as reference pattern (already done, see `docs/1-1-read-ppc-data-before-you-change-it.md`) → build career/client-delivery modules. In practice P0 #2 (renderer) and P0 #3 (legacy copy) can go in parallel; P0 #4 (course/tier model) is a product decision that should happen before more lessons are authored against the wrong structure.
+3. Before authoring any new lesson content, re-read `docs/CURRICULUM-REDESIGN.md`'s "Lesson production standard" (10-block format) — `docs/0-1-welcome-to-amph.md` and `docs/1-1-read-ppc-data-before-you-change-it.md` are the two reference examples already built to that standard, sitting in `docs/` rather than `content/curriculum/` (they haven't been wired into the importer yet — that's a gap worth closing when P0 #3 work starts, so the reference-pattern lessons actually reach the database instead of just sitting as docs).
+
 ### Follow-up: production-dependencies bump (supersedes Dependabot #18)
 Validated Dependabot's grouped bump (sentry 9→10.66, jose 5→6.2.3, pino 9→10.3.1, resend 4→6.17.2, zod 3→4.4.3) locally against green `main`: only one code change was required — zod 4 removed `ZodError.errors` (alias of `.issues`), used in two spots in `src/app/actions/refunds.ts`. Everything else passed untouched: typecheck clean, lint exit 0, 200/200 tests + coverage thresholds, build exit 0, and `pnpm peers check` is now fully clean (sentry 10 accepts next 16, which sentry 9 didn't). pnpm 11's built-in minimum-release-age policy auto-recorded `minimumReleaseAgeExclude` entries in `pnpm-workspace.yaml` for the fresh sentry 10.66.0 packages — kept, since non-frozen installs need them. Landed via a fresh PR from this branch because the two-line zod fix can't be pushed to Dependabot's branch; Dependabot closes #18 automatically once main satisfies the bumps.
 
