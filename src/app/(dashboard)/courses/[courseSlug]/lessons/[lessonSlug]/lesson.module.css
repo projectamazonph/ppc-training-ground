@@ -77,6 +77,42 @@
   padding: 0;
 }
 
+.lessonBody a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.lessonBody a:hover {
+  color: var(--accent-strong, var(--accent));
+}
+
+.lessonBody img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  margin: var(--space-4) 0;
+}
+
+.lessonBody table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--space-4) 0;
+  font-size: var(--text-sm);
+}
+
+.lessonBody th,
+.lessonBody td {
+  border: 1px solid var(--border);
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+}
+
+.lessonBody th {
+  background: var(--surface-2);
+  font-weight: 600;
+  color: var(--ink-900);
+}
+
 .actions {
   margin: var(--space-8) 0;
   display: flex;
