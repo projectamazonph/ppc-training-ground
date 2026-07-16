@@ -1,5 +1,5 @@
 ---
-title: "How Listing Quality Score Affects Your Ads"
+title: "Listing and Ad Relevance Signals"
 slug: "3.1-listing-quality-score"
 moduleNumber: 3
 lessonNumber: 1
@@ -8,19 +8,19 @@ estimatedMinutes: 14
 xpReward: 100
 ---
 
-# How Listing Quality Score Affects Your Ads
+# Listing and Ad Relevance Signals
 
-Here's something most Amazon sellers don't realize: **your ad performance isn't just about your bid.** Amazon cares about the quality of your listing. A better listing gets better ad placement at a lower cost. A bad listing — even with a high bid — gets pushed to the back of the line.
+Here's something most Amazon sellers don't realize: **your ad performance isn't just about your bid.** Amazon does not publish or expose a single named "Quality Score" you can look up for a listing. But your listing's relevance and performance signals still shape how efficiently your ads run — a strong listing tends to get more efficient ad performance than a weak one at the same bid.
 
-This invisible score is Amazon's **Listing Quality Score** (sometimes called Quality Score or Relevance Score).
+"Listing and ad relevance signals" is a teaching shorthand for this lesson, not a product feature you can check in Seller Central or the Advertising Console.
 
-> 🎯 **Analogy**: Imagine two food stalls at a market. Both pay for the same prime spot. Stall A has a bright sign, clean display, and friendly staff. Stall B has a flickering light, messy table, and grumpy vendor. The market owner notices that customers stop at Stall A and walk past Stall B. Next week, the owner gives Stall A a discount on their spot fee because they bring more foot traffic. That discount is your lower CPC from a good Quality Score.
+> 🎯 **Analogy**: Imagine two food stalls at a market. Both pay for the same prime spot. Stall A has a bright sign, clean display, and friendly staff. Stall B has a flickering light, messy table, and grumpy vendor. Customers stop at Stall A and walk past Stall B. Over time, Stall A's owner can justify the spot at a lower relative cost per customer because more of the people who see it actually buy. That's the dynamic behind a stronger listing's ad efficiency — not a discount from a documented score.
 
 ---
 
-## The Factors That Affect Your Score
+## The Signals That Actually Move the Needle
 
-Amazon doesn't publish the exact formula (it's proprietary), but years of testing and data have revealed the key factors:
+Amazon doesn't publish a formula for how these interact with ad delivery or cost, but these are the observable, verifiable inputs worth diagnosing:
 
 | Factor | Weight | Impact | What It Measures |
 |--------|--------|--------|-----------------|
@@ -33,9 +33,9 @@ Amazon doesn't publish the exact formula (it's proprietary), but years of testin
 
 ---
 
-## The Quality Score Feedback Loop
+## The Relevance Feedback Loop
 
-Here's how the system works — and why it compounds over time:
+Here's the general dynamic — and why it compounds over time:
 
 ```
                     ┌─────────────────┐
@@ -59,7 +59,7 @@ Here's how the system works — and why it compounds over time:
               ▼                             ▼
     ┌──────────────────┐          ┌──────────────────┐
     │ HIGH CTR + CVR   │          │  LOW CTR + CVR   │
-    │ = Better Score   │          │  = Worse Score    │
+    │ = Stronger signal│          │  = Weaker signal  │
     └────────┬─────────┘          └────────┬─────────┘
              │                             │
              ▼                             ▼
@@ -80,7 +80,9 @@ Here's how the system works — and why it compounds over time:
 
 ---
 
-## Real Numbers: How Quality Score Affects CPC
+## Illustrative Case: How Listing Strength Can Affect Ad Performance
+
+The numbers below are an illustrative worked example, not published Amazon data. They show the kind of gap a strong vs. weak listing can produce — verify the actual gap with your own account's data.
 
 Let's look at two identical products with different listing quality:
 
@@ -110,11 +112,11 @@ Listing A spent **$0.52 per click** and converted at 12.5%. Listing B paid **$0.
 
 ## Quick Wins vs. Long-Term Improvements
 
-Not all listing improvements are created equal. Here's your prioritization:
+Not all listing improvements are created equal. Here's your prioritization. The "Impact" column is a rough, directional estimate to help you prioritize — not a published Amazon figure. Measure your own before/after CPC and CTR to know your real impact.
 
 ### Quick Wins (This Week)
 
-| Improvement | Time | CPC Impact |
+| Improvement | Time | Impact (directional estimate) |
 |-------------|------|------------|
 | Add backend search terms | 15 min | 🟡 5-10% |
 | Fix title — include top 3 keywords | 30 min | 🟢 10-15% |
@@ -124,7 +126,7 @@ Not all listing improvements are created equal. Here's your prioritization:
 
 ### Medium-Term (This Month)
 
-| Improvement | Time | CPC Impact |
+| Improvement | Time | Impact (directional estimate) |
 |-------------|------|------------|
 | Add A+ Content modules | 4 hours | 🟢 15-25% |
 | Improve images — add infographic | 3 hours | 🟢 10-20% |
@@ -134,7 +136,7 @@ Not all listing improvements are created equal. Here's your prioritization:
 
 ### Long-Term (This Quarter)
 
-| Improvement | Time | CPC Impact |
+| Improvement | Time | Impact (directional estimate) |
 |-------------|------|------------|
 | Build brand registry (if not done) | 1 week | 🟢 20-30% |
 | Product redesign based on reviews | Months | 🟢 20-40% |
@@ -177,9 +179,24 @@ Go through this checklist before spending a single peso on ads:
 - [ ] Return policy clearly stated
 
 > 📌 **Key Takeaways:**
-> - Amazon's **Listing Quality Score** directly affects your CPC, CTR, and ACoS
-> - A **well-optimized listing** can have 50-70% lower CPC than a weak one
-> - **Fix the listing first** — increasing bids on a bad listing just burns money faster
+> - Amazon doesn't expose a single named "Quality Score" — **listing and ad relevance signals** is a teaching shorthand for CTR, CVR, listing completeness, reviews, price, and stock
+> - A **stronger listing** tends to produce more efficient ad performance than a weak one at the same bid — verify the size of the gap with your own data
+> - **Fix the listing first** — increasing bids on a weak listing just burns money faster
 > - Start with **quick wins** (title, bullets, backend terms) this week
 > - Build toward **A+ Content, review volume, and brand registry** over time
-> - The quality score effect **compounds daily** — the sooner you fix it, the more you save
+> - The effect **compounds daily** — the sooner you fix it, the more you save
+
+---
+
+## Amazon Ads Fact Card
+
+```text
+Product or feature: "Listing and ad relevance signals" (teaching shorthand — not a named Amazon product feature)
+What the learner can do: Diagnose observable inputs (CTR, CVR, listing completeness, reviews, price, stock) that plausibly affect ad efficiency; there is no inspectable score to check
+Who can access it: All sellers and advertisers — these are listing/catalog attributes, not a gated feature
+Retailer or marketplace scope: General Amazon retail and advertising practice; Amazon does not publish a formula
+Official source URL: No single official source — this is an inference from Amazon's public retail readiness and advertising relevance guidance, not a documented metric
+Last verified: [content owner to fill in at rewrite time]
+Next review due: [content owner to fill in at rewrite time]
+Owner: [content owner]
+```
