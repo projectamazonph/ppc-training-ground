@@ -54,13 +54,13 @@ jobs:
     environment: production
     if: false # DEPLOYMENT DISABLED — 2026-07-14
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # needed for Sentry commit association
 
       - name: Deploy to Vercel production
         id: deploy
-        uses: amondnet/vercel-action@v25
+        uses: amondnet/vercel-action@v42
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
@@ -68,7 +68,7 @@ jobs:
           vercel-args: "--prod"
 
       - name: Create Sentry release
-        uses: getsentry/action-release@v1
+        uses: getsentry/action-release@v3
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
@@ -85,7 +85,7 @@ jobs:
 
       - name: Notify Slack
         if: always()
-        uses: slackapi/slack-github-action@v3.0.5
+        uses: slackapi/slack-github-action@v4.0.0
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook

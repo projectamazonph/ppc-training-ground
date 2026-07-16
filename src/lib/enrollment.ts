@@ -17,7 +17,6 @@
 
 import 'server-only';
 
-import type { Prisma, PrismaClient } from '@prisma/client';
 import { db } from './db';
 import { CheckoutStatus, EnrollmentStatus, PaymentMethod, PaymentStatus } from './enums';
 import { issueInvoiceForPayment } from './receipts';
@@ -25,8 +24,14 @@ import { sendEnrollmentConfirmationEmail } from './email';
 import { logger } from './logger';
 import { randomUUID } from 'node:crypto';
 
-/** Either the global client or a transaction scope. */
-type DbClient = PrismaClient | Prisma.TransactionClient;
+/**
+ * Either the global (extended) client or a transaction scope. Both arms are
+ * derived from `db`'s own type rather than the ambient `PrismaClient` /
+ * `Prisma.TransactionClient` types — a `$extends()`-ed client is a
+ * structurally distinct type from the un-extended ones, including the
+ * transaction-scoped client its own `$transaction` callback provides.
+ */
+type DbClient = typeof db | Parameters<Parameters<typeof db.$transaction>[0]>[0];
 
 export interface CheckoutPaidEvent {
   data: {

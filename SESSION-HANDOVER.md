@@ -330,4 +330,84 @@ The `try/catch` only guards a runtime throw. The bundler (webpack/Turbopack) sta
 Option 1 is the smallest correct change and aligns with the existing comment that pino-pretty is a dev-only tool. Prefer it.
 
 ### Priority
+(section left incomplete by the previous author — no priority was recorded here)
+
+---
+
+## 2026-07-16 — CI + dependency-drift triage: gitleaks, tsconfig, Prisma 7 (2 fixed, 2 still broken)
+
+**Context:** asked to review and merge the 9 open Dependabot PRs. All 9 were failing "Quality Gates" on CI. Pulling the thread on why turned up a chain of unrelated, pre-existing breaks on `main` itself — none introduced by the open PRs, all from dependency versions that had already landed on `main` (via earlier merged Dependabot PRs) without the full combination ever being validated together locally. Two are fixed and verified below; two more were found but **not fixed** — they need a decision, not just a patch.
+
+### Issue 1 — gitleaks fails on every PR (FIXED, PR #16)
+**Root cause:** `.github/workflows/ci.yml`'s `quality` job step `gitleaks/gitleaks-action@v2` runs `git log <sha>^..<sha>` to scan only the PR's own commit. `actions/checkout@v4` defaults to a shallow (depth-1) clone, so the parent commit doesn't exist locally and gitleaks fails with `fatal: ambiguous argument '<sha>^..<sha>': unknown revision`. This reproduced identically on all 9 open Dependabot PRs and would reproduce on any PR, regardless of content.
+**Fix:** added `fetch-depth: 0` to the `quality` job's `actions/checkout@v4` step only (the only job that runs gitleaks).
+**Verified:** confirmed via job logs on PR #16 — gitleaks now passes cleanly.
+
+### Issue 2 — `tsc --noEmit` fails on unmodified `main` (FIXED, PR #16)
+**Root cause:** `package.json` already had `typescript: ^7.0.2` pinned (from an earlier merged dependency PR), but `tsconfig.json` still set `"baseUrl": "."`, which TypeScript 7 removed (`error TS5102: Option 'baseUrl' has been removed`).
+**Fix:** deleted the `baseUrl` line. `paths.@/*` already reads `["./src/*"]`, relative to the tsconfig's own directory — the same place `baseUrl: "."` pointed to — so this is a no-op for resolution.
+**Verified:** `pnpm typecheck` reached the next error (see Issue 3) instead of failing here.
+
+### Issue 3 — `@prisma/client` (5.22.0) vs `prisma` CLI (7.8.0) version skew (FIXED, PR #16)
+**Root cause:** `package.json` pinned `prisma: ^7.8.0` (generator/CLI) but `@prisma/client: ^5.22.0` (runtime) — an unsupported major-version mismatch. Produced ~50 typecheck errors: query results resolving to `any` across most `src/app/actions/*` and `src/lib/*` files, plus `Property 'TransactionIsolationLevel' does not exist on type 'typeof Prisma'`.
+**Fix:** upgraded `@prisma/client` to `^7.8.0` to match, then worked through Prisma 7's breaking changes (verified against the actually-installed package's `.d.ts` files, not blog posts — `pris.ly`/`prisma.io` docs are blocked by this environment's egress policy, and outside sources gave a subtly wrong adapter constructor signature):
+- Prisma 7 requires a driver adapter and no longer accepts `datasource.url` directly in `schema.prisma`. Added `prisma.config.ts` (CLI-side connection URL) and removed `url = env("DATABASE_URL")` from `schema.prisma`'s datasource block.
+- Added `@prisma/adapter-pg`, `pg`, `@types/pg`, `@prisma/config`, `dotenv` to `package.json`.
+- `PrismaPg`'s real constructor (v7.8.0) is `new PrismaPg(connectionStringOrPoolConfig, options?)` — a positional string/config, **not** `new PrismaPg({ connectionString })` as several web sources suggested. Confirmed by reading `node_modules/.pnpm/@prisma+adapter-pg@7.8.0/.../dist/index.d.ts` directly.
+- Prisma 7 removed the `$use` middleware API entirely (it's in the client's method denylist). `src/lib/db.ts`'s soft-delete filter (ADR-012) was rewritten from `db.$use(...)` to `client.$extends({ query: { $allModels: { $allOperations(...) {...} } } })` — same `injectDeletedAtFilter` logic, different attachment point. Behavior is unchanged; only the API surface moved.
+- `new PrismaClient({ adapter })` needed wiring in the three other standalone scripts that instantiate their own client: `prisma/seed.ts`, `scripts/import-amph-content.ts`, `scripts/smoke-test-login.ts`.
+- `src/lib/enrollment.ts` had `type DbClient = PrismaClient | Prisma.TransactionClient` built from the raw imported types. A `$extends()`-ed client is a **structurally different TS type** from the plain `PrismaClient` class (notably missing `$on`), so this became `type DbClient = typeof db | Parameters<Parameters<typeof db.$transaction>[0]>[0]` — derived from `db`'s actual (extended) type instead.
+- `src/lib/__tests__/db.test.ts` mocked `@prisma/client`'s `PrismaClient` with a fake `$use()` method; updated the mock to fake `$extends()` instead, plus added a mock for `@prisma/adapter-pg`.
+**Verified:** `pnpm typecheck` clean, `pnpm test` 165/165 passing, `pnpm prisma generate` succeeds.
+
+### Issue 4 — `pnpm lint` crashes on unmodified `main` (NOT FIXED)
+**Root cause:** `@typescript-eslint/typescript-estree@8.63.0` (pulled in by `eslint-config-next` / the `eslint: ^10.7.0` pin) is incompatible with `typescript@7.0.2`: `TypeError: Cannot read properties of undefined (reading 'Cjs')` inside `typescript-estree/dist/create-program/shared.js`, thrown while loading `getWatchProgramsForProjects.js`. Reproduces identically on unmodified `main` — confirmed via `git stash` before making any of the fixes above.
+**Impact:** `pnpm lint` cannot run at all (crashes, not just reports errors), so the `Lint (includes no-ai-slop)` CI step always fails. Blocks Quality Gates regardless of the Issue 1–3 fixes.
+**Not investigated further:** likely needs either a `@typescript-eslint` version bump to one that supports TS 7, or a temporary downgrade of `typescript`. Whichever direction, it needs the same "verify locally against the real installed versions" treatment Issue 3 got — this environment's blocked access to prisma.io suggests other vendor doc sites may also be blocked, so plan to lean on `node_modules/**/*.d.ts` and CHANGELOGs over blog posts.
+
+### Issue 5 — `pnpm build` crashes on unmodified `main` (NOT FIXED)
+**Root cause:** unclear — not root-caused. `next build` (Next.js 16.2.10, Turbopack) completes `Compiled successfully`, then during its own internal "Running TypeScript..." step prints `It looks like you're trying to use TypeScript but do not have the required package(s) installed` (despite `typescript@7.0.2` being installed and used successfully by the separate `tsc --noEmit` invocation for Issue 2/3's verification), auto-triggers a `pnpm add typescript` that changes nothing, then crashes: `The "id" argument must be of type string. Received undefined` from inside a Next.js build worker, exit code 1.
+**Impact:** `pnpm build` cannot complete, so both the `Build` CI step and Vercel deploys are blocked regardless of Issues 1–4.
+**Not investigated further:** looks like a Next 16 / TypeScript 7 version-detection incompatibility (Next may be parsing `typescript`'s version in a way that doesn't understand TS 7's versioning), but this is a guess — the actual crash is inside Next's own build-worker IPC, several layers removed from the detection logic. Needs a minimal repro (maybe a scratch Next 16 + TS 7 app) before spending more time on it.
+
+### Net effect
+Quality Gates still cannot go fully green on `main` even with Issues 1–3 fixed — Issues 4 and 5 remain. The 9 open Dependabot PRs (`#1`–`#9`, listed in this session's earlier discussion — mostly trivial `github_actions` version bumps, plus one large `production-dependencies` bump touching `@prisma/client`, `@sentry/nextjs`, `jose`, `pino`, `resend`, `zod`) are unaffected by this work and remain open, still red, pending a decision on Issues 4–5.
+
+### Suggested next step
+Treat Issues 4 and 5 as their own triage pass, same as this one: reproduce in isolation, read the actually-installed package's types/changelog rather than trusting external doc sites (several gave wrong information for Issue 3), fix, verify with the real command (`pnpm lint` / `pnpm build`), not just an assumption.
 High. It is currently blocking all E2E re-testing because the dev server is unhealthy, and it would block `pnpm build` in CI. Fix alongside the `ActionResult` re-export bug. Either fix alone is not enough: with only `ActionResult` fixed, the server still 500s on `pino-pretty`; with only `pino-pretty` fixed, authenticated pages still 500 on `ActionResult`.
+---
+
+## 2026-07-16 (cont.) — dependency-drift triage part 2: TS 7 root cause for Issues 4 + 5, coverage gate (all fixed)
+
+**Context:** continuation of the triage above. Issues 4 and 5 turned out to share a single root cause, and fixing them exposed a sixth pre-existing break (the coverage gate). All three are fixed and verified below; `main`'s Quality Gates can now go fully green.
+
+### Issues 4 + 5 — one root cause: `typescript@7.0.2` is the native compiler with no JS API (FIXED)
+**Root cause:** `typescript@7.0.2` (npm `latest`) is the native Go-based compiler. Its package `exports` map resolves `require('typescript')` to `lib/version.cjs`, which exports only `{ version, versionMajorMinor }` — there is **no JS compiler API at all** (no `ts.Extension`, no `createProgram`, nothing; `lib/` contains only `version.cjs`, `tsc.js`, `getExePath.js`). Verified by reading the installed package's `package.json` exports and `lib/` directly. `tsc --noEmit` kept working because `bin/tsc` shells out to the native binary — which is why Issue 2/3's typecheck verification never tripped over this.
+- **Issue 4 (lint):** `@typescript-eslint/typescript-estree` reads `ts.Extension.Cjs` at module load → `TypeError: Cannot read properties of undefined (reading 'Cjs')`. Its peer range is `typescript >=4.8.4 <6.1.0` — TS 7 was never supported.
+- **Issue 5 (build):** Next 16.2.10's `verify-typescript-setup` checks for `typescript/lib/typescript.js` (`node_modules/next/dist/lib/verify-typescript-setup.js`, `has-necessary-dependencies.js`). That file doesn't exist in TS 7, so Next marks typescript "missing", auto-runs the pointless reinstall, then `require(deps.resolved.get('typescript'))` gets `undefined` → `The "id" argument must be of type string. Received undefined`.
+
+**Fix:** pinned `typescript` to `~6.0.3` — the last JS-based compiler release (6.0.x is the final line with the full JS API; 6.0.3 is inside typescript-estree's `<6.1.0` peer range). `tsconfig.json` needed no changes: TS 6.0 also rejects `baseUrl`, so Issue 2's fix stands. Added a Dependabot `ignore` for typescript major bumps so it doesn't immediately re-open a PR back to 7.x.
+
+### Issue 4b — second lint break behind the first: `eslint@10.7.0` unsupported by eslint-config-next (FIXED)
+With TS fixed, `pnpm lint` crashed twice more, both ESLint-10-specific:
+- `scopeManager.addGlobals is not a function` — ESLint 10 requires `ScopeManager#addGlobals`; `eslint-config-next@16.2.10` applies its **own bundled parser** (`eslint-config-next/parser`, block 0 of its flat config, matching `**/*.{js,jsx,mjs,ts,tsx,mts,cts}`) whose bundled scope-manager predates that API. Updating the separate `@typescript-eslint/*` packages to 8.64.0 (which does implement `addGlobals`) did not help because the bundled copy is compiled in.
+- `contextOrFilename.getFilename is not a function` — `eslint-plugin-react@7.37.5` (latest; supports eslint `^9.7` max) uses `context.getFilename()`, removed in ESLint 10.
+
+**Fix:** downgraded `eslint` to `^9.39.5` (the 9.x maintenance line — the newest line eslint-config-next 16.2.x's stack actually works with; no stable or canary eslint-config-next supports 10 yet). Also kept the transitive `typescript-eslint` update to 8.64.0 in the lockfile. Added a Dependabot `ignore` for eslint major bumps. `pnpm lint` now exits 0 (6 pre-existing "unused eslint-disable directive" warnings remain — warnings, not errors; left alone to keep the diff minimal).
+
+### Issue 6 — coverage gate fails on unmodified `main` (FIXED)
+**Root cause:** `pnpm test:coverage` fails the 70% **branches** threshold on `src/lib` (63.71%; lines/functions/statements pass). Verified pre-existing by stashing all changes and re-running against the untouched lockfile — identical numbers. Most likely the vitest 3→4 bump (merged dev-deps PR #14) changed v8 branch counting (vitest 4 uses AST-aware remapping); the prior session only ran `pnpm test`, which doesn't check coverage. Five `src/lib` files had 0% coverage; `paymongo.ts` alone was 0/47 branches.
+**Fix:** wrote real unit tests for the two biggest gaps — `src/lib/__tests__/paymongo.test.ts` (mocked `paymongo` SDK; covers all four wrappers, response-shape fallbacks, and `mapPayMongoError` paths) and `src/lib/__tests__/refunds.test.ts` (pure window/label helpers + db-mocked queries, same `vi.hoisted` mock idiom as `pricing.test.ts`). Branches now 77.65%, all four metrics pass both vitest's thresholds and `scripts/check-coverage.js`.
+
+### Verified (all with the real commands, local, `DATABASE_URL` set as in CI)
+`pnpm typecheck` clean · `pnpm lint` exit 0 · `prisma format --check` + `prisma validate` OK · `pnpm test:coverage` 200/200 tests, all thresholds pass · `node scripts/check-coverage.js` pass · `pnpm build` exit 0 (full route table, no reinstall, no worker crash).
+
+### Net effect
+All six pre-existing breaks on `main` are fixed. The 9 open Dependabot PRs can now be re-run against a green base. Note for future triage: any Dependabot PR bumping `typescript` to 7.x or `eslint` to 10.x must be declined until typescript-eslint/eslint-config-next support them (the dependabot.yml ignores now prevent these PRs from opening).
+
+### Follow-up: production-dependencies bump (supersedes Dependabot #18)
+Validated Dependabot's grouped bump (sentry 9→10.66, jose 5→6.2.3, pino 9→10.3.1, resend 4→6.17.2, zod 3→4.4.3) locally against green `main`: only one code change was required — zod 4 removed `ZodError.errors` (alias of `.issues`), used in two spots in `src/app/actions/refunds.ts`. Everything else passed untouched: typecheck clean, lint exit 0, 200/200 tests + coverage thresholds, build exit 0, and `pnpm peers check` is now fully clean (sentry 10 accepts next 16, which sentry 9 didn't). pnpm 11's built-in minimum-release-age policy auto-recorded `minimumReleaseAgeExclude` entries in `pnpm-workspace.yaml` for the fresh sentry 10.66.0 packages — kept, since non-frozen installs need them. Landed via a fresh PR from this branch because the two-line zod fix can't be pushed to Dependabot's branch; Dependabot closes #18 automatically once main satisfies the bumps.
+
+### Issue 7 — quality job typechecks before `prisma generate` (FIXED)
+Surfaced only once CI got past the earlier breaks: ci.yml's quality job ran `pnpm typecheck` right after install, with "Generate Prisma client" several steps later. Prisma 5's `@prisma/client` postinstall auto-generated the client so the order never mattered; Prisma 7 removed install-time generation, so CI typechecked against the ungenerated stub (`Module '"@prisma/client"' has no exported member 'PrismaClient'` + ~60 implicit-any errors). Invisible locally (generate was always run first) and on every earlier CI run (they died before typecheck's dependence showed). Fix: moved the generate step to immediately after `pnpm install` in the quality job; e2e and lighthouse jobs already generated before use.

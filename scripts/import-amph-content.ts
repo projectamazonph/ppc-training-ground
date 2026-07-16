@@ -24,11 +24,15 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 import type { CourseDifficulty } from '../src/lib/enums';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-const prisma = new PrismaClient();
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL environment variable is not set.');
+}
+const prisma = new PrismaClient({ adapter: new PrismaPg(process.env.DATABASE_URL) });
 
 const SOURCE_ROOT = '/storage/emulated/0/Hermes Projects/projects/AMPH-Academy/project';
 const MODULES_DIR = join(SOURCE_ROOT, 'content/modules');
