@@ -554,7 +554,7 @@ CREATE TABLE "Invoice" (
     "paymentId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "businessTin" TEXT NOT NULL DEFAULT '000-000-000-000',
-    "businessName" TEXT NOT NULL DEFAULT 'AMPH Academy',
+    "businessName" TEXT NOT NULL DEFAULT 'Project Amazon PH Academy',
     "businessAddress" TEXT NOT NULL DEFAULT 'Philippines',
     "grossAmountCentavos" INTEGER NOT NULL,
     "vatAmountCentavos" INTEGER NOT NULL,
