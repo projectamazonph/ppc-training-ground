@@ -12,6 +12,19 @@ updates:
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
+    ignore:
+      # typescript >=7 is the native (Go) compiler with no JS API
+      # (require('typescript') exposes only {version}). typescript-eslint and
+      # Next.js's build-time type checking both need the JS API, so stay on
+      # the 6.x JS-based line until the ecosystem supports 7.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      # eslint 10 removed context.getFilename() and requires
+      # ScopeManager#addGlobals; eslint-config-next 16.2.x's bundled parser
+      # and eslint-plugin-react (<=9 support) both crash under it. Stay on
+      # eslint 9 until eslint-config-next supports 10.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
     groups:
       production-dependencies:
         dependency-type: "production"
