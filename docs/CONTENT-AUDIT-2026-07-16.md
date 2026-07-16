@@ -44,11 +44,13 @@ The priority is not adding more theory. It is helping a learner move through thi
 
 ## Critical issues
 
-### P0. Content is not owned by the v2 repository
+### P0. Content is not owned by the v2 repository — resolved 2026-07-16
 
-`scripts/import-amph-content.ts` reads from `/storage/emulated/0/Hermes Projects/projects/AMPH-Academy/project`. This makes v2 dependent on one device and leaves the production curriculum outside the repository, pull-request review, backups, and release history.
+`scripts/import-amph-content.ts` read from `/storage/emulated/0/Hermes Projects/projects/AMPH-Academy/project`. This made v2 dependent on one device and left the production curriculum outside the repository, pull-request review, backups, and release history.
 
 **Fix:** Move all authored content into `content/curriculum/` inside v2. Keep one MDX or structured-content file per lesson, version quiz data beside the lesson, and import from a repository-relative path. Treat curriculum changes like product changes: review, test, publish, and record the version.
+
+**Status:** The 31 legacy MDX lessons and the quiz fixture are now versioned at `content/curriculum/modules/` and `content/curriculum/quiz-questions.json`, and the importer reads from that repo-relative path. The content itself is still the unrevised legacy text — the P0 findings below (AdCraft/AI Mentor references, factual corrections, course-to-tier structure) are unchanged and still block the next release.
 
 ### P0. The current lesson renderer cannot faithfully display the existing curriculum
 

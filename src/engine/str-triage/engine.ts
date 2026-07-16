@@ -79,9 +79,12 @@ export function gradeStrDecisions(
     )
   );
 
-  // No wasted conversions (did you pause any high-converting terms?)
+  // Bolt optimization: Map search terms by ID to replace nested O(N*M) lookups with O(1) lookups
+  const termMap = new Map(scenario.searchTerms.map((t) => [t.id, t]));
+
+  // No wasted conversions (did you pause any high-converting terms?) (optimized with O(1) Map lookup)
   const wastedConversions = decisions.filter((d) => {
-    const term = scenario.searchTerms.find((t) => t.id === d.searchTermId);
+    const term = termMap.get(d.searchTermId);
     if (!term || term.orders === 0) return false;
     // If they paused a term with orders, that was wrong
     return d.action === 'pause';
@@ -95,9 +98,9 @@ export function gradeStrDecisions(
     )
   );
 
-  // Negatives applied (did you add negatives for clear junk?)
+  // Negatives applied (did you add negatives for clear junk?) (optimized with O(1) Map lookup)
   const clearJunkNegated = decisions.filter((d) => {
-    const term = scenario.searchTerms.find((t) => t.id === d.searchTermId);
+    const term = termMap.get(d.searchTermId);
     if (!term) return false;
     const refAction = scenario.referenceActions[term.id];
     if (refAction !== 'negate-exact' && refAction !== 'negate-phrase') return false;
@@ -106,7 +109,7 @@ export function gradeStrDecisions(
     return term.orders === 0;  // clear junk if no orders
   });
   const clearJunkCount = decisions.filter((d) => {
-    const term = scenario.searchTerms.find((t) => t.id === d.searchTermId);
+    const term = termMap.get(d.searchTermId);
     if (!term) return false;
     const refAction = scenario.referenceActions[term.id];
     return refAction === 'negate-exact' || refAction === 'negate-phrase';
@@ -121,14 +124,14 @@ export function gradeStrDecisions(
     )
   );
 
-  // Conversions kept (did you keep terms with sales?)
+  // Conversions kept (did you keep terms with sales?) (optimized with O(1) Map lookup)
   const keptConverters = decisions.filter((d) => {
-    const term = scenario.searchTerms.find((t) => t.id === d.searchTermId);
+    const term = termMap.get(d.searchTermId);
     if (!term || term.orders === 0) return false;
     return d.action === 'keep' || d.action === 'optimize-bid';
   });
   const shouldKeep = decisions.filter((d) => {
-    const term = scenario.searchTerms.find((t) => t.id === d.searchTermId);
+    const term = termMap.get(d.searchTermId);
     return term && term.orders > 0;
   }).length;
   criteria.push(
