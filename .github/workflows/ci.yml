@@ -53,6 +53,11 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # Prisma 7 removed @prisma/client's install-time auto-generate, so the
+      # client must be generated before anything typechecks against it.
+      - name: Generate Prisma client
+        run: pnpm prisma generate
+
       - name: TypeScript check
         run: pnpm typecheck
 
@@ -68,9 +73,6 @@ jobs:
         run: |
           pnpm prisma format --check
           pnpm prisma validate
-
-      - name: Generate Prisma client
-        run: pnpm prisma generate
 
       - name: Apply migrations
         run: pnpm prisma migrate deploy
