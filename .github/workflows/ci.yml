@@ -36,7 +36,7 @@ jobs:
       NODE_ENV: test
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # gitleaks diffs the PR commit against its parent (`git log <sha>^..<sha>`),
           # which needs that parent to exist locally. The default shallow
@@ -44,15 +44,17 @@ jobs:
           # revision" on every PR regardless of what changed.
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
 
+      # Prisma 7 removed @prisma/client's install-time auto-generate, so the
+      # client must be generated before anything typechecks against it.
       - name: Generate Prisma client
         run: pnpm prisma generate
 
@@ -125,11 +127,11 @@ jobs:
       JWT_SECRET: test-secret-min-32-characters-long-aaaaaaaa
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
@@ -149,7 +151,7 @@ jobs:
 
       - run: pnpm test:e2e
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-report
@@ -183,11 +185,11 @@ jobs:
       JWT_SECRET: test-secret-min-32-characters-long-aaaaaaaa
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
@@ -204,7 +206,7 @@ jobs:
       - run: pnpm build
 
       - name: Run Lighthouse CI
-        uses: treosh/lighthouse-ci-action@v11
+        uses: treosh/lighthouse-ci-action@v12
         with:
           configPath: .lighthouserc.json
           uploadArtifacts: true
