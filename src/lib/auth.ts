@@ -15,13 +15,22 @@
 import 'server-only';
 
 import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
-import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
+import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { db } from './db';
 import { type UserRole } from './enums';
 import { log } from './logger';
 import { trace } from './tracing';
+
+function scryptAsync(password: string, salt: string, keylen: number): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    scrypt(password, salt, keylen, (err, derivedKey) => {
+      if (err) reject(err);
+      else resolve(derivedKey);
+    });
+  });
+}
 
 const AUTH_COOKIE = 'amph_auth';
 const TOKEN_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
@@ -41,20 +50,20 @@ function getSecret(): Uint8Array {
 // Password hashing (scrypt, format: scrypt$<salt-hex>$<hash-hex>)
 // ---------------------------------------------------------------------------
 
-export function hashPassword(password: string): string {
+export async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16).toString('hex');
-  const hash = scryptSync(password, salt, 64).toString('hex');
-  return `scrypt$${salt}$${hash}`;
+  const hash = await scryptAsync(password, salt, 64);
+  return `scrypt$${salt}$${hash.toString('hex')}`;
 }
 
-export function verifyPassword(password: string, stored: string): boolean {
+export async function verifyPassword(password: string, stored: string): Promise<boolean> {
   const parts = stored.split('$');
   if (parts.length !== 3 || parts[0] !== 'scrypt') return false;
   const [, salt, hashHex] = parts;
   if (!salt || !hashHex) return false;
 
   const expected = Buffer.from(hashHex, 'hex');
-  const actual = scryptSync(password, salt, 64);
+  const actual = await scryptAsync(password, salt, 64);
   if (expected.length !== actual.length) return false;
   return timingSafeEqual(expected, actual);
 }

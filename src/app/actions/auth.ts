@@ -51,7 +51,7 @@ export const signUpAction = createSafeAction(signUpSchema, async (data) => {
       where: { id: existing.id },
       data: {
         name: data.name ?? existing.name,
-        passwordHash: hashPassword(data.password),
+        passwordHash: await hashPassword(data.password),
         emailVerified: new Date(),
       },
     });
@@ -69,7 +69,7 @@ export const signUpAction = createSafeAction(signUpSchema, async (data) => {
     data: {
       email: data.email,
       name: data.name,
-      passwordHash: hashPassword(data.password),
+      passwordHash: await hashPassword(data.password),
       role: 'STUDENT',
       status: 'ACTIVE',
       emailVerified: new Date(),
@@ -108,7 +108,7 @@ export const signInAction = createSafeAction(signInSchema, async (data) => {
     throw new Error('This account is suspended. Contact support.');
   }
 
-  if (!verifyPassword(data.password, user.passwordHash)) {
+  if (!(await verifyPassword(data.password, user.passwordHash))) {
     throw new Error('Email or password is incorrect.');
   }
 

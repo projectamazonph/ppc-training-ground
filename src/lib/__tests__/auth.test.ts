@@ -45,27 +45,27 @@ describe('auth.ts', () => {
 
   // ── Password hashing (existing) ──────────────────────────────────────────
 
-  it('hashPassword returns scrypt format', () => {
-    const hash = hashPassword('password123');
+  it('hashPassword returns scrypt format', async () => {
+    const hash = await hashPassword('password123');
     expect(hash).toMatch(/^scrypt\$[0-9a-f]+\$[0-9a-f]+$/);
   });
 
-  it('verifyPassword accepts correct password and rejects wrong', () => {
-    const hash = hashPassword('password123');
-    expect(verifyPassword('password123', hash)).toBe(true);
-    expect(verifyPassword('wrong', hash)).toBe(false);
+  it('verifyPassword accepts correct password and rejects wrong', async () => {
+    const hash = await hashPassword('password123');
+    expect(await verifyPassword('password123', hash)).toBe(true);
+    expect(await verifyPassword('wrong', hash)).toBe(false);
   });
 
-  it('verifyPassword rejects malformed stored hash', () => {
-    expect(verifyPassword('x', 'not-a-valid-hash')).toBe(false);
+  it('verifyPassword rejects malformed stored hash', async () => {
+    expect(await verifyPassword('x', 'not-a-valid-hash')).toBe(false);
   });
 
-  it('verifyPassword rejects empty salt in stored hash', () => {
-    expect(verifyPassword('x', 'scrypt$$hash')).toBe(false);
+  it('verifyPassword rejects empty salt in stored hash', async () => {
+    expect(await verifyPassword('x', 'scrypt$$hash')).toBe(false);
   });
 
-  it('verifyPassword rejects wrong-length hash hex', () => {
-    expect(verifyPassword('x', 'scrypt$salt$ab')).toBe(false);
+  it('verifyPassword rejects wrong-length hash hex', async () => {
+    expect(await verifyPassword('x', 'scrypt$salt$ab')).toBe(false);
   });
 
   // ── JWT sign/verify (existing) ──────────────────────────────────────────
