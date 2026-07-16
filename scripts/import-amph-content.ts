@@ -258,7 +258,7 @@ async function importLessons(moduleIdByNumber: Map<number, string>): Promise<num
       const convertedBody = convertCurrency(body);
       const convertedTitle = convertCurrency(frontmatter.title ?? '');
 
-      // Build slug from filename: "1.1-what-is-ppc.mdx" → "1-1-what-is-ppc"
+      // Build slug from filename: "1.2-cpc-ctr.mdx" → "1.2-cpc-ctr"
       const fileSlug = file.replace('.mdx', '');
       const lessonSlug = `${meta.courseSlug}-${fileSlug}`;
 
