@@ -1,4 +1,4 @@
-# AI Feature Removal — AMPH Academy
+# AI Feature Removal — Project Amazon PH Academy
 
 **Status:** Approved
 **Owner:** Ryan Roland Dabao
@@ -8,7 +8,7 @@
 
 ## The Rule
 
-> AMPH Academy uses zero external AI APIs. Zero AI features ship to production. No mentor chat, no AI-powered mistake analysis, no AI-generated content, no AI scoring.
+> Project Amazon PH Academy uses zero external AI APIs. Zero AI features ship to production. No mentor chat, no AI-powered mistake analysis, no AI-generated content, no AI scoring.
 
 This is a product decision, not a temporary cost-saving measure. The platform is human-authored content with deterministic, rule-based scoring.
 

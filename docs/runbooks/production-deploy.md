@@ -4,7 +4,7 @@
 **Audience:** Ryan (and any future operator)
 **Last verified:** 2026-07-13
 
-This runbook takes AMPH Academy v2 from a clean `main` to a stable production deployment on Vercel. It is written to be runnable top-to-bottom by someone who did not write it. Every command is copy-pasteable; every gate has a clear pass/fail signal.
+This runbook takes Project Amazon PH Academy v2 from a clean `main` to a stable production deployment on Vercel. It is written to be runnable top-to-bottom by someone who did not write it. Every command is copy-pasteable; every gate has a clear pass/fail signal.
 
 ---
 
@@ -72,13 +72,17 @@ Neon manages connection pooling automatically. Verify before deploy:
 psql "$DATABASE_URL" -c "SELECT version();"
 ```
 
-Expected: a Postgres 16+ version string from Neon. Then run pending migrations (Vercel build does this automatically via `postinstall`, but verify the dev branch is in sync):
+Expected: a Postgres 16+ version string from Neon. Then run pending migrations. **This is a manual, required step** — there is no `postinstall` hook, so the Vercel build does NOT apply migrations for you:
 
 ```bash
 DATABASE_URL=<prod_url> npx prisma migrate deploy
 ```
 
-Expected: `5 migrations found in prisma/migrations` and `Already in sync, no migration found to apply` (or it applies any pending ones).
+Expected: `1 migration found in prisma/migrations` (the 2026-07-16 squashed
+PostgreSQL baseline `20260716000000_init_postgresql`) and either `Already in
+sync` or it applies the baseline. If the target database has tables from a
+pre-squash deploy, use `prisma migrate resolve --applied 20260716000000_init_postgresql`
+once to baseline it instead of re-applying.
 
 ---
 

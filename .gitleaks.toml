@@ -1,0 +1,17 @@
+# Gitleaks config — extends the default ruleset.
+#
+# Allowlists test files only: unit tests construct fake secrets (e.g. the
+# PayMongo webhook-signature fixtures) to exercise verification code paths.
+# Real config must never live in test files; anything outside these paths is
+# still scanned with the full default ruleset.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Fake secrets in test fixtures"
+paths = [
+  '''(^|/)__tests__/''',
+  '''\.test\.(ts|tsx)$''',
+  '''^tests/e2e/''',
+]

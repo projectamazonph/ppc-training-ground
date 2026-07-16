@@ -24,8 +24,9 @@ Wire Sentry alerts to Slack and schedule a daily health summary at 9am.
     title+count+url+deployLink card to Slack.
   - `--mode=summary --date=YYYY-MM-DD` (called from daily cron): posts
     error counts + top 3 issues + p95 response time.
-- `.github/workflows/ci.yml` — `sentry-alert` cron job (daily 09:00 UTC) that
-  invokes `scripts/sentry-slack-alert.ts`.
+- `.github/workflows/sentry-alert.yml` — dedicated alert workflow (split out of
+  `ci.yml` during the 2026-07-14 hardening) with a daily 01:00 UTC (09:00 PHT)
+  summary + every-30-min spike check that invokes `scripts/sentry-slack-alert.ts`.
 - `.env.example` — `SLACK_WEBHOOK_URL` and supporting `SENTRY_API_TOKEN` /
   `SENTRY_HOST` / `SENTRY_ORG` / `SENTRY_PROJECT`.
 
@@ -40,6 +41,6 @@ Wire Sentry alerts to Slack and schedule a daily health summary at 9am.
 - The 10-minute deploy suppression is implemented as an in-memory flag toggled
   by an external deploy pipeline (Vercel deploy hook → `/api/internal/deploy-flags`,
   not yet built; for now the script also accepts `--suppress-deploy=1`).
-- Summary cron time is 09:00 UTC = 17:00 PHT, intentionally outside the
-  Filipino peak study window so admin notifications don't compete with
-  classroom hours.
+- Summary cron time is 01:00 UTC = 09:00 PHT (PHT = UTC+8), intentionally
+  inside the Filipino peak study-prep window so admins see the daily summary
+  before students log in for the day's classes.

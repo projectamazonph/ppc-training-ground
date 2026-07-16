@@ -72,7 +72,7 @@ describe('auth actions', () => {
     (db.user.create as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
       id: 'u2', email: 'new@b.com', name: 'New', role: 'STUDENT', status: 'ACTIVE', emailVerified: null, lastActiveAt: null, createdAt: new Date(), updatedAt: new Date(), deletedAt: null,
     });
-    const result = await signUpAction({ email: 'new@b.com', password: 'pass1234', name: 'New' });
+    const result = await signUpAction({ email: 'new@b.com', password: 'pass1234', confirmPassword: 'pass1234', name: 'New' });
     expect(result.success).toBe(true);
     expect((result as any).data.userId).toBe('u2');
   });

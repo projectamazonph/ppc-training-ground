@@ -1,4 +1,4 @@
-// AMPH Academy v2 — Prisma Schema
+// Project Amazon PH Academy v2 — Prisma Schema
 // Source of truth: docs/db-schema.md
 // Day-1 design: no orgId, no legacy tables, all mutable tables have
 // deletedAt + createdById + updatedById (ADR-012, ADR-014).
@@ -12,7 +12,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 // ============================================================================
@@ -784,13 +783,14 @@ model ProcessedWebhook {
 
 model Invoice {
   id                  String    @id @default(cuid())
-  // Sequential number formatted as zero-padded 5-digit string ("00001", "00002").
+  // Sequential per-year number stored as "<year>-<5-digit seq>" ("2026-00001").
+  // Legacy rows may use the old dashless format ("000012026").
   number              String    @unique
   paymentId           String    @unique
   userId              String
   // BIR-required fields.
   businessTin         String    @default("000-000-000-000")
-  businessName        String    @default("AMPH Academy")
+  businessName        String    @default("Project Amazon PH Academy")
   businessAddress     String    @default("Philippines")
   // Amounts stored as centavos.
   grossAmountCentavos Int

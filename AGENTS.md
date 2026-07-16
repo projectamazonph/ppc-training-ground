@@ -1,4 +1,4 @@
-# AGENTS.md — AMPH Academy v2
+# AGENTS.md — Project Amazon PH Academy v2
 
 Conventions for AI coding assistants and developers working on this codebase.
 

@@ -4,32 +4,33 @@
  * Sprint 6 — STORY-029.
  *
  * Numbers and amounts:
- *   - Invoice.number is a zero-padded 5-digit string ("00001"). Displayed
- *     as "BS 00001-2026" (where 2026 is the year issued). The display
- *     format is a presentation concern; storage is the raw zero-pad.
- *   - Amounts on Invoice are in CENTAVOS (per schema comment) — different
- *     from Payment.amountPhp which is whole PHP. The conversion happens
- *     in `issueInvoiceForPayment`.
+ *   - Invoice.number is stored as "<year>-<5-digit sequence>" ("2026-00001").
+ *     Displayed as "BS 00001-2026". Legacy rows may use the old dashless
+ *     format ("000012026") — the PDF renderer parses both.
+ *   - ALL money fields store CENTAVOS (Payment.amountPhp included — the
+ *     `*Php` names are historical; see docs/security/code-audit-2026-07-15.md).
  *   - VAT: standard Philippine VAT-inclusive pricing. For a gross of
- *     X pesos, net = X / 1.12, vat = X - net. Rounded to nearest centavo.
+ *     X, net = X / 1.12, vat = X - net. Rounded to nearest centavo.
  *
  * Storage:
- *   - PDFs render server-side and write to `public/receipts/{invoiceId}.pdf`
- *   - The relative path is stored on Invoice.pdfUrl
- *   - This is the SWAP POINT for Vercel Blob integration in production
- *     — replace `writePdfToStorage` with a `@vercel/blob` upload call.
- *     The data shape stays the same; only the storage layer changes.
+ *   - PDFs render server-side into the OS temp dir (writable on Vercel,
+ *     ephemeral — the authed route re-renders on cache miss). They must
+ *     NEVER go under `public/`: that serves BIR receipts (name + email)
+ *     statically with no auth, and the bundle FS is read-only on Vercel.
+ *   - This is the SWAP POINT for durable storage — replace the fs write
+ *     with a private Vercel Blob upload. The data shape stays the same.
  */
 
 import 'server-only';
 
+import os from 'node:os';
 import path from 'node:path';
 import { promises as fs } from 'node:fs';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { db } from './db';
 import { ReceiptDocument, type ReceiptData } from './receipt-pdf';
 
-const PUBLIC_RECEIPTS_DIR = path.join(process.cwd(), 'public', 'receipts');
+export const RECEIPTS_DIR = path.join(os.tmpdir(), 'amph-receipts');
 
 /**
  * Build the receipt number for a given year + 5-digit sequence.
@@ -41,30 +42,23 @@ export function formatReceiptNumber(sequence: number, year: number): string {
 
 /**
  * Find the next available sequence number for invoices issued in a given
- * calendar year. We look at the maximum numeric suffix across all invoices
- * with the current year's receipts and add 1. If no invoices exist for
- * the year, start at 1.
- *
- * The implementation parses Invoice.number as a string. It assumes the
- * canonical format is a 5-digit zero-padded sequence (per schema comment).
+ * calendar year. Looks at the highest stored number with the "<year>-"
+ * prefix and adds 1; starts at 1 when the year has no invoices yet.
+ * Zero-padding makes lexicographic `orderBy: desc` equal numeric ordering.
  */
 export async function nextInvoiceSequence(year: number): Promise<number> {
-  const yearSuffix = String(year);
-  // All Invoice.number values are zero-padded 5-digit strings, so the
-  // natural string ordering is the same as numeric ordering for the
-  // same length. Filter by checking the last 4 chars match the year.
-  const allThisYear = await db.invoice.findMany({
-    where: { deletedAt: null },
+  const prefix = `${year}-`;
+  const latest = await db.invoice.findFirst({
+    where: {
+      deletedAt: null,
+      number: { startsWith: prefix },
+    },
+    orderBy: { number: 'desc' },
     select: { number: true },
   });
-  let max = 0;
-  for (const inv of allThisYear) {
-    if (inv.number.length >= 4 && inv.number.slice(-4) === yearSuffix) {
-      const seq = parseInt(inv.number.slice(0, 5), 10);
-      if (Number.isFinite(seq) && seq > max) max = seq;
-    }
-  }
-  return max + 1;
+  if (!latest) return 1;
+  const seq = parseInt(latest.number.split('-')[1] ?? '', 10);
+  return Number.isFinite(seq) ? seq + 1 : 1;
 }
 
 /**
@@ -99,31 +93,43 @@ export async function issueInvoiceForPayment(
   });
   if (!payment) throw new Error(`Payment ${paymentId} not found`);
 
-  // Compute sequence + display number
   const issuedAt = payment.paidAt ?? new Date();
   const year = issuedAt.getUTCFullYear();
-  const sequence = await nextInvoiceSequence(year);
-  const number = `${String(sequence).padStart(5, '0')}${year}`;
 
-  // VAT split (inclusive pricing: gross = net + vat, where vat = 12% of net)
-  const grossCentavos = payment.amountPhp * 100;
+  // VAT split (inclusive pricing: gross = net + vat, where vat = 12% of net).
+  // payment.amountPhp already stores centavos.
+  const grossCentavos = payment.amountPhp;
   const netCentavos = Math.round(grossCentavos / 1.12);
   const vatCentavos = grossCentavos - netCentavos;
 
-  const invoice = await db.invoice.create({
-    data: {
-      number,
-      paymentId: payment.id,
-      userId: payment.userId,
-      grossAmountCentavos: grossCentavos,
-      vatAmountCentavos: vatCentavos,
-      netAmountCentavos: netCentavos,
-      issuedAt,
-    },
-    select: { id: true, number: true },
-  });
-
-  return { id: invoice.id, number: invoice.number, isNew: true };
+  // Sequence + create with retry: two concurrent payments can compute the
+  // same sequence; the @unique constraint on `number` rejects the loser,
+  // which recomputes and tries again.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const sequence = await nextInvoiceSequence(year);
+    const number = `${year}-${String(sequence).padStart(5, '0')}`;
+    try {
+      const invoice = await db.invoice.create({
+        data: {
+          number,
+          paymentId: payment.id,
+          userId: payment.userId,
+          grossAmountCentavos: grossCentavos,
+          vatAmountCentavos: vatCentavos,
+          netAmountCentavos: netCentavos,
+          issuedAt,
+        },
+        select: { id: true, number: true },
+      });
+      return { id: invoice.id, number: invoice.number, isNew: true };
+    } catch (e) {
+      const isUniqueViolation =
+        e instanceof Error && 'code' in e && (e as { code?: string }).code === 'P2002';
+      if (!isUniqueViolation || attempt === 2) throw e;
+    }
+  }
+  // Unreachable — the loop either returns or throws.
+  throw new Error(`Failed to issue invoice for payment ${paymentId}`);
 }
 
 /**
@@ -163,9 +169,11 @@ export async function renderInvoicePdf(
   });
   if (!invoice) throw new Error(`Invoice ${invoiceId} not found`);
 
-  // Build the display number from the stored year-suffix.
-  const year = invoice.number.slice(-4);
-  const seq = invoice.number.slice(0, 5);
+  // Build the display number. Canonical format is "2026-00001"; legacy
+  // rows use the dashless "000012026" (5-digit seq + 4-digit year).
+  const [year, seq] = invoice.number.includes('-')
+    ? invoice.number.split('-')
+    : [invoice.number.slice(-4), invoice.number.slice(0, 5)];
   const receiptNumber = `BS ${seq}-${year}`;
 
   const data: ReceiptData = {
@@ -189,17 +197,18 @@ export async function renderInvoicePdf(
 
   const buffer = await renderToBuffer(<ReceiptDocument data={data} />);
   const fileName = `${invoice.id}.pdf`;
-  const absPath = path.join(PUBLIC_RECEIPTS_DIR, fileName);
-  await fs.mkdir(PUBLIC_RECEIPTS_DIR, { recursive: true });
+  const absPath = path.join(RECEIPTS_DIR, fileName);
+  await fs.mkdir(RECEIPTS_DIR, { recursive: true });
   await fs.writeFile(absPath, buffer);
-  const publicPath = `/receipts/${fileName}`;
 
+  // The only download path is the authed, owner-checked API route.
+  const pdfUrl = `/api/invoices/${invoice.id}/pdf`;
   await db.invoice.update({
     where: { id: invoice.id },
-    data: { pdfUrl: publicPath },
+    data: { pdfUrl },
   });
 
-  return { pdfPath: publicPath, receiptNumber };
+  return { pdfPath: pdfUrl, receiptNumber };
 }
 
 /**

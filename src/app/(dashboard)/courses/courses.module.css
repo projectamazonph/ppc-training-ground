@@ -1,0 +1,43 @@
+.courseGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .courseGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.courseLink {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.courseLink:hover {
+  text-decoration: none;
+}
+
+.progressBar {
+  height: 4px;
+  background: var(--surface-2);
+  border-radius: var(--radius-full);
+  margin: var(--space-3) 0 var(--space-2);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: var(--radius-full);
+  transition: width var(--duration-base) var(--ease-out);
+}
+
+.courseMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-xs);
+  color: var(--ink-500);
+}

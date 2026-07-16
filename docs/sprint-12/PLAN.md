@@ -10,7 +10,7 @@
 
 ## Goal
 
-Ship AMPH Academy to production. Drive the project from "code complete" to a
+Ship Project Amazon PH Academy to production. Drive the project from "code complete" to a
 live, monitored, backed-up, audited platform with a coordinated launch comms
 drop. No new features; this sprint is purely about getting Sprints 1–11 into
 the hands of paying students safely.
@@ -80,7 +80,7 @@ budgets pass on production URL.
 **Acceptance**
 - [ ] Production URL returns 200 for `/`, `/dashboard`, `/pricing`, `/courses`. *(Operator runs `scripts/smoke-prod.sh`.)*
 - [ ] Sentry shows a release for the production deploy SHA.
-- [ ] Slack `#amph-alerts` receives the next 09:00 UTC summary.
+- [ ] Slack `#amph-alerts` receives the next 01:00 UTC (09:00 PHT) summary.
 - [ ] Lighthouse CI run on production passes all 6 budgets.
 
 ### STORY-057 — Launch communications (1 pt) ✅ (drafts ready, operator schedules)

@@ -1,19 +1,25 @@
-'use server';
-
 /**
  * Resend Webhook — email delivery tracking.
  *
  * Handles: delivered, bounced, complained (spam), unsubscribed events.
- * Signature verification is optional (enabled when RESEND_WEBHOOK_SECRET is set).
  *
- * Note: Resend may send events as type "text/plain" with raw JSON in the body,
- * so we handle both JSON and text/plain content types.
+ * Resend signs webhooks with Svix: headers `svix-id`, `svix-timestamp`,
+ * `svix-signature`, where the signature is
+ *   base64( HMAC-SHA256( base64decode(secret without "whsec_"),
+ *                        `${svix-id}.${svix-timestamp}.${rawBody}` ) )
+ * and `svix-signature` may carry several space-separated `v1,<sig>`
+ * candidates (key rotation). The previous implementation checked a
+ * nonexistent `resend-signature` hex HMAC and read the body twice — no
+ * genuine event could ever pass (audit finding M1).
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createHmac } from 'crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
+import { logger } from '@/lib/logger';
 
-const RESEND_WEBHOOK_SECRET = process.env.RESEND_WEBHOOK_SECRET;
+export const runtime = 'nodejs';
+
+const TIMESTAMP_TOLERANCE_SECONDS = 5 * 60;
 
 interface ResendWebhookPayload {
   type: 'email.delivered' | 'email.bounced' | 'email.complained' | 'email.unsubscribed';
@@ -24,49 +30,67 @@ interface ResendWebhookPayload {
   };
 }
 
-/**
- * Verify the Resend webhook signature (HMAC-SHA256).
- * Returns true if verification is disabled (no secret set) or valid.
- */
-async function verifySignature(req: NextRequest): Promise<boolean> {
-  if (!RESEND_WEBHOOK_SECRET) return true;
+function safeEqual(a: string, b: string): boolean {
+  const aBuf = Buffer.from(a, 'utf8');
+  const bBuf = Buffer.from(b, 'utf8');
+  if (aBuf.length !== bBuf.length) return false;
+  return timingSafeEqual(aBuf, bBuf);
+}
 
-  const signature = req.headers.get('resend-signature') ?? '';
-  if (!signature) return false;
+/** Verify the Svix signature over the raw body. */
+function verifySvixSignature(
+  secret: string,
+  svixId: string,
+  svixTimestamp: string,
+  svixSignature: string,
+  rawBody: string,
+): boolean {
+  // Reject stale or far-future timestamps (replay protection).
+  const ts = Number(svixTimestamp);
+  if (!Number.isFinite(ts)) return false;
+  if (Math.abs(Date.now() / 1000 - ts) > TIMESTAMP_TOLERANCE_SECONDS) return false;
 
-  try {
-    const payload = await req.text();
-    const expectedSig = createHmac('sha256', RESEND_WEBHOOK_SECRET)
-      .update(payload)
-      .digest('hex');
-    // Timing-safe comparison
-    if (signature.length !== expectedSig.length) return false;
-    let mismatch = 0;
-    for (let i = 0; i < signature.length; i++) {
-      mismatch |= signature.charCodeAt(i) ^ expectedSig.charCodeAt(i);
-    }
-    return mismatch === 0;
-  } catch {
-    return false;
-  }
+  const secretBytes = Buffer.from(
+    secret.startsWith('whsec_') ? secret.slice('whsec_'.length) : secret,
+    'base64',
+  );
+  const expected = createHmac('sha256', secretBytes)
+    .update(`${svixId}.${svixTimestamp}.${rawBody}`)
+    .digest('base64');
+
+  // Header format: "v1,<base64> v1,<base64> ..." — accept any candidate.
+  return svixSignature
+    .split(' ')
+    .map((part) => part.split(',')[1])
+    .filter((sig): sig is string => Boolean(sig))
+    .some((sig) => safeEqual(sig, expected));
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
-  if (!(await verifySignature(req))) {
+  const secret = process.env.RESEND_WEBHOOK_SECRET;
+  if (!secret) {
+    logger.error('RESEND_WEBHOOK_SECRET not set — rejecting webhook');
+    return NextResponse.json({ error: 'Webhook secret not configured.' }, { status: 500 });
+  }
+
+  // Read the body exactly once — it is a one-shot stream.
+  const rawBody = await req.text();
+
+  const svixId = req.headers.get('svix-id');
+  const svixTimestamp = req.headers.get('svix-timestamp');
+  const svixSignature = req.headers.get('svix-signature');
+  if (
+    !svixId ||
+    !svixTimestamp ||
+    !svixSignature ||
+    !verifySvixSignature(secret, svixId, svixTimestamp, svixSignature, rawBody)
+  ) {
     return NextResponse.json({ error: 'Invalid signature.' }, { status: 401 });
   }
 
   let payload: ResendWebhookPayload;
-  const contentType = req.headers.get('content-type') ?? '';
-
   try {
-    const body = await req.text();
-    payload = contentType.includes('text/plain')
-      ? (JSON.parse(body) as ResendWebhookPayload)
-      : (await import('stream').then(({ Readable }) => {
-          // Re-parse from the text we already read
-          return JSON.parse(body) as ResendWebhookPayload;
-        }));
+    payload = JSON.parse(rawBody) as ResendWebhookPayload;
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body.' }, { status: 400 });
   }
@@ -76,34 +100,23 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   switch (type) {
     case 'email.delivered':
-      console.info(
-        `[resend-webhook] delivered email_id=${data.email_id} to=${toAddresses.join(',')}`,
-      );
+      logger.info({ emailId: data.email_id, to: toAddresses }, 'Email delivered');
       break;
 
     case 'email.bounced':
-      console.warn(
-        `[resend-webhook] BOUNCED email_id=${data.email_id} to=${toAddresses.join(',')}`,
-      );
-      // Future: mark user email as bounced in DB to suppress further sends.
+      logger.warn({ emailId: data.email_id, to: toAddresses }, 'Email bounced');
       break;
 
     case 'email.complained':
-      console.warn(
-        `[resend-webhook] SPAM COMPLAINT email_id=${data.email_id} to=${toAddresses.join(',')}`,
-      );
-      // Future: add to Resend suppression list or mark in DB.
+      logger.warn({ emailId: data.email_id, to: toAddresses }, 'Email spam complaint');
       break;
 
     case 'email.unsubscribed':
-      console.info(
-        `[resend-webhook] unsubscribed email_id=${data.email_id} to=${toAddresses.join(',')}`,
-      );
-      // Future: record unsubscribe preference in DB.
+      logger.info({ emailId: data.email_id, to: toAddresses }, 'Email unsubscribed');
       break;
 
     default:
-      console.info(`[resend-webhook] unhandled event type=${type}`);
+      logger.info({ type }, 'Unhandled resend webhook event');
   }
 
   return NextResponse.json({ received: true });

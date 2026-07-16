@@ -37,7 +37,7 @@ verify Prisma row-level guards on every multi-tenant endpoint.
 | 1 | PayMongo webhook HMAC not verified | High | **Open issue**, flagged for post-launch bugfix |
 | 2 | CSP header not configured in next.config.ts | Medium | Deferred to Sprint 13 (#S13-001) |
 | 3 | `RESEND_WEBHOOK_SECRET` must be set in Vercel prod | Medium | Verify during deploy pre-flight (STORY-056) |
-| 4 | 3 broken Vitest mocks (test coverage gap, not runtime) | Low | Post-launch bugfix |
+| 4 | ~~3 broken Vitest mocks~~ — **stale claim** (removed 2026-07-14; `requireAuth` mocked at `tool-actions.test.ts:21–24`). **Verified by CI**. | Low | Post-launch bugfix |
 | 5 | Pre-existing TS7006 errors in admin/course pages | Low | Out of scope |
 
 ## Verification

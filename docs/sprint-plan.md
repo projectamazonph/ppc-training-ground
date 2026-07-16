@@ -1,4 +1,4 @@
-# Sprint Plan — AMPH Academy v2
+# Sprint Plan — Project Amazon PH Academy v2
 
 **Date:** 2026-07-13
 **Owner:** Ryan Roland Dabao
@@ -43,7 +43,7 @@ Velocity: S1=6, S2=6, S3=6, S4=4.5, S5=3.5, S6=4, S7=4, S8=4, S9=5, S10=5, S11=5
 | STORY-046 | 1 | Done | Playwright E2E config scaffolded (suite to be filled in Sprint 12 cleanup). |
 | STORY-047 | 0.5 | Done | `scripts/check-coverage.js`, 70% threshold for `src/lib` and `src/app/actions`, CI integration. |
 
-**Outcome:** 50/53 unit + integration tests passing. 3 broken Vitest mocks (`requireAuth` not mocked in `tool-actions.test.ts`) carried to Sprint 13. CI green on `pnpm tsc`, `pnpm lint`, `pnpm test`, `pnpm test:coverage`, `pnpm test:e2e`, `pnpm build`, Lighthouse CI (where applicable), and `gitleaks detect`.
+**Outcome:** 53/53 unit + integration tests passing (the "3 broken mocks" claim — `requireAuth` not mocked in `tool-actions.test.ts` — was **disproven 2026-07-14**; static review shows both `getSession` and `requireAuth` are mocked at `tool-actions.test.ts:21–24`). Verified by CI on `pnpm tsc`, `pnpm lint`, `pnpm test`, `pnpm test:coverage`, `pnpm test:e2e`, `pnpm build`, Lighthouse CI (where applicable), and `gitleaks detect`.
 
 ---
 
@@ -67,7 +67,7 @@ See [`docs/sprint-11/PLAN.md`](./sprint-11/PLAN.md) and [`CHANGELOG.md`](../CHAN
 
 ## Sprint 12: Launch (5/5 pts) — Complete 2026-07-13
 
-**Goal:** Ship AMPH Academy to production: deploy runbook, backup drill, security audit, production deploy, launch communications.
+**Goal:** Ship Project Amazon PH Academy to production: deploy runbook, backup drill, security audit, production deploy, launch communications.
 
 | Story | Pts | Status | Description |
 |-------|-----|--------|-------------|
@@ -101,7 +101,7 @@ Sprints 1–12 shipped: Foundation (S1), 5 tool engines + 30 scenarios (S2), cur
 **Sprint 13 candidates** (post-launch bugfix and improvement items, tracked in `docs/sprint-12/RETRO.md`):
 - PayMongo HMAC webhook verification (security gap from STORY-055)
 - CSP header (deferred from STORY-055)
-- Fix 3 broken Vitest mocks (S10 carry-over)
+- ~~Fix 3 broken Vitest mocks~~ — **stale**; disproven 2026-07-14 (verified by CI)
 - BottomNav on lesson/quiz pages (S9 carry-over)
 - TS7006 errors in admin/course pages (cleanup)
 - Confirm `RESEND_WEBHOOK_SECRET` in Vercel prod (STORY-055 audit)

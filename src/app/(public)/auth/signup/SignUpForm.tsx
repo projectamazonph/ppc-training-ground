@@ -22,14 +22,15 @@ export function SignUpForm({ error: initialError, prefilledEmail = '', nextUrl =
   async function handleSubmit(formData: FormData) {
     setError(null);
     const password = formData.get('password') as string;
-    const confirm = formData.get('confirm') as string;
-    if (password !== confirm) {
+    const confirmPassword = formData.get('confirmPassword') as string;
+    if (password !== confirmPassword) {
       setError('Passwords do not match.');
       return;
     }
     const result = await signUpAction({
       email: formData.get('email'),
       password,
+      confirmPassword,
       name: (formData.get('name') as string) || undefined,
     });
     if (result.success) {
@@ -58,7 +59,7 @@ export function SignUpForm({ error: initialError, prefilledEmail = '', nextUrl =
         placeholder="[email protected]"
       />
       <Input label="Password" type="password" name="password" autoComplete="new-password" required hint="At least 8 characters." />
-      <Input label="Confirm password" type="password" name="confirm" autoComplete="new-password" required />
+      <Input label="Confirm password" type="password" name="confirmPassword" autoComplete="new-password" required />
       <Button type="submit" variant="primary" size="lg" fullWidth loading={isPending}>
         Create account
       </Button>

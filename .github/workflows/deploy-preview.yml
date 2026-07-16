@@ -1,5 +1,9 @@
 # Preview deployment + smoke test for every PR.
 #
+# ⚠️  DEPLOYMENT DISABLED — 2026-07-14
+#     This workflow has been disabled to halt all deployments.
+#     To re-enable, remove the `if: false` condition from the preview job.
+#
 # Deploys a Vercel preview build, then runs scripts/smoke-prod.sh against the
 # preview URL and reports the result as a PR comment. Keeps "ship to preview"
 # cheap and verifiable *before* anything touches production.
@@ -28,6 +32,7 @@ jobs:
     name: Vercel Preview + Smoke
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    if: false # DEPLOYMENT DISABLED — 2026-07-14
     steps:
       - uses: actions/checkout@v4
 

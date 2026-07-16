@@ -1,5 +1,5 @@
 /**
- * Email sending via Resend — transactional email for AMPH Academy.
+ * Email sending via Resend — transactional email for Project Amazon PH Academy.
  *
  * Sprint 8 — STORY-035 / STORY-036 / STORY-037.
  *
@@ -11,8 +11,17 @@
  */
 
 import { Resend } from 'resend';
+import { BRAND_NAME } from '@/lib/brand';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy singleton: the Resend constructor throws when the API key is unset,
+// so constructing at module scope breaks `next build` (page-data collection
+// imports this module via the PayMongo webhook route). Defer until first send,
+// which is already guarded on RESEND_API_KEY being present.
+let resend: Resend | null = null;
+function getResend(): Resend {
+  resend ??= new Resend(process.env.RESEND_API_KEY);
+  return resend;
+}
 
 const FROM = process.env.RESEND_FROM_EMAIL ?? 'noreply@projectamazonph.com';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
@@ -32,7 +41,7 @@ async function sendEmail({
     return;
   }
   try {
-    const { error } = await resend.emails.send({
+    const { error } = await getResend().emails.send({
       from: FROM,
       to,
       subject,
@@ -63,7 +72,7 @@ export async function sendEnrollmentConfirmationEmail({
 }: EnrollmentEmailProps): Promise<void> {
   await sendEmail({
     to,
-    subject: `You're enrolled — ${tierName} on AMPH Academy`,
+    subject: `You're enrolled — ${tierName} on ${BRAND_NAME}`,
     react: (
       <EnrollmentConfirmationEmail
         studentName={studentName}
@@ -105,7 +114,7 @@ function EnrollmentConfirmationEmail({
             margin: '0 0 8px',
           }}
         >
-          AMPH Academy
+          {BRAND_NAME}
         </p>
         <h1
           style={{
@@ -147,7 +156,7 @@ function EnrollmentConfirmationEmail({
           margin: '20px 0 0',
         }}
       >
-        AMPH Academy · projectamazonph.com
+        {`${BRAND_NAME} · projectamazonph.com`}
       </p>
     </div>
   );
@@ -183,7 +192,7 @@ export async function sendRefundStatusEmail({
   const amount = new Intl.NumberFormat('en-PH', {
     style: 'currency',
     currency: 'PHP',
-  }).format(amountPhp);
+  }).format(amountPhp / 100); // money fields store centavos
 
   const subject =
     status === 'requested'
@@ -258,7 +267,7 @@ function RefundStatusEmail({
             margin: '0 0 8px',
           }}
         >
-          AMPH Academy
+          {BRAND_NAME}
         </p>
         <h1
           style={{
@@ -345,7 +354,7 @@ function RefundStatusEmail({
           margin: '20px 0 0',
         }}
       >
-        AMPH Academy · projectamazonph.com
+        {`${BRAND_NAME} · projectamazonph.com`}
       </p>
     </div>
   );
@@ -446,7 +455,7 @@ function LiveClassReminderEmail({
             margin: '0 0 8px',
           }}
         >
-          AMPH Academy · Live Class
+          {`${BRAND_NAME} · Live Class`}
         </p>
         <h1
           style={{
@@ -543,7 +552,7 @@ function LiveClassReminderEmail({
           margin: '20px 0 0',
         }}
       >
-        AMPH Academy · projectamazonph.com
+        {`${BRAND_NAME} · projectamazonph.com`}
       </p>
     </div>
   );

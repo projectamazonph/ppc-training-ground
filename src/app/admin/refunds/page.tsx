@@ -120,13 +120,13 @@ export default async function AdminRefundsPage() {
                           style: 'currency',
                           currency: 'PHP',
                           maximumFractionDigits: 2,
-                        }).format(r.amountPhp)}{' '}
+                        }).format(r.amountPhp / 100)}{' '}
                         of{' '}
                         {new Intl.NumberFormat('en-PH', {
                           style: 'currency',
                           currency: 'PHP',
                           maximumFractionDigits: 2,
-                        }).format(r.payment.amountPhp)}{' '}
+                        }).format(r.payment.amountPhp / 100)}{' '}
                         · {r.payment.method} · {ageLabel}
                       </p>
                       <p className={styles.rowReason}>

@@ -20,7 +20,7 @@ budgets pass on production URL.
       *(Verified automatically by `scripts/smoke-prod.sh`.)*
 - [x] Sentry shows a release for the production deploy SHA.
       *(Verified via Sentry releases page.)*
-- [x] Slack `#amph-alerts` receives the next 09:00 UTC summary.
+- [x] Slack `#amph-alerts` receives the next 01:00 UTC (09:00 PHT) summary.
       *(Verified via Slack channel.)*
 - [x] Lighthouse CI run on production passes all 6 budgets.
       *(Verified via LHCI artifact.)*

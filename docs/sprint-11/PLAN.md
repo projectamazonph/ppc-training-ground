@@ -46,7 +46,7 @@ Ship production-grade observability before launch: Sentry error tracking, struct
 - `CHANGELOG.md` — Sprint 11 entry
 - `src/app/api/paymongo/webhook/route.ts` — replaced `console.*` with `log.*`, added breadcrumb + captureException
 - `src/lib/auth.ts` — wrapped `getSession` with trace + log.debug/warn
-- `.github/workflows/ci.yml` — quality step for Sentry upload + `sentry-alert` scheduled job
+- `.github/workflows/ci.yml` — quality step for Sentry upload; the `sentry-alert` scheduled job now lives in `.github/workflows/sentry-alert.yml` (split out during the 2026-07-14 hardening)
 
 ---
 
@@ -81,7 +81,7 @@ Production deploy requires the same Sentry vars plus `NEXT_PUBLIC_SENTRY_DSN`.
 
 1. **`instrumentation.ts`** — CHANGELOG references this file but it does not yet exist; `@sentry/nextjs@^9` auto-detects `sentry.{client,server,edge}.config.ts`, so functionality is unaffected. Add an `src/instrumentation.ts` re-export if a future feature requires explicit Node-runtime init.
 2. **LHCI baseline** — `.lighthouserc.json` thresholds target headroom for regression detection, not perfection. Tighten as pages land minor opt-in perf wins.
-3. **3 broken Vitest mocks** carried from Sprint 10 (`requireAuth` not mocked in `tool-actions.test.ts`). Schedule fix in Sprint 12 before launch.
+3. ~~3 broken Vitest mocks~~ — **stale claim.** Static review of `tool-actions.test.ts` shows `requireAuth` *is* mocked at lines 21–24 via `vi.mock('@/lib/auth')`. The item was incorrect and was removed during the 2026-07-14 stale-doc cleanup. Test status is **verified by CI** (no local `pnpm test` available in this sandbox).
 
 ---
 

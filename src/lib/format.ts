@@ -5,21 +5,22 @@
  * pages. Centralized here so changing the locale or currency convention
  * is a single edit.
  *
- * Convention: amounts passed in are in WHOLE PHP (not centavos) — matches
- * the Prisma `amountPhp` / `pricePhp` fields. If you have centavos,
- * divide by 100 first.
+ * Convention: all Prisma money fields (`pricePhp`, `amountPhp`,
+ * `finalAmountPhp`, `refundAmountPhp`, `minPurchasePhp`, `*Centavos`) store
+ * CENTAVOS (₱2,999.00 = 299900), matching the seed data and PayMongo's API.
+ * The `*Php` names are historical — see docs/security/code-audit-2026-07-15.md.
  */
 
 /**
- * Format a whole-PHP amount as Philippine peso currency. Default locale
+ * Format a centavo amount as Philippine peso currency. Default locale
  * is en-PH; the result includes the ₱ symbol and 2 decimal places.
  */
-export function formatPhp(amountPhp: number): string {
+export function formatPhp(amountCentavos: number): string {
   return new Intl.NumberFormat('en-PH', {
     style: 'currency',
     currency: 'PHP',
     maximumFractionDigits: 2,
-  }).format(amountPhp);
+  }).format(amountCentavos / 100);
 }
 
 /**
