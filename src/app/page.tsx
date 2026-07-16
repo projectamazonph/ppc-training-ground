@@ -137,7 +137,7 @@ export default function HomePage() {
             </p>
           </div>
           <div className={styles.footerCol}>
-            <h4>Platform</h4>
+            <h3>Platform</h3>
             <ul>
               <li><Link href="/pricing">Pricing</Link></li>
               <li><Link href="/tools/campaign-builder">Tools</Link></li>
@@ -145,7 +145,7 @@ export default function HomePage() {
             </ul>
           </div>
           <div className={styles.footerCol}>
-            <h4>Account</h4>
+            <h3>Account</h3>
             <ul>
               <li><Link href="/auth/signin">Sign in</Link></li>
               <li><Link href="/auth/signup">Sign up</Link></li>

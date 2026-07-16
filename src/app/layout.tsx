@@ -70,6 +70,8 @@ export default function RootLayout({
             <Link
               href="/"
               style={{
+                display: 'inline-block',
+                padding: 'var(--space-2) 0',
                 fontWeight: 700,
                 fontSize: 'var(--text-lg)',
                 color: 'var(--ink-900)',
