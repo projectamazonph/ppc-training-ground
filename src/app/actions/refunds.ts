@@ -153,7 +153,7 @@ export async function approveRefundAction(
   const admin = await requireAdmin();
   const parsed = approveSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0]?.message ?? 'Invalid input.' };
+    return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
   }
   const { requestId, reviewerNotes } = parsed.data;
 
@@ -305,7 +305,7 @@ export async function rejectRefundAction(
   const admin = await requireAdmin();
   const parsed = rejectSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0]?.message ?? 'Invalid input.' };
+    return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
   }
   const { requestId, reviewerNotes } = parsed.data;
 
