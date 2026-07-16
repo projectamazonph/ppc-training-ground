@@ -43,13 +43,13 @@
         },
         {
           "order": 4,
-          "question": "In a second-price auction system, how much do you actually pay per click?",
-          "optionA": "Your maximum bid amount",
-          "optionB": "One cent more than the second-highest bid",
-          "optionC": "The average of all bids",
-          "optionD": "A fixed price determined by Amazon",
+          "question": "What does your Amazon PPC bid actually control?",
+          "optionA": "The exact price you'll pay for every click",
+          "optionB": "A starting point that placement adjustments and your bid strategy then act on to set the real ceiling",
+          "optionC": "A price that never changes once the campaign is live",
+          "optionD": "A guaranteed discount of one cent below the next bidder",
           "correctAnswer": "B",
-          "explanation": "In a second-price auction, you pay just one cent more than the next highest bidder, not your full maximum bid. This means your actual CPC is often lower than your bid."
+          "explanation": "Your entered bid is the base. Placement adjustments raise it for specific placements, and your bid strategy setting decides whether the result is a hard ceiling (Fixed Bids, Dynamic Down Only) or something Amazon can raise further for likely conversions (Dynamic Up and Down). The safe habit isn't memorizing an auction formula, it's setting a defensible maximum bid and then watching your realized CPC in the reports."
         },
         {
           "order": 5,
