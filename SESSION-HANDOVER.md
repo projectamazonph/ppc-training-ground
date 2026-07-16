@@ -405,3 +405,6 @@ With TS fixed, `pnpm lint` crashed twice more, both ESLint-10-specific:
 
 ### Net effect
 All six pre-existing breaks on `main` are fixed. The 9 open Dependabot PRs can now be re-run against a green base. Note for future triage: any Dependabot PR bumping `typescript` to 7.x or `eslint` to 10.x must be declined until typescript-eslint/eslint-config-next support them (the dependabot.yml ignores now prevent these PRs from opening).
+
+### Follow-up: production-dependencies bump (supersedes Dependabot #18)
+Validated Dependabot's grouped bump (sentry 9→10.66, jose 5→6.2.3, pino 9→10.3.1, resend 4→6.17.2, zod 3→4.4.3) locally against green `main`: only one code change was required — zod 4 removed `ZodError.errors` (alias of `.issues`), used in two spots in `src/app/actions/refunds.ts`. Everything else passed untouched: typecheck clean, lint exit 0, 200/200 tests + coverage thresholds, build exit 0, and `pnpm peers check` is now fully clean (sentry 10 accepts next 16, which sentry 9 didn't). pnpm 11's built-in minimum-release-age policy auto-recorded `minimumReleaseAgeExclude` entries in `pnpm-workspace.yaml` for the fresh sentry 10.66.0 packages — kept, since non-frozen installs need them. Landed via a fresh PR from this branch because the two-line zod fix can't be pushed to Dependabot's branch; Dependabot closes #18 automatically once main satisfies the bumps.
