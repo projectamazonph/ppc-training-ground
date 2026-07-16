@@ -25,7 +25,9 @@
   --accent: #FF6B35;
   --accent-hover: #E55A2B;
   --accent-soft: #FFE5D9;
-  --accent-ink: #FFFFFF;
+  /* Deep navy, not white: white on --accent is 2.83:1 (WCAG AA needs 4.5:1
+     for body-size text); navy on --accent is 6.0:1. */
+  --accent-ink: #1A1A2E;
 
   /* Semantic */
   --success: #0E7C3A;
@@ -242,6 +244,9 @@ pre {
 
 /* Skip link for keyboard users */
 .skip-link {
+  /* inline-block so vertical padding grows the box to the 24px WCAG
+     target-size minimum (inline elements measure line-height only) */
+  display: inline-block;
   position: absolute;
   top: -100px;
   left: var(--space-4);

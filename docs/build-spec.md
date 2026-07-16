@@ -1,4 +1,4 @@
-# Build Spec — AMPH Academy v2
+# Build Spec — Project Amazon PH Academy v2
 
 **Project:** amph-v2
 **Repo:** github.com/projectamazonph/amph-v2

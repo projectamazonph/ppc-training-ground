@@ -1,296 +1,290 @@
-# AMPH Academy v2
+# Project Amazon PH Academy v2
 
-**Amazon advertising training platform for Filipino virtual assistants.**
+### Amazon PPC Training for Filipino Virtual Assistants
 
-Three courses. One outcome: the VA becomes the Amazon ads specialist clients retain at ₱60k–₱80k/month.
+**Stop earning ₱15k/month. Start charging ₱60k–₱80k/month.**
 
+Three courses. One outcome: become the Amazon ads specialist clients retain.
 
-## 📊 Codegraph
+![Landing Page](docs/screenshots/landing.png)
 
-See [codegraphs/amph-v2.md](./codegraphs/amph-v2.md) for the full dependency graph.
+---
+
+## What is Project Amazon PH Academy?
+
+Project Amazon PH Academy is an online training platform built specifically for Filipino virtual assistants who want to specialize in Amazon advertising. It's not a generic course site — every lesson, tool, and feature is designed around real-world Amazon PPC work.
+
+You learn by doing. Interactive simulators let you practice with real campaign scenarios before touching a client's account.
+
+---
+
+## What's Inside
+
+### 📚 Structured Courses
+
+Three tiered courses, each building on the last:
+
+| Course | What You Learn | Price |
+|--------|---------------|-------|
+| **PPC Foundations** | Amazon advertising basics, Sponsored Products, campaign structure, keyword research, bid management | ₱2,999 |
+| **Accelerated Mastery** | Everything in Foundations + advanced strategies, Sponsored Brands, Sponsored Display, optimization frameworks | ₱5,999 |
+| **Ultimate Transformation** | Everything in both courses + live classes, 1-on-1 support, portfolio-ready projects, job placement guidance | ₱9,999 |
+
+**Early bird deal:** First 30 enrollees pay only ₱499 — full access, not a deposit.
+
+![Course Detail](docs/screenshots/course-detail.png)
+
+### 📖 Interactive Lessons
+
+Each course breaks down into modules and lessons. You read, practice, and quiz your way through. Progress saves automatically — pick up where you left off on any device.
+
+![Lesson View](docs/screenshots/lesson.png)
+
+### 🧪 Quizzes & Knowledge Checks
+
+After each module, a quiz tests what you learned. Score above the passing threshold to unlock the next module. No guessing — each question targets a real skill.
+
+![Quiz](docs/screenshots/quiz.png)
+
+---
+
+## 🛠️ Practice Tools
+
+This is what makes AMPH different. Five interactive simulators let you practice Amazon PPC tasks with real data — no risk to client accounts.
+
+### Campaign Builder
+
+Build Sponsored Products, Sponsored Brands, and Sponsored Display campaigns step by step. Choose targeting, set bids, structure ad groups — the full workflow.
+
+![Campaign Builder](docs/screenshots/campaign-builder.png)
+
+### Bid Elevator
+
+Upload your campaign data and get smart bid adjustment suggestions. See which keywords are over-spending and where to push bids up.
+
+![Bid Elevator](docs/screenshots/bid-elevator.png)
+
+### Search Term Triage
+
+Sort search terms into Keep, Pause, or Optimize buckets. Learn to identify wasted spend and hidden opportunities in your search term reports.
+
+![Search Term Triage](docs/screenshots/str-triage.png)
+
+### Listing Audit
+
+Audit a product listing against Amazon's best practices. Get a score and actionable fixes for titles, bullets, images, and backend keywords.
+
+![Listing Audit](docs/screenshots/listing-audit.png)
+
+### Keyword Research
+
+Discover, categorize, and export keywords for your campaigns. Organize by match type, intent, and priority.
+
+![Keyword Research](docs/screenshots/keyword-research.png)
+
+![Tools Index](docs/screenshots/tools-index.png)
+
+---
+
+## 🏆 Gamification
+
+Learning isn't just about lessons. AMPH keeps you motivated with badges, XP, and certificates.
+
+- **XP & Levels** — Earn experience points for completing lessons, quizzes, and tool sessions
+- **Streaks** — Log in daily to build your streak and earn bonus XP
+- **Badges** — Unlock achievements for milestones like completing a course or acing a quiz
+- **Certificates** — Earn a downloadable PDF certificate when you complete a course. Each certificate has a public verification link employers can check.
+
+![Certificates](docs/screenshots/certificates.png)
+
+![Verify Certificate](docs/screenshots/verify-certificate.png)
+
+---
+
+## 💳 Payments & Enrollment
+
+Pay once, access forever. No subscriptions, no recurring fees.
+
+- **GCash, Maya, credit/debit card, bank transfer** — all via PayMongo
+- **BIR-compliant receipt** — downloadable PDF for your records
+- **Instant access** — pay and start learning immediately
+
+![Checkout Success](docs/screenshots/checkout-success.png)
+
+![Pricing](docs/screenshots/pricing.png)
+
+---
+
+## 📱 Mobile-First Design
+
+Most Filipino VAs learn on their phones. Project Amazon PH Academy is built for mobile first — every page works at 390px width. No app to install. Just open your browser.
+
+![Student Dashboard](docs/screenshots/student-dashboard.png)
+
+---
+
+## 🔐 Account & Security
+
+- **Simple sign-in** — email + password, no social login required
+- **Secure** — passwords are encrypted, sessions are HttpOnly cookies
+- **Privacy-first** — your data stays yours. No tracking, no ads, no AI profiling
+
+![Sign In](docs/screenshots/sign-in.png)
+
+---
+
+## ⚙️ Admin Panel
+
+For the team running Project Amazon PH Academy. A full admin dashboard to manage everything:
+
+- **Dashboard** — real-time stats on users, enrollments, revenue, and engagement
+- **User Management** — search, view, and manage student accounts
+- **Course Management** — create and edit courses, modules, and lessons with a rich editor
+- **Tool Management** — manage simulator scenarios and difficulty levels
+- **Refund Management** — review and process refund requests
+- **Badges & Gamification** — create badges, set criteria, manage the achievement system
+- **Analytics** — enrollment funnels, revenue trends, student engagement metrics
+- **Settings** — platform configuration
+
+![Admin Dashboard](docs/screenshots/admin-dashboard.png)
+
+![Admin Courses](docs/screenshots/admin-courses.png)
+
+![Admin Analytics](docs/screenshots/admin-analytics.png)
+
+---
+
+## Why AMPH Exists
+
+There are 500,000+ Filipino virtual assistants. Most earn ₱15k–₱30k/month doing general admin work. The ones who specialize in Amazon advertising charge ₱60k–₱80k/month.
+
+AMPH was built to bridge that gap. Not with theory — with practice.
+
+Every tool in the platform is modeled on real Amazon PPC workflows. By the time you finish the courses, you've already done the work that gets you hired.
 
 ---
 
 ## Status
 
-| Sprint | Status | Stories |
-|---|---|---|
-| **Sprint 1** — Foundation | ✅ Complete (2026-07-07) | 6 / 6 |
-| **Sprint 2** — Tools (5 engines + fixtures) | ✅ Complete (2026-07-07) | 6 / 6 |
-| **Sprint 3** — Curriculum + tier gating | ✅ Complete (2026-07-08) | 5 / 5 |
-| **Sprint 4** — Tool UIs | ✅ Complete (2026-07-08) | 5 / 5 |
-| **Sprint 5** — Gamification | ✅ Complete (2026-07-09) | 3 / 3 |
-| Sprint 6 — Payments | ✅ Complete (2026-07-10) | 4 / 4 |
-|| Sprint 7 — Admin | ✅ Complete (2026-07-10) | 4 / 4 |
-|| Sprint 8 — Refunds + Email | ✅ Complete (2026-07-11) | 3 / 3 |
-|| Sprint 9 — Polish + Mobile | ✅ Complete (2026-07-12) | 5 / 5 |
-|| Sprint 10 — Tests + CI Hardening | 🔄 In Progress | 0 / 5 |
-|| Sprint 11 — Observability | Planned | 0 / 5 |
-|| Sprint 12 — Launch | Planned | 0 / 4 |
-|| **Total** | **42 / 47 stories shipped (89%)** | |
+| Sprint | Track | Stories | Status |
+|--------|-------|---------|--------|
+| **S1** | Foundation | 6 / 6 | ✅ Complete (2026-07-07) |
+| **S2** | Tools | 6 / 6 | ✅ Complete (2026-07-07) |
+| **S3** | Curriculum | 5 / 5 | ✅ Complete (2026-07-08) |
+| **S4** | Tool UIs | 5 / 5 | ✅ Complete (2026-07-08) |
+| **S5** | Gamification | 3 / 3 | ✅ Complete (2026-07-09) |
+| **S6** | Payments | 4 / 4 | ✅ Complete (2026-07-10) |
+| **S7** | Admin | 4 / 4 | ✅ Complete (2026-07-10) |
+| **S8** | Refunds + Email | 4 / 4 | ✅ Complete (2026-07-11) |
+| **S9** | Polish + Mobile | 5 / 5 | ✅ Complete (2026-07-12) |
+| **S10** | Tests + CI | 5 / 5 | ✅ Complete (2026-07-13) |
+| **S11** | Observability | 5 / 5 | ✅ Complete (2026-07-13) |
+| **S12** | Launch | 5 / 5 | ✅ Complete (2026-07-13) |
+| | **Total** | **52 / 52** | **100% shipped** |
 
-| Layer | Status |
-|-------|--------|
-| Architecture (16 ADRs) | ✅ Complete — `docs/decisions.md` |
-| Database schema (31 models) | ✅ Complete — `prisma/schema.prisma` |
-| Design system (Field Manual) | ✅ Complete — `src/styles/globals.css` |
-| UI component library (7 components + admin shell) | ✅ Complete — `src/components/ui/` |
-| JWT auth + RBAC | ✅ Complete — `src/lib/auth.ts` + `src/middleware.ts` |
-| 5 tool engines + 30 scenarios + grading | ✅ Complete — `src/engine/` |
-| Tool session persistence (save/resume/submit) | ✅ Complete — `src/app/actions/tools.ts` |
-| AMPH v1 content imported (31 lessons, 5 quizzes) | ✅ Complete — `scripts/import-amph-content.ts` |
-| Curriculum pages (dashboard, course, lesson, quiz) | ✅ Complete — `src/app/(dashboard)/` |
-| Voice + copy guide | ✅ Spec complete — `docs/voice-guide.md` |
-| 5 tool interactive UIs | ✅ Complete — `src/components/tools/` (5 client runners + shared `ToolResult`) |
-| Business layer (PayMongo) | ⏳ Spec complete, code in Sprint 6 — `docs/business-layer.md` |
-| Admin panel (full surface) | ⏳ Layout only, full panels in Sprint 7 — `docs/admin-backend.md` |
-| Tests | 🔄 Sprint 10 in progress — 50/53 tests passing |
-| Observability | ⏳ Sprint 11 planned |
-
-This is a **greenfield rebuild**. v1 lives at `github.com/projectamazonph/AMPH-Academy` and is frozen. No code, schema, or commits from v1 carry over. Every architectural decision is made fresh.
-
----
-
-## What This Platform Is
-
-A paid training platform where Filipino VAs learn Amazon advertising through structured courses, interactive tools (Campaign Builder, Bid Elevator, Search Term Triage), gamified learning, and downloadable resources.
-
-**Tiers:**
-- **PPC Foundations** — ₱2,999
-- **Accelerated Mastery** — ₱5,999
-- **Ultimate Transformation** — ₱9,999
-
-**Audience:** Filipino virtual assistants who already do general VA work and want to specialize in Amazon advertising. Most earn ₱15k–₱30k/month. They want to reach ₱60k–₱80k/month.
-
----
-
-## What This Platform Is NOT
-
-- Not a generic course platform. Built for one specific niche.
-- Not AI-powered. Zero external AI APIs. See `docs/decisions.md` ADR-003.
-- Not a CMS. Content is hand-authored and shipped with the app.
-- Not a marketplace. Ryan owns the content.
-- Not multi-tenant. Single organization.
+**57 points over 12 sprints. No slip.**
 
 ---
 
 ## Tech Stack
 
-| Layer | Choice | Why |
-|-------|--------|-----|
-| Framework | Next.js 16 App Router | Server components, server actions, single deploy |
-| Language | TypeScript (strict) | Catch errors at compile time |
-| Database | PostgreSQL (dev + prod) | Managed in prod, consistent local+prod environment |
-| ORM | Prisma | Type-safe queries, migrations |
-| Auth | JWT in HttpOnly cookies (jose) | Stateless, works with middleware |
-| Styling | CSS Modules + design tokens | No Tailwind. Per design-brief. |
-| Icons | Phosphor (light) only | One icon set across the product |
-| Fonts | Space Grotesk + JetBrains Mono | Self-hosted via `next/font` |
-| Payments | PayMongo | Native PHP, GCash/Maya/card/bank |
-| Email | Resend + React Email | Templates as React components |
-| File storage | Vercel Blob | Resources, certificates, receipts |
-| Error tracking | Sentry | Errors + performance |
-| Testing | Vitest + Playwright | Unit/integration + E2E |
-| CI | GitHub Actions | tsc, eslint, vitest, playwright, gitleaks, lighthouse-ci |
-
-**Design system:** Field Manual. Dense, scannable, utilitarian. Off-white surface (#FAFAF7), orange accent (#FF6B35), type-led hierarchy. See `docs/design-brief.md`.
-
-**Auth pattern:** Defense-in-depth. Edge middleware verifies JWT and gates `/admin/*` + `/dashboard/*`. Server Components and server actions re-verify via `getSession()` + `jose`. Never trust headers blindly.
-
-**Soft-delete pattern:** `src/lib/db.ts` Prisma middleware auto-injects `deletedAt: null` on every `find*` / `count` / `aggregate` query. Bypass only when caller genuinely needs deleted records.
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 16 |
+| Language | TypeScript (strict) |
+| Database | PostgreSQL (Neon) |
+| ORM | Prisma |
+| Auth | JWT + HttpOnly cookies (jose) |
+| Styling | CSS Modules + design tokens |
+| Icons | Phosphor (light) |
+| Fonts | Space Grotesk + JetBrains Mono |
+| Payments | PayMongo (GCash/Maya/Card/Bank) |
+| Email | Resend + React Email |
+| File Storage | Vercel Blob |
+| Error Tracking | Sentry (`@sentry/nextjs@^9`) |
+| Logging | Pino + AsyncLocalStorage |
+| Testing | Vitest + Playwright |
+| CI/CD | GitHub Actions (tsc, lint, vitest, playwright, lighthouse, gitleaks) |
+| Alerting | Slack Incoming Webhook |
+| Hosting | Vercel |
 
 ---
 
-## Repository Structure
-
-```
-amph-v2/
-├── src/
-│   ├── app/
-│   │   ├── (public)/             Public pages (auth pages live here)
-│   │   │   └── auth/
-│   │   │       ├── signin/        Sign-in page + form
-│   │   │       └── signup/        Sign-up page + form
-│   │   ├── actions/              Server actions
-│   │   │   └── auth.ts           signup/signin/signout actions
-│   │   ├── admin/                Admin panel (RBAC-gated)
-│   │   │   ├── layout.tsx        requireAdmin() + sidebar/topbar
-│   │   │   └── page.tsx          Dashboard with stats
-│   │   ├── layout.tsx            Root layout: fonts + header nav
-│   │   └── page.tsx              Landing page
-│   ├── components/
-│   │   └── ui/                   Shared UI primitives (Field Manual)
-│   │       ├── Button.tsx        Primary/secondary/ghost/danger × sm/md/lg
-│   │       ├── Card.tsx          Default/interactive/outlined + sub-components
-│   │       ├── Input.tsx         Label + error/hint + left/right icon
-│   │       ├── Badge.tsx         Default/success/warning/danger/info
-│   │       ├── Modal.tsx         Native <dialog> with focus trap
-│   │       ├── Toast.tsx         Provider + auto-dismiss + stack ≤3
-│   │       ├── Icon.tsx          Phosphor wrapper (28 named icons)
-│   │       ├── NavSidebar.tsx    Admin nav with active state
-│   │       ├── TopBar.tsx        Admin top bar with sign-out
-│   │       └── index.ts          Barrel export
-│   ├── lib/
-│   │   ├── db.ts                 Prisma singleton + soft-delete middleware
-│   │   ├── auth.ts               JWT (jose) + scrypt + requireAuth/requireAdmin
-│   │   └── validation.ts         Zod schemas + createSafeAction wrapper
-│   ├── middleware.ts             Edge JWT verification + RBAC gating
-│   └── styles/
-│       └── globals.css           Field Manual design tokens + dark mode
-├── prisma/
-│   ├── schema.prisma             31 models
-│   └── seed.ts                   Admin user + 3 pricing tiers + 5 badges
-├── scripts/
-│   └── gen-jwt-secret.ts         HS256 secret generator
-├── eslint-rules/
-│   └── no-ai-slop.js             Custom rule banning 30+ AI-generated patterns
-├── docs/                         Specifications (the plan)
-│   ├── build-spec.md             Why greenfield
-│   ├── product-brief.md          Audience + value prop
-│   ├── decisions.md              16 ADRs
-│   ├── design-brief.md           Field Manual design system
-│   ├── voice-guide.md            Copy rules + jargon buster
-│   ├── db-schema.md              Schema specification
-│   ├── admin-backend.md          Admin panel routes + RBAC
-│   ├── business-layer.md         PayMongo integration
-│   ├── ai-removal.md             Zero AI commitment
-│   ├── sprint-plan.md            11 sprints, 55 stories
-│   └── bmad/                     BMAD state files
-├── .omh/plans/                   Consensus plans (ralplan output)
-├── .github/workflows/ci.yml      tsc + lint + vitest + playwright + lighthouse + gitleaks
-├── AGENTS.md                     Agent conventions
-├── package.json
-├── tsconfig.json                 Strict + noUncheckedIndexedAccess + noImplicitOverride
-├── next.config.ts                Security headers + CSP-ready
-├── .eslintrc.json                Loads local/no-ai-slop rule
-├── .env.example                  All required env vars documented
-└── README.md
-```
-
----
-
-## Development
+## For Developers
 
 ### First-time setup
 
 ```bash
-# Clone
 git clone https://github.com/projectamazonph/amph-v2.git
 cd amph-v2
-
-# Install
 pnpm install
-
-# Generate JWT secret (writes to .env.local automatically)
-pnpm gen:secret --write
-
-# Set up database
-pnpm prisma migrate dev    # creates prisma/dev.db and applies schema
-pnpm prisma db seed        # seeds admin + pricing tiers + badges
-
-# Start dev server
-pnpm dev
+pnpm gen:secret --write       # Generate JWT secret
+pnpm prisma migrate dev       # Set up database
+pnpm prisma db seed           # Seed admin + pricing tiers + badges
+pnpm dev                      # Start dev server
 ```
 
 Open http://localhost:3000.
 
 ### Default admin account
 
-After seeding, sign in at `/auth/signin`:
+- **Email:** `ryan@projectamazonph.com`
+- **Password:** `ChangeMe123!`
 
-- **Email:** `ryan@projectamazonph.com` (override via `ADMIN_EMAIL` env var)
-- **Password:** `ChangeMe123!` (override via `ADMIN_PASSWORD` env var)
+**Change the password after first sign-in.**
 
-**Change the password after first sign-in.** Real production deployments must use a different seeded credential.
-
-### Day-to-day commands
+### Commands
 
 ```bash
-pnpm dev              # Next.js dev server
+pnpm dev              # Dev server
 pnpm build            # Production build
 pnpm typecheck        # tsc --noEmit
 pnpm lint             # ESLint + no-ai-slop rule
-pnpm test             # Vitest unit + integration (Sprint 9)
-pnpm test:e2e         # Playwright E2E (Sprint 9)
-pnpm test:coverage    # Coverage report (Sprint 9)
+pnpm test             # Vitest unit + integration
+pnpm test:e2e         # Playwright E2E
+pnpm test:coverage    # Coverage report (70% threshold)
 pnpm prisma:studio    # Browse the database
-pnpm gen:secret       # Print a new JWT secret
-pnpm gen:secret --write  # Append to .env.local
+pnpm sentry:sourcemaps   # Upload source maps
 ```
 
-### Verifying Sprint 1 works
+### Project structure
 
-1. Visit http://localhost:3000 — landing page renders with header nav (Sign in / Get started)
-2. Click **Sign in** → enter the default admin credentials
-3. After sign-in you're routed to `/admin` — dashboard renders with 4 stat cards (Users, Courses, Badges, Pricing tiers)
-4. Click **Sign out** in the top-right → cleared cookie, redirected to home
-5. While signed out, try navigating to `/admin` directly → redirected to `/auth/signin?redirect=/admin`
-
----
-
-## Architecture Highlights
-
-### Zero AI features (ADR-003)
-
-No `openai`, `anthropic`, `langchain`, or any LLM API. No mentor chat. No AI mistake analysis. Static "Common Mistakes" sections replace dynamic AI explanations. Content is hand-authored and shipped with the app.
-
-### Defense-in-depth auth
+<details>
+<summary>Full repository tree</summary>
 
 ```
-Edge Middleware                 Server Components / Actions
-     │                                    │
-     ▼                                    ▼
-jwtVerify(token)                   getSession() → jose.verify()
-  ├─ no token → /auth/signin        ├─ no session → redirect('/auth/signin')
-  ├─ bad token → clear + redirect   ├─ bad session → redirect('/auth/signin')
-  └─ OK → forward with headers      └─ role !== ADMIN → redirect('/')
-                                    └─ OK → return user
+amph-v2/
+├── src/
+│   ├── app/
+│   │   ├── (public)/              Public pages (auth, pricing)
+│   │   ├── (dashboard)/           Student dashboard, courses, tools, quizzes
+│   │   ├── admin/                 Admin panel (RBAC-gated)
+│   │   ├── api/webhook/           PayMongo webhook handler
+│   │   └── actions/               Server actions
+│   ├── components/
+│   │   ├── ui/                    11 shared UI primitives (Field Manual)
+│   │   └── tools/                 5 interactive tool runners
+│   ├── lib/                       Auth, DB, badges, certificates, paymongo, refunds, etc.
+│   ├── engine/                    5 tool engines + 30 scenarios
+│   ├── middleware.ts              Edge JWT verification + RBAC
+│   └── styles/globals.css         Design tokens + dark mode
+├── prisma/                        Schema (19 models) + seed
+├── scripts/                       Smoke, backup, restore, Sentry alert
+├── docs/                          Specs, runbooks, security audits, sprint plans
+├── .github/workflows/             7 workflows (CI, deploy, rollback, backup, alerts)
+├── sentry.{client,server,edge}.config.ts
+├── .lighthouserc.json             Performance budgets
+├── AGENTS.md                      Agent conventions
+├── SESSION-HANDOVER.md            Project status + secrets
+├── CHANGELOG.md                   Full changelog (S1–S12)
+└── README.md
 ```
 
-Both layers verify independently. The Edge middleware runs on every request to `/admin/*` and `/dashboard/*` via the `matcher` config. Server actions also call `requireAuth()` or `requireAdmin()` for defense in depth.
+</details>
 
-### Soft-delete middleware (ADR-012)
+### Contributing
 
-Every mutable table has a `deletedAt DateTime?` column. The Prisma middleware in `src/lib/db.ts` auto-injects `deletedAt: null` on every read query (`findUnique`, `findFirst`, `findMany`, `count`, `aggregate`, `groupBy`). Soft-deleted records are invisible to app code by default.
-
-### CSS Modules + tokens (no Tailwind)
-
-Every component imports a `.module.css` file that uses `var(--token)` references. Tokens live in `src/styles/globals.css`. The `no-ai-slop` ESLint rule scans all source for AI-generated copy patterns.
-
----
-
-## Sprint Status
-
-**42/47 stories shipped across Sprints 1–9 (89%).** Sprints 1–5 shipped the foundation, all 5 tool engines + 30 scenarios, content import, curriculum pages, quiz system, tier gating, the 5 interactive tool UIs, and the full gamification stack: auto-awarded badges, PDF certificates with public verification, and live classes with tier-gated registration. **Sprint 6 — Payments** (2026-07-10): STORY-026/027/028/029 — PayMongo checkout + webhook, enrollment + tier gating, refund flow engine, BIR-compliant receipt PDFs. **Sprint 7 — Admin** (2026-07-10): STORY-030/031/032/033 — admin dashboard + user management, course/module/lesson CRUD with MDX editor, tool scenario admin, analytics dashboards. **Sprint 8 — Refunds + Email** (2026-07-11, commit `1414754`): STORY-034/035/036/037 — admin refund approval UI, 3 Resend React Email templates, webhook handler with HMAC signature verification. **Sprint 9 — Polish + Mobile** (2026-07-12): STORY-038/039/040/041/042 — design-system audit + token purge, responsive breakpoint infrastructure, BottomNav component, marketing+auth mobile-first refactor, student app shell refactor. All pages verified at 390px and 1280px.
-
-**Next: Sprint 10 — Tests + CI Hardening.** Vitest unit tests (src/lib core, badges, validation, enums, tier-gate), server action integration tests (auth, progress, live classes), Playwright E2E critical path, coverage enforcement. CI updated: tsc, lint, vitest, playwright, lighthouse-ci, gitleaks. Plan at `docs/sprint-11/PLAN.md`. Stories at `docs/stories/STORY-048.md` through `STORY-052.md`.
-
-- Next.js 16 scaffold with TypeScript strict
-- Field Manual design system (60+ tokens, full dark mode)
-- 7 UI primitives + admin shell components
-- Full 25-model Prisma schema migrated and seeded
-- JWT auth with HttpOnly cookies, 7-day TTL
-- Edge middleware with RBAC for `/admin/*` and `/dashboard/*`
-- 5 tool engines with 30 scenarios (Campaign Builder SP/SB/SD/BTV, Bid Elevator, STR Triage, Listing Audit, Keyword Research)
-- Tool session persistence (save/resume/submit/grade)
-- AMPH v1 content imported (1 course, 9 modules, 31 lessons, 5 quizzes, 30 questions) with $USD→₱PHP currency refactor
-- Curriculum pages: dashboard, course detail, lesson reader, quiz
-- Tier-gated course access (enroll-aware): TierLock screen on lesson/quiz pages, lock icons on course index, server actions enforce the gate
-- 5 interactive tool UIs: Listing Audit form, Keyword Research categorizer, Bid Elevator table, STR Triage triager, Campaign Builder 5-step wizard (BTV-aware)
-- 1 admin + 3 pricing tiers + 5 badges seeded
-- Admin panel: 8 screens (dashboard + user mgmt + course CRUD + tool scenarios + analytics + refunds + settings + badges)
-- Refund flow: student request → admin approve/reject → PayMongo refund API + email
-- Email: enrollment confirmation, live class reminder, refund status (3 templates) + Resend webhook handler
-
-See `docs/sprint-plan.md` for the full roadmap and `bmad/sprint-status.yaml` for current state.
-
----
-
-## Contributing
-
-Read `AGENTS.md` first. Conventions there are enforced by ESLint and CI.
-
-The five rules:
+Read `AGENTS.md` first. The five rules:
 
 1. Zero AI features.
 2. One icon set: Phosphor (light) only.
@@ -298,20 +292,20 @@ The five rules:
 4. Server actions for mutations. API routes for webhooks/uploads only.
 5. Every admin action logs to AuditLog.
 
-The voice:
+---
 
-- Direct, plain-spoken, Filipino VA audience.
-- No jargon without definition.
-- No AI-slop phrases (enforced by ESLint).
-- See `docs/voice-guide.md` for the full rules.
+## 📊 Codegraph
+
+See [codegraphs/amph-v2.md](./codegraphs/amph-v2.md) for the full dependency graph.
 
 ---
 
-## License
-
-Proprietary. © 2026 Project Amazon PH. All rights reserved.
-
 ## Contact
 
-Ryan Roland Dabao — Project Amazon PH
-[Email protected]
+**Ryan Roland Dabao** — Project Amazon PH
+
+Managed ₱50M+ in Amazon ad spend across 200+ client accounts since 2014.
+
+---
+
+*Proprietary. © 2026 Project Amazon PH. All rights reserved.*

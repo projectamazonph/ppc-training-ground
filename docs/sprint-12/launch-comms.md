@@ -1,4 +1,4 @@
-# Launch Communications — AMPH Academy v2
+# Launch Communications — Project Amazon PH Academy v2
 
 **Status:** 🟡 Drafts ready, scheduling pending deploy (Sprint 12 / STORY-057)
 **Owner:** Ryan
@@ -17,10 +17,10 @@ to the waitlist, internal Slack celebration post, and the launch retro template.
 
 ### 1.1 Long post (Facebook primary)
 
-> 🎉 **AMPH Academy v2 is LIVE.**
+> 🎉 **Project Amazon PH Academy v2 is LIVE.**
 >
 > After 12 sprints, 52 stories, and one very patient build-out, the new
-> AMPH Academy is open for Filipino virtual assistants who want to master
+> Project Amazon PH Academy is open for Filipino virtual assistants who want to master
 > Amazon advertising.
 >
 > What's inside:
@@ -48,7 +48,7 @@ to the waitlist, internal Slack celebration post, and the launch retro template.
 
 ### 1.2 Short post (LinkedIn / X)
 
-> AMPH Academy v2 is live.
+> Project Amazon PH Academy v2 is live.
 >
 > A 12-sprint build to teach Filipino virtual assistants the full Amazon
 > advertising stack — Campaign Builder, Bid Elevator, STR Triage, Listing
@@ -62,7 +62,7 @@ to the waitlist, internal Slack celebration post, and the launch retro template.
 ### 1.3 Image suggestion
 
 A 1200×630 hero card showing:
-- Headline: "AMPH Academy v2 — Now Live"
+- Headline: "Project Amazon PH Academy v2 — Now Live"
 - Subhead: "Amazon advertising for Filipino VAs"
 - Background: a screenshot of the student dashboard (anonymized)
 - Logo: AMPH mark (top-left), Vercel-style "Live now" badge (top-right)
@@ -86,8 +86,8 @@ either:
 
 | Variant | Subject |
 |---------|---------|
-| A | `AMPH Academy v2 is live — let's go` |
-| B | `The new AMPH Academy is open for VAs` |
+| A | `Project Amazon PH Academy v2 is live — let's go` |
+| B | `The new Project Amazon PH Academy is open for VAs` |
 
 Pick A for primary send; B as the A/B variant (50/50 split).
 
@@ -106,14 +106,14 @@ export default function LaunchAnnouncement() {
   return (
     <Html>
       <Head />
-      <Preview>AMPH Academy v2 is live — Amazon ads for Filipino VAs</Preview>
+      <Preview>Project Amazon PH Academy v2 is live — Amazon ads for Filipino VAs</Preview>
       <Body style={{ backgroundColor: '#0c0a09', color: '#fafaf9', fontFamily: 'system-ui' }}>
         <Container style={{ maxWidth: 560, padding: '32px 16px', margin: '0 auto' }}>
           <Heading style={{ fontSize: 28, fontWeight: 700 }}>
             You're in. 🎉
           </Heading>
           <Text>
-            The new AMPH Academy is live. Everything we built over the last
+            The new Project Amazon PH Academy is live. Everything we built over the last
             12 sprints — 5 hands-on tools, tier-aware curriculum, mobile-first
             design, real certificates — is ready for you.
           </Text>
@@ -132,7 +132,7 @@ export default function LaunchAnnouncement() {
             </Button>
           </Section>
           <Text style={{ color: '#a8a29e', fontSize: 12 }}>
-            You're receiving this because you joined the AMPH Academy waitlist.
+            You're receiving this because you joined the Project Amazon PH Academy waitlist.
             <br />Reply to this email if anything looks off.
           </Text>
         </Container>
@@ -205,11 +205,11 @@ Save as `docs/sprint-12/RETRO.md` within 48 hours of launch. Template:
 -
 
 ## Sprint 13 candidates
-- [ ] PayMongo HMAC verification (security gap from STORY-055)
+- [ ] ~~PayMongo HMAC verification~~ — **stale**; implemented + verified 2026-07-15 (see `docs/security/code-audit-2026-07-15.md`)
 - [ ] CSP header (deferred from STORY-055)
-- [ ] Fix 3 broken Vitest mocks (S10 carry-over)
+- [ ] ~~Fix 3 broken Vitest mocks~~ — **stale**; disproven 2026-07-14 (verified by CI)
 - [ ] BottomNav on lesson/quiz pages (S9 carry-over)
-- [ ] TS7006 errors in admin/course pages (cleanup)
+- [ ] ~~TS7006 errors in admin/course pages~~ — **stale**; fixed by hotfix `8012071` 2026-07-14
 - [ ] Resend webhook secret env var confirmation
 
 ## Metrics to watch (first 7 days)

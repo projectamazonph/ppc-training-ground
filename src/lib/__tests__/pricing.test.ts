@@ -133,7 +133,7 @@ describe('pricing.ts', () => {
       expect(result.checkoutSessionId).toBe('cs-1');
     });
 
-    it('increments discount code usage when discountCodeId is provided', async () => {
+    it('does NOT increment discount usage at session creation (counted on paid webhook instead)', async () => {
       const mockTxDiscountUpdate = vi.fn().mockResolvedValue({});
       const mockTxCheckoutCreate = vi.fn().mockResolvedValue({ id: 'cs-2' });
       mockTransaction.mockImplementation(async (cb: (tx: Record<string, unknown>) => Promise<unknown>) => {
@@ -152,10 +152,9 @@ describe('pricing.ts', () => {
       });
 
       expect(result.checkoutSessionId).toBe('cs-2');
-      expect(mockTxDiscountUpdate).toHaveBeenCalledWith({
-        where: { id: 'dc-1' },
-        data: { currentUses: { increment: 1 } },
-      });
+      // Abandoned checkouts must not burn limited-use codes — the increment
+      // happens in handleCheckoutPaid when the payment completes.
+      expect(mockTxDiscountUpdate).not.toHaveBeenCalled();
     });
   });
 

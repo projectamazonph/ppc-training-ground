@@ -13,13 +13,14 @@
  */
 
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { CourseTier } from '@/lib/enums';
 import { createSafeAction, type ActionResult } from '@/lib/validation';
 import { userMeetsTierRequirement } from '@/lib/tier-gate';
 import { sendLiveClassReminderEmail } from '@/lib/email';
-import { isClassFull } from '@/lib/live-classes';
+
 
 const classIdSchema = z.object({ classId: z.string().min(1) });
 
@@ -83,24 +84,47 @@ export const registerForLiveClass = createSafeAction<
     };
   }
 
-  const full = await isClassFull(data.classId);
-  if (full) {
-    throw new Error('This class is at capacity. Join the waitlist or pick another date.');
-  }
-
-  if (existing) {
-    // Was cancelled — restore instead of recreating.
-    await db.liveClassRegistration.update({
-      where: { id: existing.id },
-      data: { cancelledAt: null, deletedAt: null },
-    });
-  } else {
-    await db.liveClassRegistration.create({
-      data: {
-        liveClassId: data.classId,
-        userId: user.id,
+  // Capacity check + write in ONE Serializable transaction. At the default
+  // READ COMMITTED level, two concurrent registrations can both pass the
+  // count check and overbook; Serializable aborts the loser (P2034), which
+  // we retry — it then sees the committed count and gets the capacity error.
+  const registerOnce = () =>
+    db.$transaction(
+      async (tx) => {
+        const klassRow = await tx.liveClass.findUnique({
+          where: { id: data.classId },
+          select: { maxAttendees: true },
+        });
+        const count = await tx.liveClassRegistration.count({
+          where: { liveClassId: data.classId, deletedAt: null, cancelledAt: null },
+        });
+        if (count >= (klassRow?.maxAttendees ?? 0)) {
+          throw new Error('This class is at capacity. Join the waitlist or pick another date.');
+        }
+        if (existing) {
+          // Was cancelled — restore instead of recreating.
+          await tx.liveClassRegistration.update({
+            where: { id: existing.id },
+            data: { cancelledAt: null, deletedAt: null },
+          });
+        } else {
+          await tx.liveClassRegistration.create({
+            data: { liveClassId: data.classId, userId: user.id },
+          });
+        }
       },
-    });
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
+
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await registerOnce();
+      break;
+    } catch (e) {
+      const isSerializationFailure =
+        e instanceof Error && 'code' in e && (e as { code?: string }).code === 'P2034';
+      if (!isSerializationFailure || attempt >= 2) throw e;
+    }
   }
 
   // Send reminder email (best-effort — errors are swallowed).

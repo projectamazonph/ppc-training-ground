@@ -158,7 +158,9 @@ describe('auth.ts', () => {
       sub: 'u1', email: 'a@b.com', role: 'STUDENT', name: 'Alice',
     });
     mockCookieStore.get.mockReturnValue({ name: 'amph_auth', value: token });
-    mockDb.user.findUnique.mockResolvedValue({ xp: 100, level: 5, streakDays: 3 });
+    mockDb.user.findUnique.mockResolvedValue({
+      xp: 100, level: 5, streakDays: 3, status: 'ACTIVE', deletedAt: null,
+    });
 
     const session = await getSession();
     expect(session).toEqual({
@@ -167,18 +169,38 @@ describe('auth.ts', () => {
     });
   });
 
-  it('getSession defaults xp/level/streakDays when user is null', async () => {
+  it('getSession returns null when user no longer exists', async () => {
     const token = await signToken({
       sub: 'u2', email: 'b@b.com', role: 'ADMIN', name: null,
     });
     mockCookieStore.get.mockReturnValue({ name: 'amph_auth', value: token });
     mockDb.user.findUnique.mockResolvedValue(null);
 
-    const session = await getSession();
-    expect(session).toEqual({
-      id: 'u2', email: 'b@b.com', name: null, role: 'ADMIN',
-      xp: 0, level: 1, streakDays: 0,
+    expect(await getSession()).toBeNull();
+  });
+
+  it('getSession returns null when user is suspended', async () => {
+    const token = await signToken({
+      sub: 'u2', email: 'b@b.com', role: 'ADMIN', name: null,
     });
+    mockCookieStore.get.mockReturnValue({ name: 'amph_auth', value: token });
+    mockDb.user.findUnique.mockResolvedValue({
+      xp: 0, level: 1, streakDays: 0, status: 'SUSPENDED', deletedAt: null,
+    });
+
+    expect(await getSession()).toBeNull();
+  });
+
+  it('getSession returns null when user is soft-deleted', async () => {
+    const token = await signToken({
+      sub: 'u2', email: 'b@b.com', role: 'ADMIN', name: null,
+    });
+    mockCookieStore.get.mockReturnValue({ name: 'amph_auth', value: token });
+    mockDb.user.findUnique.mockResolvedValue({
+      xp: 0, level: 1, streakDays: 0, status: 'ACTIVE', deletedAt: new Date(),
+    });
+
+    expect(await getSession()).toBeNull();
   });
 
   // ── requireAuth / requireAdmin (lines 152-166) ──────────────────────────
@@ -188,7 +210,7 @@ describe('auth.ts', () => {
       sub: 'u1', email: 'a@b.com', role: 'STUDENT', name: 'A',
     });
     mockCookieStore.get.mockReturnValue({ name: 'amph_auth', value: token });
-    mockDb.user.findUnique.mockResolvedValue({ xp: 0, level: 1, streakDays: 0 });
+    mockDb.user.findUnique.mockResolvedValue({ xp: 0, level: 1, streakDays: 0, status: 'ACTIVE', deletedAt: null });
 
     const user = await requireAuth();
     expect(user.id).toBe('u1');
@@ -204,7 +226,7 @@ describe('auth.ts', () => {
       sub: 'u1', email: 'admin@b.com', role: 'ADMIN', name: 'Admin',
     });
     mockCookieStore.get.mockReturnValue({ name: 'amph_auth', value: token });
-    mockDb.user.findUnique.mockResolvedValue({ xp: 0, level: 1, streakDays: 0 });
+    mockDb.user.findUnique.mockResolvedValue({ xp: 0, level: 1, streakDays: 0, status: 'ACTIVE', deletedAt: null });
 
     const user = await requireAdmin();
     expect(user.role).toBe('ADMIN');
@@ -215,7 +237,7 @@ describe('auth.ts', () => {
       sub: 'u1', email: 'a@b.com', role: 'STUDENT', name: 'A',
     });
     mockCookieStore.get.mockReturnValue({ name: 'amph_auth', value: token });
-    mockDb.user.findUnique.mockResolvedValue({ xp: 0, level: 1, streakDays: 0 });
+    mockDb.user.findUnique.mockResolvedValue({ xp: 0, level: 1, streakDays: 0, status: 'ACTIVE', deletedAt: null });
 
     await expect(requireAdmin()).rejects.toThrow('NEXT_REDIRECT');
   });

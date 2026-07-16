@@ -7,6 +7,7 @@ import { CourseTier } from '@/lib/enums';
 import { userMeetsTierRequirement, listActivePricingTiers } from '@/lib/tier-gate';
 import { getClassDetail } from '@/lib/live-classes';
 import { RegisterButton } from './RegisterButton';
+import { BRAND_NAME } from '@/lib/brand';
 import styles from '../live-classes.module.css';
 import detailStyles from './detail.module.css';
 import breadcrumbStyles from '../breadcrumb.module.css';
@@ -19,7 +20,7 @@ export async function generateMetadata({ params }: PageProps) {
   const { id } = await params;
   const user = await requireAuth();
   const klass = await getClassDetail(id, user.id);
-  if (!klass) return { title: 'Class not found — AMPH Academy' };
+  if (!klass) return { title: `Class not found — ${BRAND_NAME}` };
   return { title: `${klass.title} — Live Class` };
 }
 

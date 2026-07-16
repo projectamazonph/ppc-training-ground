@@ -17,6 +17,7 @@ import { Icon } from '@/components/ui/Icon';
 import { db } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import { CheckoutStatus } from '@/lib/enums';
+import { BRAND_NAME } from '@/lib/brand';
 import styles from './complete.module.css';
 
 interface PageProps {
@@ -24,7 +25,7 @@ interface PageProps {
 }
 
 export const metadata = {
-  title: 'Payment complete — AMPH Academy',
+  title: `Payment complete — ${BRAND_NAME}`,
   robots: { index: false },
 };
 
@@ -47,7 +48,11 @@ async function resolveCheckout(
 }
 
 export default async function CheckoutCompletePage({ searchParams }: PageProps) {
-  const { status, returnUrl, id } = await searchParams;
+  const { status, returnUrl: rawReturnUrl, id } = await searchParams;
+  // Defense in depth against open redirects: only same-app relative paths
+  // survive ("/foo" yes, "//evil.example" and "https://…" no).
+  const returnUrl =
+    rawReturnUrl?.startsWith('/') && !rawReturnUrl.startsWith('//') ? rawReturnUrl : undefined;
   const checkout = await resolveCheckout(id, returnUrl);
 
   if (status === 'failed') {

@@ -192,9 +192,11 @@ export async function approveRefundAction(
     };
   }
 
-  // Mark APPROVED so a second admin can't double-approve while we wait.
-  await db.refundRequest.update({
-    where: { id: request.id },
+  // Atomically claim PENDING → APPROVED. Two admins racing both pass the
+  // read check above; only the winner of this guarded update proceeds to
+  // call PayMongo, so a refund can never be issued twice.
+  const claimed = await db.refundRequest.updateMany({
+    where: { id: request.id, status: RefundStatus.PENDING, deletedAt: null },
     data: {
       status: RefundStatus.APPROVED,
       reviewedById: admin.id,
@@ -202,13 +204,16 @@ export async function approveRefundAction(
       reviewerNotes: reviewerNotes?.trim() || null,
     },
   });
+  if (claimed.count === 0) {
+    return { success: false, error: 'Request is no longer pending.' };
+  }
 
   // Call PayMongo. If this throws, mark the request FAILED.
   let paymongoRefundId: string | null = null;
   try {
     const refund = await refundPayment({
       paymentId: request.payment.paymongoPaymentId,
-      amountCentavos: request.amountPhp * 100, // payment.amountPhp is whole PHP
+      amountCentavos: request.amountPhp, // money fields store centavos
       reason: PAYMONGO_REFUND_REASON,
       metadata: { refundRequestId: request.id },
     });

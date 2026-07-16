@@ -1,8 +1,8 @@
-# Google Stitch Prompt — AMPH Academy v2
+# Google Stitch Prompt — Project Amazon PH Academy v2
 
 ## Instructions for Use
 
-This document contains Stitch prompts for every page/screen of AMPH Academy v2. Feed each prompt section into Google Stitch (stitch.withgoogle.com) individually. Stitch generates HTML/CSS with Tailwind — we will convert the output to CSS Modules + design tokens for the Next.js project.
+This document contains Stitch prompts for every page/screen of Project Amazon PH Academy v2. Feed each prompt section into Google Stitch (stitch.withgoogle.com) individually. Stitch generates HTML/CSS with Tailwind — we will convert the output to CSS Modules + design tokens for the Next.js project.
 
 **Strategy:** Generate one screen at a time. Start with the landing page (most complex marketing surface), then auth pages, pricing, dashboard, course flow, tools, admin, and utility pages.
 
@@ -91,14 +91,14 @@ Layout Rules (enforce in every prompt):
 ## SCREEN 1: LANDING PAGE (Public)
 
 ```
-Generate a web landing page for "AMPH Academy" — an Amazon advertising training platform for Filipino virtual assistants.
+Generate a web landing page for "Project Amazon PH Academy" — an Amazon advertising training platform for Filipino virtual assistants.
 
-Brand: AMPH Academy. Tagline: "Three courses. One outcome: become the Amazon ads specialist clients retain."
+Brand: Project Amazon PH Academy. Tagline: "Three courses. One outcome: become the Amazon ads specialist clients retain."
 
 Page structure (top to bottom):
 
 1. HEADER (sticky, 56px tall):
-   - Left: "AMPH Academy" logotype (Space Grotesk 700, #171717)
+   - Left: "Project Amazon PH Academy" logotype (Space Grotesk 700, #171717)
    - Right: "Sign in" text link (#404040) + "Get started" button (primary, #FF6B35)
    - Bottom border: 1px #E5E5E0
 
@@ -106,7 +106,7 @@ Page structure (top to bottom):
    - Layout: Two-column asymmetric. Left column (60% width): text content. Right column (40%): empty or subtle decorative element (a single large JetBrains Mono number like "₱80k" in #FFE5D9, rotated slightly, acting as visual punctuation — NOT an image, NOT a card).
    - Eyebrow text above heading: "AMAZON PPC TRAINING FOR FILIPINO VAs" (Space Grotesk, 0.75rem, uppercase, #737373, letter-spacing 0.05em)
    - Main heading: "Stop earning ₱15k/month. Start charging ₱60k–₱80k for Amazon ads." (Space Grotesk 600, clamp(2.25rem, 4vw, 3rem), #171717, max-width 700px, line-height 1.15)
-   - Subheading: "AMPH Academy teaches Filipino VAs the Amazon advertising work that clients pay premium rates for. Practice with real campaign tools, not just theory videos." (1.125rem, #404040, max-width 560px, line-height 1.5)
+   - Subheading: "Project Amazon PH Academy teaches Filipino VAs the Amazon advertising work that clients pay premium rates for. Practice with real campaign tools, not just theory videos." (1.125rem, #404040, max-width 560px, line-height 1.5)
    - Single CTA: "See pricing →" (primary button, #FF6B35). No secondary button — one CTA per viewport.
    - NO hero image. Text-only hero with one typographic decorative element. Clean, direct, type-led.
    - Motion: Heading fades in + slides up from 8px below over 400ms ease-out. Subheading delays 100ms. CTA delays 200ms. Right column element delays 300ms.
@@ -153,7 +153,7 @@ Page structure (top to bottom):
 7. RYAN SECTION (founder/authority, left-aligned, asymmetric):
    - Layout: Left-aligned text block (60% width). Right side (40%): large decorative number "₱50M+" in JetBrains Mono, #FFE5D9, acting as visual weight.
    - "Built by someone who's done the work" (h2)
-   - "Ryan has managed ₱50M+ in Amazon ad spend across 200+ client accounts since 2014. He built AMPH Academy because the training he wished existed when he started doesn't exist anywhere — especially not for Filipino VAs." (#404040)
+   - "Ryan has managed ₱50M+ in Amazon ad spend across 200+ client accounts since 2014. He built Project Amazon PH Academy because the training he wished existed when he started doesn't exist anywhere — especially not for Filipino VAs." (#404040)
    - No photo. Text-only authority block with typographic decoration.
    - Motion: Text slides in from left, decorative number fades in with 200ms delay.
 
@@ -161,13 +161,13 @@ Page structure (top to bottom):
    - Full-width background #171717 (dark)
    - Layout: Left-aligned text (not centered). Heading + subtext + button stacked left. Right side: empty — let the dark space do the work.
    - Heading: "Start earning ₱60k–₱80k/month" (white text, left-aligned)
-   - Subtext: "Join 500+ Filipino VAs who specialized in Amazon advertising through AMPH Academy." (left-aligned)
+   - Subtext: "Join 500+ Filipino VAs who specialized in Amazon advertising through Project Amazon PH Academy." (left-aligned)
    - Single CTA button: "See pricing →" (#FF6B35 button on dark background, left-aligned)
    - Generous padding (64px vertical)
    - Motion: Heading fades in + slides up. Button delays 150ms.
 
 9. FOOTER:
-   - Simple. 3 columns: "AMPH Academy" (brand + copyright), "Platform" (links: Pricing, Tools, Sign in), "Contact" (email link)
+   - Simple. 3 columns: "Project Amazon PH Academy" (brand + copyright), "Platform" (links: Pricing, Tools, Sign in), "Contact" (email link)
    - Top border 1px #E5E5E0, muted text (#737373)
 ```
 
@@ -176,14 +176,14 @@ Page structure (top to bottom):
 ## SCREEN 2: SIGN IN PAGE
 
 ```
-Generate a sign-in page for "AMPH Academy".
+Generate a sign-in page for "Project Amazon PH Academy".
 
 Page structure:
 - Centered layout, max-width 400px, vertically centered (min-height 100vh with flex centering)
 - Background: #FAFAF7
 - Card container: white (#FFFFFF), padding 32px, border 1px #E5E5E0, radius 6px
 - Header inside card:
-  - "AMPH Academy" logotype (centered, Space Grotesk 700, #171717)
+  - "Project Amazon PH Academy" logotype (centered, Space Grotesk 700, #171717)
   - "Sign in to your account" (h1, centered, Space Grotesk 600, 1.75rem)
 - Form:
   - Email field: label "Email" above input, input has border #E5E5E0, radius 4px, padding 12px, font 1rem, placeholder "you@example.com"
@@ -192,7 +192,7 @@ Page structure:
 - Below form:
   - "Don't have an account? Get started" — link to /auth/signup (#FF6B35)
 - Error state (if applicable): red text below the field, "Email or password is incorrect. Try again."
-- Footer text below card: "AMPH Academy © 2026 Project Amazon PH"
+- Footer text below card: "Project Amazon PH Academy © 2026 Project Amazon PH"
 ```
 
 ---
@@ -200,14 +200,14 @@ Page structure:
 ## SCREEN 3: SIGN UP PAGE
 
 ```
-Generate a sign-up page for "AMPH Academy".
+Generate a sign-up page for "Project Amazon PH Academy".
 
 Page structure:
 - Same centered layout as sign-in (max-width 400px, vertically centered)
 - Background: #FAFAF7
 - Card: white, padding 32px, border 1px #E5E5E0, radius 6px
 - Header:
-  - "AMPH Academy" logotype (centered)
+  - "Project Amazon PH Academy" logotype (centered)
   - "Create your account" (h1, centered, Space Grotesk 600, 1.75rem)
   - "Start your path to ₱60k–₱80k/month" (subtitle, #737373, centered)
 - Form:
@@ -226,7 +226,7 @@ Page structure:
 ## SCREEN 4: PRICING PAGE
 
 ```
-Generate a pricing page for "AMPH Academy" — Amazon PPC training for Filipino VAs.
+Generate a pricing page for "Project Amazon PH Academy" — Amazon PPC training for Filipino VAs.
 
 Page structure:
 
@@ -302,12 +302,12 @@ Page structure:
 ## SCREEN 5: STUDENT DASHBOARD
 
 ```
-Generate a student dashboard for "AMPH Academy" — the main screen after sign-in.
+Generate a student dashboard for "Project Amazon PH Academy" — the main screen after sign-in.
 
 Layout: Full-width with sidebar navigation on the left (collapsible on mobile).
 
 1. SIDEBAR (240px wide, white background, border-right 1px #E5E5E0):
-   - Top: "AMPH Academy" logotype
+   - Top: "Project Amazon PH Academy" logotype
    - Nav items (vertical list):
      - "Dashboard" (active — #FF6B35 text + #FFE5D9 background wash)
      - "Courses"
@@ -349,7 +349,7 @@ Layout: Full-width with sidebar navigation on the left (collapsible on mobile).
 ## SCREEN 6: COURSE DETAIL PAGE
 
 ```
-Generate a course detail page for "AMPH Academy".
+Generate a course detail page for "Project Amazon PH Academy".
 
 Layout: Full-width with sidebar (same as dashboard), main content area.
 
@@ -384,7 +384,7 @@ Layout: Full-width with sidebar (same as dashboard), main content area.
 ## SCREEN 7: LESSON PAGE
 
 ```
-Generate a lesson reading page for "AMPH Academy".
+Generate a lesson reading page for "Project Amazon PH Academy".
 
 Layout: Full-width with sidebar, main content with constrained reading width.
 
@@ -426,7 +426,7 @@ Layout: Full-width with sidebar, main content with constrained reading width.
 ## SCREEN 8: QUIZ PAGE
 
 ```
-Generate a quiz page for "AMPH Academy".
+Generate a quiz page for "Project Amazon PH Academy".
 
 Layout: Full-width with sidebar, centered content.
 
@@ -466,7 +466,7 @@ Layout: Full-width with sidebar, centered content.
 ## SCREEN 9: TOOLS INDEX PAGE
 
 ```
-Generate a tools index page for "AMPH Academy" — listing all 5 interactive tools.
+Generate a tools index page for "Project Amazon PH Academy" — listing all 5 interactive tools.
 
 Layout: Full-width with sidebar, main content.
 
@@ -500,7 +500,7 @@ Layout: Full-width with sidebar, main content.
 ## SCREEN 10: TOOL SCENARIO PAGE (Campaign Builder Example)
 
 ```
-Generate a tool scenario page for "AMPH Academy" — Campaign Builder wizard.
+Generate a tool scenario page for "Project Amazon PH Academy" — Campaign Builder wizard.
 
 Layout: Full-width with sidebar, main content.
 
@@ -546,12 +546,12 @@ Layout: Full-width with sidebar, main content.
 ## SCREEN 11: ADMIN DASHBOARD
 
 ```
-Generate an admin dashboard for "AMPH Academy".
+Generate an admin dashboard for "Project Amazon PH Academy".
 
 Layout: Full-width with admin sidebar, main content.
 
 1. ADMIN SIDEBAR (240px, white, border-right):
-   - Top: "AMPH Academy" + "Admin" badge (danger variant, small)
+   - Top: "Project Amazon PH Academy" + "Admin" badge (danger variant, small)
    - Nav items:
      - "Dashboard" (active)
      - "Users"
@@ -593,7 +593,7 @@ Layout: Full-width with admin sidebar, main content.
 ## SCREEN 12: ADMIN USER MANAGEMENT
 
 ```
-Generate a user management page for the admin panel of "AMPH Academy".
+Generate a user management page for the admin panel of "Project Amazon PH Academy".
 
 Layout: Full-width with admin sidebar, main content.
 
@@ -621,7 +621,7 @@ Layout: Full-width with admin sidebar, main content.
 ## SCREEN 13: PAYMENTS PAGE (Student)
 
 ```
-Generate a payments history page for "AMPH Academy" students.
+Generate a payments history page for "Project Amazon PH Academy" students.
 
 Layout: Full-width with sidebar, main content.
 
@@ -649,7 +649,7 @@ Layout: Full-width with sidebar, main content.
 ## SCREEN 14: CERTIFICATES PAGE
 
 ```
-Generate a certificates page for "AMPH Academy" students.
+Generate a certificates page for "Project Amazon PH Academy" students.
 
 Layout: Full-width with sidebar, main content.
 
@@ -676,7 +676,7 @@ Layout: Full-width with sidebar, main content.
 ## SCREEN 15: CHECKOUT COMPLETE PAGE
 
 ```
-Generate a checkout success page for "AMPH Academy".
+Generate a checkout success page for "Project Amazon PH Academy".
 
 Layout: Centered, max-width 480px, vertically centered.
 
@@ -695,7 +695,7 @@ Layout: Centered, max-width 480px, vertically centered.
 ## SCREEN 16: LIVE CLASSES PAGE
 
 ```
-Generate a live classes page for "AMPH Academy" students (Ultimate tier).
+Generate a live classes page for "Project Amazon PH Academy" students (Ultimate tier).
 
 Layout: Full-width with sidebar, main content.
 
@@ -722,7 +722,7 @@ Layout: Full-width with sidebar, main content.
 ## SCREEN 17: REFUND REQUEST PAGE
 
 ```
-Generate a refund request page for "AMPH Academy" students.
+Generate a refund request page for "Project Amazon PH Academy" students.
 
 Layout: Full-width with sidebar, centered content.
 
@@ -747,7 +747,7 @@ Layout: Full-width with sidebar, centered content.
 ## SCREEN 18: VERIFY CERTIFICATE (Public)
 
 ```
-Generate a certificate verification page for "AMPH Academy" — public, no auth.
+Generate a certificate verification page for "Project Amazon PH Academy" — public, no auth.
 
 Layout: Centered, max-width 480px.
 
@@ -760,7 +760,7 @@ Layout: Centered, max-width 480px.
   - "Course: PPC Foundations"
   - "Completed: July 8, 2026"
   - "Status: Valid" (green badge)
-- "This certificate was issued by AMPH Academy and can be verified at this URL."
+- "This certificate was issued by Project Amazon PH Academy and can be verified at this URL."
 ```
 
 ---
@@ -770,7 +770,7 @@ Layout: Centered, max-width 480px.
 For Stitch's multi-screen prototype feature, use this combined prompt:
 
 ```
-Create a multi-screen prototype for "AMPH Academy" — an Amazon PPC training platform.
+Create a multi-screen prototype for "Project Amazon PH Academy" — an Amazon PPC training platform.
 
 The prototype should connect these screens with interaction hotspots:
 
@@ -809,7 +809,7 @@ The Stitch output is the **visual starting point**, not the final product. We ad
 ## SCREEN 19: CAMPAIGN BUILDER — FULL WIZARD
 
 ```
-Generate a multi-step wizard UI for building Amazon ad campaigns in "AMPH Academy".
+Generate a multi-step wizard UI for building Amazon ad campaigns in "Project Amazon PH Academy".
 
 Layout: Full-width with student sidebar, main content area.
 
@@ -884,7 +884,7 @@ Layout: Full-width with student sidebar, main content area.
 ## SCREEN 20: BID ELEVATOR — KEYWORD TABLE
 
 ```
-Generate a bid optimization table UI for "AMPH Academy" Bid Elevator tool.
+Generate a bid optimization table UI for "Project Amazon PH Academy" Bid Elevator tool.
 
 Layout: Full-width with student sidebar, main content.
 
@@ -937,7 +937,7 @@ Layout: Full-width with student sidebar, main content.
 ## SCREEN 21: SEARCH TERM TRIAGE — CARD-BASED TRIAGE
 
 ```
-Generate a search term triage UI for "AMPH Academy" STR Triage tool.
+Generate a search term triage UI for "Project Amazon PH Academy" STR Triage tool.
 
 Layout: Full-width with student sidebar, main content.
 
@@ -993,7 +993,7 @@ Layout: Full-width with student sidebar, main content.
 ## SCREEN 22: LISTING AUDIT — FLAG + REVISE
 
 ```
-Generate a listing audit UI for "AMPH Academy" Listing Audit tool.
+Generate a listing audit UI for "Project Amazon PH Academy" Listing Audit tool.
 
 Layout: Full-width with student sidebar, main content.
 
@@ -1052,7 +1052,7 @@ Layout: Full-width with student sidebar, main content.
 ## SCREEN 23: KEYWORD RESEARCH — CATEGORIZATION
 
 ```
-Generate a keyword research categorization UI for "AMPH Academy" Keyword Research tool.
+Generate a keyword research categorization UI for "Project Amazon PH Academy" Keyword Research tool.
 
 Layout: Full-width with student sidebar, main content.
 
@@ -1102,7 +1102,7 @@ Layout: Full-width with student sidebar, main content.
 ## SCREEN 24: TOOL RESULT / GRADING SCREEN
 
 ```
-Generate a grading result screen for "AMPH Academy" tools.
+Generate a grading result screen for "Project Amazon PH Academy" tools.
 
 Layout: Full-width with student sidebar, centered content.
 
@@ -1143,12 +1143,12 @@ Layout: Full-width with student sidebar, centered content.
 ## SCREEN 25: ADMIN — USERS LIST
 
 ```
-Generate a user management list page for "AMPH Academy" admin panel.
+Generate a user management list page for "Project Amazon PH Academy" admin panel.
 
 Layout: Full-width with admin sidebar, main content.
 
 1. ADMIN SIDEBAR (240px, white, border-right):
-   - Top: "AMPH Academy" + "Admin" badge
+   - Top: "Project Amazon PH Academy" + "Admin" badge
    - Nav: Dashboard (active: no), Users (active: yes, #FF6B35), Courses, Content, Payments, Refunds, Live Classes, Badges, Resources, Analytics, Settings, Audit Log
    - Each item: Phosphor icon + label
 
@@ -1197,7 +1197,7 @@ Layout: Full-width with admin sidebar, main content.
 ## SCREEN 26: ADMIN — USER DETAIL
 
 ```
-Generate a user detail page for "AMPH Academy" admin panel.
+Generate a user detail page for "Project Amazon PH Academy" admin panel.
 
 Layout: Full-width with admin sidebar, main content.
 
@@ -1249,7 +1249,7 @@ Layout: Full-width with admin sidebar, main content.
 ## SCREEN 27: ADMIN — COURSES LIST
 
 ```
-Generate a course management list page for "AMPH Academy" admin panel.
+Generate a course management list page for "Project Amazon PH Academy" admin panel.
 
 Layout: Full-width with admin sidebar, main content.
 
@@ -1276,7 +1276,7 @@ Layout: Full-width with admin sidebar, main content.
 ## SCREEN 28: ADMIN — COURSE EDIT (Modules & Lessons)
 
 ```
-Generate a course editor page for "AMPH Academy" admin panel.
+Generate a course editor page for "Project Amazon PH Academy" admin panel.
 
 Layout: Full-width with admin sidebar, main content.
 
@@ -1318,7 +1318,7 @@ Layout: Full-width with admin sidebar, main content.
 ## SCREEN 29: ADMIN — PAYMENTS LIST
 
 ```
-Generate a payment operations page for "AMPH Academy" admin panel.
+Generate a payment operations page for "Project Amazon PH Academy" admin panel.
 
 Layout: Full-width with admin sidebar, main content.
 
@@ -1350,7 +1350,7 @@ Layout: Full-width with admin sidebar, main content.
 ## SCREEN 30: ADMIN — REFUNDS LIST + DETAIL
 
 ```
-Generate a refund management page for "AMPH Academy" admin panel.
+Generate a refund management page for "Project Amazon PH Academy" admin panel.
 
 Layout: Full-width with admin sidebar, main content.
 
@@ -1385,7 +1385,7 @@ Layout: Full-width with admin sidebar, main content.
 ## SCREEN 31: ADMIN — ANALYTICS DASHBOARD
 
 ```
-Generate an analytics dashboard for "AMPH Academy" admin panel.
+Generate an analytics dashboard for "Project Amazon PH Academy" admin panel.
 
 Layout: Full-width with admin sidebar, main content.
 
@@ -1426,7 +1426,7 @@ Layout: Full-width with admin sidebar, main content.
 ## SCREEN 32: ADMIN — BADGES MANAGEMENT
 
 ```
-Generate a badge management page for "AMPH Academy" admin panel.
+Generate a badge management page for "Project Amazon PH Academy" admin panel.
 
 Layout: Full-width with admin sidebar, main content.
 
@@ -1458,7 +1458,7 @@ Layout: Full-width with admin sidebar, main content.
 ## SCREEN 33: ADMIN — LIVE CLASSES MANAGEMENT
 
 ```
-Generate a live class management page for "AMPH Academy" admin panel.
+Generate a live class management page for "Project Amazon PH Academy" admin panel.
 
 Layout: Full-width with admin sidebar, main content.
 
@@ -1483,7 +1483,7 @@ Layout: Full-width with admin sidebar, main content.
 ## SCREEN 34: ADMIN — SETTINGS
 
 ```
-Generate a settings page for "AMPH Academy" admin panel.
+Generate a settings page for "Project Amazon PH Academy" admin panel.
 
 Layout: Full-width with admin sidebar, main content.
 
@@ -1497,7 +1497,7 @@ Layout: Full-width with admin sidebar, main content.
    - BRANDING TAB:
      - Logo upload area (dashed border, 200x80px)
      - Primary color: color picker (#FF6B35)
-     - App name: "AMPH Academy" text input
+     - App name: "Project Amazon PH Academy" text input
      - Tagline: "Amazon advertising training for Filipino VAs" textarea
    
    - PRICING TAB:
@@ -1510,7 +1510,7 @@ Layout: Full-width with admin sidebar, main content.
      - Warning: "Price changes only affect new purchases. Existing enrollments keep their original price."
    
    - EMAIL TAB:
-     - Sender name: "AMPH Academy"
+     - Sender name: "Project Amazon PH Academy"
      - Sender email: "noreply@amphacademy.ph"
      - Template previews: Welcome, Payment confirmation, Refund approved
    
@@ -1525,7 +1525,7 @@ Layout: Full-width with admin sidebar, main content.
 ## SCREEN 35: ADMIN — AUDIT LOG
 
 ```
-Generate an audit log page for "AMPH Academy" admin panel.
+Generate an audit log page for "Project Amazon PH Academy" admin panel.
 
 Layout: Full-width with admin sidebar, main content.
 

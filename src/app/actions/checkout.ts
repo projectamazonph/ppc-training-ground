@@ -35,6 +35,7 @@ import {
   PayMongoError,
 } from '@/lib/paymongo';
 import { getSession } from '@/lib/auth';
+import { rateLimit } from '@/lib/rate-limit';
 import { createSafeAction, type ActionResult } from '@/lib/validation';
 import { z } from 'zod';
 
@@ -47,7 +48,13 @@ const checkoutSchema = z.object({
   email: z.string().email(),
   name: z.string().max(100).optional(),
   discountCode: z.string().max(50).optional(),
-  returnUrl: z.string().url().optional(),
+  // Relative in-app paths only — an absolute URL here is an open-redirect
+  // vector via /checkout/complete's "Try again" link.
+  returnUrl: z
+    .string()
+    .max(200)
+    .regex(/^\/(?!\/)/, 'Return URL must be a relative path.')
+    .optional(),
 });
 
 // ---------------------------------------------------------------------------
@@ -76,7 +83,7 @@ export async function validateDiscountCodeAction(
   const result = await validateDiscountCode(
     discountCode,
     pricingTierId,
-    Math.round(tier.pricePhp * 100),
+    tier.pricePhp, // pricePhp is stored in centavos
   );
   return { success: true as const, data: result };
 }
@@ -107,6 +114,11 @@ export async function createCheckoutSessionAction(
 
   const { pricingTierId, email, name: formName, discountCode, returnUrl } = parsed.data;
 
+  const rl = rateLimit(`checkout:${email.toLowerCase()}`, 5, 60_000);
+  if (!rl.allowed) {
+    return { success: false as const, error: 'Too many checkout attempts. Please wait a minute and try again.' };
+  }
+
   const session = await getSession();
   const tier = await db.pricingTier.findFirst({
     where: { id: pricingTierId, isActive: true, deletedAt: null },
@@ -116,7 +128,8 @@ export async function createCheckoutSessionAction(
     return { success: false as const, error: 'Pricing tier is not available.' };
   }
 
-  const amountCentavos = Math.round(tier.pricePhp * 100);
+  // pricePhp is stored in centavos (₱2,999.00 = 299900) — no conversion.
+  const amountCentavos = tier.pricePhp;
 
   // Validate discount
   let discountCodeId: string | null = null;

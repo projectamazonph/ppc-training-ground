@@ -1,5 +1,10 @@
 # Production deploy gate.
 #
+# ⚠️  DEPLOYMENT DISABLED — 2026-07-14
+#     This workflow has been disabled to halt production deployments.
+#     To re-enable, remove the `if: false` condition from the deploy job
+#     and re-enable Vercel auto-deploy in project settings.
+#
 # Triggered MANUALLY (workflow_dispatch) or when a GitHub Release is published.
 # Deploys to Vercel production, creates a Sentry release for the commit SHA,
 # runs the production smoke test against the live custom domain, and posts a
@@ -47,6 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: production
+    if: false # DEPLOYMENT DISABLED — 2026-07-14
     steps:
       - uses: actions/checkout@v4
         with:
@@ -79,7 +85,7 @@ jobs:
 
       - name: Notify Slack
         if: always()
-        uses: slackapi/slack-github-action@v1.27.0
+        uses: slackapi/slack-github-action@v3.0.5
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook

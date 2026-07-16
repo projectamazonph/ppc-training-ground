@@ -99,6 +99,10 @@ export async function setAuthCookie(token: string): Promise<void> {
   store.set(AUTH_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
+    // 'lax', not 'strict': the PayMongo redirect back to /checkout/complete
+    // is a cross-site navigation — with 'strict' the cookie is withheld and
+    // buyers land on the completion page signed out. CSRF exposure is
+    // covered by Next server actions' Origin checking.
     sameSite: 'lax',
     path: '/',
     maxAge: TOKEN_TTL_SECONDS,
@@ -142,20 +146,33 @@ export const getSession = trace('auth.getSession', async (): Promise<SessionUser
     return null;
   }
 
-  // Fetch gamification fields from DB (not in JWT to keep token small)
+  // Fetch gamification + account-status fields from DB (not in JWT to keep
+  // the token small — and so suspension takes effect immediately instead of
+  // at token expiry).
   const user = await db.user.findUnique({
     where: { id: payload.sub },
-    select: { xp: true, level: true, streakDays: true },
+    select: { xp: true, level: true, streakDays: true, status: true, deletedAt: true },
   });
+
+  // A valid token is not enough: the account must still exist and be ACTIVE.
+  // This is what makes suspend/delete effective mid-session (7-day tokens
+  // have no revocation list).
+  if (!user || user.status !== 'ACTIVE' || user.deletedAt) {
+    log.warn(
+      { component: 'auth', userId: payload.sub, status: user?.status ?? 'missing' },
+      'token valid but account not active — session rejected',
+    );
+    return null;
+  }
 
   return {
     id: payload.sub,
     email: payload.email,
     name: payload.name,
     role: payload.role,
-    xp: user?.xp ?? 0,
-    level: user?.level ?? 1,
-    streakDays: user?.streakDays ?? 0,
+    xp: user.xp,
+    level: user.level,
+    streakDays: user.streakDays,
   };
 });
 

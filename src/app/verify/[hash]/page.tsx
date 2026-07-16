@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getCertificateByVerificationHash } from '@/lib/certificates';
 import { Badge, Button } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
+import { BRAND_NAME, BRAND_NAME_UPPER, BRAND_CERT_PREFIX } from '@/lib/brand';
 import styles from './verify.module.css';
 
 interface PageProps {
@@ -12,10 +13,10 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps) {
   const { hash } = await params;
   const cert = await getCertificateByVerificationHash(hash);
-  if (!cert) return { title: 'Certificate not found — AMPH Academy' };
+  if (!cert) return { title: `Certificate not found — ${BRAND_NAME}` };
   return {
     title: `Verify: ${cert.course.title} — ${cert.user.name}`,
-    description: `AMPH Academy certificate of completion for ${cert.user.name}, issued for ${cert.course.title}.`,
+    description: `${BRAND_NAME} certificate of completion for ${cert.user.name}, issued for ${cert.course.title}.`,
   };
 }
 
@@ -35,9 +36,9 @@ export default async function VerifyPage({ params }: PageProps) {
   return (
     <div className={styles.page}>
       <div className={styles.brandBar}>
-        <Link href="/" className={styles.brand}>
-          AMPH ACADEMY
-        </Link>
+          <Link href="/" className={styles.brand}>
+            {BRAND_NAME_UPPER}
+          </Link>
         <span className={styles.brandTag}>Certificate Verification</span>
       </div>
 
@@ -54,7 +55,7 @@ export default async function VerifyPage({ params }: PageProps) {
         </div>
 
         <article className={styles.certificateFrame}>
-          <div className={styles.eyebrow}>AMPH ACADEMY</div>
+          <div className={styles.eyebrow}>{BRAND_NAME_UPPER}</div>
           <h1 className={styles.title}>Certificate of Completion</h1>
           <p className={styles.subtitle}>Amazon PPC Mastery for Filipino Virtual Assistants</p>
 
@@ -79,7 +80,7 @@ export default async function VerifyPage({ params }: PageProps) {
             <div className={styles.footerCol}>
               <p className={styles.refLabel}>CERTIFICATE NO.</p>
               <p className={styles.refHash}>
-                AMPH-{cert.verificationHash.replace(/-/g, '').slice(0, 8).toUpperCase()}
+                {`${BRAND_CERT_PREFIX}-${cert.verificationHash.replace(/-/g, '').slice(0, 8).toUpperCase()}`}
               </p>
               <p className={styles.issuedDate}>Issued {issuedDateFmt.format(cert.issuedAt)}</p>
             </div>
@@ -98,7 +99,7 @@ export default async function VerifyPage({ params }: PageProps) {
               </Button>
             </a>
             <Link href="/">
-              <Button variant="secondary">Visit AMPH Academy</Button>
+              <Button variant="secondary">{`Visit ${BRAND_NAME}`}</Button>
             </Link>
           </div>
         )}

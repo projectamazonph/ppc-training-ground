@@ -9,8 +9,12 @@
 import { scryptSync } from 'node:crypto';
 import { SignJWT } from 'jose';
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 
-const prisma = new PrismaClient();
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL environment variable is not set.');
+}
+const prisma = new PrismaClient({ adapter: new PrismaPg(process.env.DATABASE_URL) });
 
 const EMAIL = process.env.SMOKE_EMAIL ?? '[email protected]';
 const PASSWORD = process.env.SMOKE_PASSWORD ?? 'ChangeMe123!';

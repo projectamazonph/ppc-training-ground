@@ -82,18 +82,14 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  // Admin routes require ADMIN role
+  // Admin routes require ADMIN role. Do NOT clear the cookie here — a
+  // student following a stray /admin link should be turned away, not
+  // logged out of their whole session.
   if (isAdminRoute && payload.role !== 'ADMIN') {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  // Forward user info to downstream handlers via headers
-  const response = NextResponse.next();
-  response.headers.set('x-user-id', payload.sub);
-  response.headers.set('x-user-email', payload.email);
-  response.headers.set('x-user-role', payload.role);
-
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {

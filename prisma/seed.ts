@@ -10,6 +10,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 import {
   UserRole,
   UserStatus,
@@ -20,7 +21,10 @@ import {
 } from '../src/lib/enums';
 import { randomBytes, scryptSync } from 'node:crypto';
 
-const prisma = new PrismaClient();
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL environment variable is not set.');
+}
+const prisma = new PrismaClient({ adapter: new PrismaPg(process.env.DATABASE_URL) });
 
 function hashPassword(password: string): string {
   // Format: scrypt$<salt-hex>$<hash-hex>
@@ -369,7 +373,7 @@ async function grandfatherFreeEnrollment(): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  console.log('Seeding AMPH Academy v2...\n');
+  console.log('Seeding Project Amazon PH Academy v2...\n');
 
   await upsertAdminUser();
   await upsertPricingTiers();

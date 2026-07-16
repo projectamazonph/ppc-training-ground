@@ -17,10 +17,11 @@ import { Icon } from '@/components/ui/Icon';
 import { requireAuth } from '@/lib/auth';
 import { listUserPayments, daysRemainingInWindow, refundStatusLabel, REFUND_WINDOW_DAYS } from '@/lib/refunds';
 import { formatPhp, formatDate, formatReceiptNumber } from '@/lib/format';
+import { BRAND_NAME } from '@/lib/brand';
 import styles from './payments.module.css';
 
 export const metadata = {
-  title: 'Payments — AMPH Academy',
+  title: `Payments — ${BRAND_NAME}`,
 };
 
 interface PageProps {

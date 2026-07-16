@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Icon, type PhosphorIconName } from '@/components/ui/Icon';
+import { BRAND_NAME } from '@/lib/brand';
 import styles from './NavSidebar.module.css';
 
 interface NavItem {
@@ -28,7 +29,7 @@ export function NavSidebar() {
       <div className={styles.brand}>
         <Link href="/admin" className={styles.brandLink}>
           <span className={styles.brandMark}>◆</span>
-          <span className={styles.brandText}>AMPH Admin</span>
+          <span className={styles.brandText}>{`${BRAND_NAME} Admin`}</span>
         </Link>
       </div>
 

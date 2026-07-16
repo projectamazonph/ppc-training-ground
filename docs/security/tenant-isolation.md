@@ -9,7 +9,7 @@ This document enumerates every server-side data access that touches the
 in place to prevent one student or admin from reading or mutating another
 student's data.
 
-AMPH Academy v2 is a multi-tenant application where each `User` row is the
+Project Amazon PH Academy v2 is a multi-tenant application where each `User` row is the
 boundary. There are three roles (`STUDENT`, `ADMIN`, `SUPER_ADMIN`) but only
 one tenant boundary: the `User.id`.
 
@@ -54,7 +54,7 @@ entire audit is invalidated.
 | `requestRefund` | `src/app/actions/refund.ts` | `requireAuth()` then reads `Enrollment` only for `userId = session.userId`. | None: lookup is filtered by `userId`. | Code review. Sprint 8 added student-side test (covered). |
 | `approveRefund` (admin) | `src/app/actions/refund.ts` | `requireAdmin()` then updates any `Enrollment`. | None: `requireAdmin` gates the whole action. | Code review. Sprint 8 admin test pending (post-launch bugfix). |
 | `rejectRefund` (admin) | `src/app/actions/refund.ts` | Same as `approveRefund`. | Same. | Code review. |
-| `saveToolSession` | `src/app/actions/tool-actions.ts` | `requireAuth()` then writes `ToolSession.userId = session.userId`. | None. | Unit test (3 broken mocks noted as carry-over; not a guard failure). |
+| `saveToolSession` | `src/app/actions/tool-actions.ts` | `requireAuth()` then writes `ToolSession.userId = session.userId`. | None. | Unit test (verified by CI; `requireAuth` mocked at `tool-actions.test.ts:21–24`; not a guard failure). |
 | `markLessonComplete` | `src/app/actions/progress.ts` | `requireAuth()` then updates `LessonProgress` only for the session user. | None: writes use `where: { userId_lessonId: { userId, lessonId } }`. | Code review. |
 | `updateProfile` | `src/app/actions/profile.ts` | `requireAuth()` then updates `User` only for `userId = session.userId`. Cannot change role. | Risk: role change. Mitigation: Zod schema (`updateProfileSchema`) whitelists only `name`, `email`, `password`. | Code review. |
 | `issueCertificate` | `src/app/actions/certificate.ts` | `requireAuth()` then verifies user owns the course before issuing. | None: ownership check precedes issuance. | Code review. |
@@ -139,9 +139,10 @@ HMAC verification lands (post-launch bugfix candidate).
    if live payments are expected at launch, this must be fixed first.
 2. **Resend webhook signature verification depends on `RESEND_WEBHOOK_SECRET`
    being set.** Validate this env var is present in Vercel production.
-3. **`requireAuth()` mocking in unit tests is incomplete** — 3 broken tests in
-   `src/app/actions/__tests__/tool-actions.test.ts`. This is a test-coverage
-   issue, not a runtime security issue, but it's listed here for completeness.
+3. ~~`requireAuth()` mocking in unit tests is incomplete~~ — **stale claim.**
+   Static review of `tool-actions.test.ts` (lines 21–24) shows `requireAuth`
+   *is* mocked via `vi.mock('@/lib/auth')`. Removed during the 2026-07-14
+   stale-doc cleanup. Test status is **verified by CI**.
 
 ---
 

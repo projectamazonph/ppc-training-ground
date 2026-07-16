@@ -15,7 +15,7 @@
 import { z } from 'zod';
 import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
-import { createSafeAction, type ActionResult } from '@/lib/validation';
+import { createSafeAction } from '@/lib/validation';
 import { type ToolType } from '@/lib/enums';
 import { evaluateBadges } from '@/lib/badges';
 
@@ -71,7 +71,7 @@ export const startToolSession = createSafeAction(startSessionSchema, async (data
 
 const saveSessionSchema = z.object({
   sessionId: z.string().min(1),
-  state: z.unknown(),
+  state: z.record(z.string(), z.unknown()),
   timeSpentSeconds: z.number().int().min(0).optional(),
 });
 
@@ -98,7 +98,7 @@ export const saveToolSession = createSafeAction(saveSessionSchema, async (data) 
 
 const submitSessionSchema = z.object({
   sessionId: z.string().min(1),
-  state: z.unknown(),
+  state: z.record(z.string(), z.unknown()),
   timeSpentSeconds: z.number().int().min(0).optional(),
 });
 
@@ -207,6 +207,3 @@ export async function loadToolSession(sessionId: string): Promise<unknown | null
     return null;
   }
 }
-
-// Re-export ActionResult for callers
-export type { ActionResult };

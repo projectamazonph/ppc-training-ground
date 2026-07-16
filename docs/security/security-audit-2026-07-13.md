@@ -117,12 +117,18 @@ Verified by reading `src/lib/auth.ts`:
 
 ## 6. Open issues (must be tracked)
 
+> **2026-07-15 update:** issue #1 below is **stale** — PayMongo HMAC
+> verification IS implemented in `src/lib/webhook-signature.ts` (raw body,
+> timing-safe compare) and wired in the webhook route. Superseded by
+> [`code-audit-2026-07-15.md`](./code-audit-2026-07-15.md), which found
+> different launch blockers.
+
 | # | Issue | Severity | Blocks launch? |
 |---|-------|----------|----------------|
-| 1 | PayMongo webhook HMAC not verified | High | **Conditional** — only if live payments enabled at launch |
+| 1 | ~~PayMongo webhook HMAC not verified~~ — **stale**, verified implemented 2026-07-15 | High | ~~Conditional~~ No |
 | 2 | CSP header missing | Medium | No (defer to S13) |
 | 3 | Resend webhook `RESEND_WEBHOOK_SECRET` env var must be set in Vercel prod | Medium | Conditional — block if unset |
-| 4 | 3 broken Vitest mocks (test coverage, not runtime security) | Low | No (post-launch bugfix) |
+| 4 | ~~3 broken Vitest mocks~~ — **stale claim** (removed 2026-07-14; `requireAuth` *is* mocked at `tool-actions.test.ts:21–24`). Test status **verified by CI**. | Low | No (post-launch bugfix) |
 | 5 | Pre-existing TS7006 errors in admin/course pages | Low | No (out of scope) |
 
 ---

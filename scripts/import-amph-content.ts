@@ -7,7 +7,7 @@
  *   - fixtures/quiz-questions.json (8 quizzes, ~40 questions)
  *
  * Targets:
- *   Course         "ProjectAMPH Academy"
+ *   Course         "Project Amazon PH Academy"
  *   Module x9      One per AMPH module (0-onboarding through 8-competitive)
  *   Lesson x31     One per MDX file
  *   Quiz x8        One per quiz in the JSON
@@ -24,11 +24,15 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 import type { CourseDifficulty } from '../src/lib/enums';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-const prisma = new PrismaClient();
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL environment variable is not set.');
+}
+const prisma = new PrismaClient({ adapter: new PrismaPg(process.env.DATABASE_URL) });
 
 const SOURCE_ROOT = '/storage/emulated/0/Hermes Projects/projects/AMPH-Academy/project';
 const MODULES_DIR = join(SOURCE_ROOT, 'content/modules');
@@ -37,7 +41,7 @@ const QUIZ_FIXTURE = join(SOURCE_ROOT, 'fixtures/quiz-questions.json');
 // Course metadata — single course for now
 const COURSE = {
   slug: 'amph-foundations',
-  title: 'ProjectAMPH Academy',
+  title: 'Project Amazon PH Academy',
   description:
     'Amazon advertising training for Filipino virtual assistants. Master CPC, ACoS, ROAS, campaign architecture, bidding, search term triage, and competitive intelligence through structured modules and interactive tools.',
   difficulty: 'FOUNDATIONS' as CourseDifficulty,
@@ -54,7 +58,7 @@ const MODULE_META: Array<{
   description: string;
   estimatedMinutes: number;
 }> = [
-  { dirName: '0-onboarding', moduleNumber: 0, title: 'Onboarding', description: 'Get oriented to AMPH Academy and the Amazon advertising landscape.', estimatedMinutes: 30 },
+  { dirName: '0-onboarding', moduleNumber: 0, title: 'Onboarding', description: 'Get oriented to Project Amazon PH Academy and the Amazon advertising landscape.', estimatedMinutes: 30 },
   { dirName: '1-foundations', moduleNumber: 1, title: 'PPC Foundations', description: 'The Big Six metrics: CPC, CTR, ACoS, TACoS, ROAS, conversion rate. The numbers every operator lives by.', estimatedMinutes: 90 },
   { dirName: '2-keyword-research', moduleNumber: 2, title: 'Keyword Research', description: 'Match types, negative keywords, keyword grouping, and the research workflow.', estimatedMinutes: 75 },
   { dirName: '3-listing-optimization', moduleNumber: 3, title: 'Listing Optimization', description: 'Listing quality score, listing anatomy, A+ content. The conversion foundation under every campaign.', estimatedMinutes: 60 },
