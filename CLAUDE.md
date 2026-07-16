@@ -67,7 +67,7 @@ Passwords are scrypt-hashed (`scrypt$<salt>$<hash>`), not bcrypt. The auth cooki
 
 ### Data layer (`src/lib/db.ts`, `prisma/schema.prisma`)
 
-- Single Prisma client singleton with a `$use` middleware that auto-injects `deletedAt: null` into every read on any model in the `SOFT_DELETE_MODELS` set (ADR-012). **Adding a new mutable model requires adding it to that set** or soft-delete silently doesn't apply.
+- Single Prisma client singleton, instantiated with the `@prisma/adapter-pg` driver adapter (required since Prisma 7 — `prisma.config.ts` holds the CLI-side connection URL, `schema.prisma`'s datasource no longer takes `url` directly). A `$extends` query extension (Prisma 7 removed the old `$use` middleware API) auto-injects `deletedAt: null` into every read on any model in the `SOFT_DELETE_MODELS` set (ADR-012). **Adding a new mutable model requires adding it to that set** or soft-delete silently doesn't apply.
 - Enums are **not** modeled as Prisma enums — every "enum" column is a plain `String`, and the valid values live in `src/lib/enums.ts` as const-object + union-type pairs (e.g. `UserRole`, `CourseTier`). Import enum values from `@/lib/enums`, not `@prisma/client`.
 - Every mutable table carries `deletedAt`, `createdById`, `updatedById` (ADR-012). Admin "delete" always sets `deletedAt`, never calls `.delete()`.
 - `orgId` does not exist yet and multi-tenancy is explicitly deferred (ADR-015) — don't add tenant-scoping.
