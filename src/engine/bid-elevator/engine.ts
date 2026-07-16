@@ -35,6 +35,9 @@ export function gradeBidDecisions(
     })
   );
 
+  // Bolt optimization: Map keywords by ID to replace O(N*M) nested lookups with O(1) lookups
+  const keywordMap = new Map(scenario.keywords.map((k) => [k.id, k]));
+
   const criteria: CriterionResult[] = [];
 
   // For each keyword, score the bid decision
@@ -42,7 +45,7 @@ export function gradeBidDecisions(
   let keywordsScored = 0;
 
   for (const decision of decisions) {
-    const keyword = scenario.keywords.find((k) => k.id === decision.keywordId);
+    const keyword = keywordMap.get(decision.keywordId);
     const refBid = scenario.referenceBids[decision.keywordId];
     if (!keyword || refBid === undefined) continue;
 
@@ -74,9 +77,9 @@ export function gradeBidDecisions(
     )
   );
 
-  // Budget check
+  // Budget check (optimized with O(1) Map lookup)
   const totalDecidedSpend = decisions.reduce((sum, d) => {
-    const keyword = scenario.keywords.find((k) => k.id === d.keywordId);
+    const keyword = keywordMap.get(d.keywordId);
     if (!keyword) return sum;
     const cvr = keyword.clicks > 0 ? keyword.orders / keyword.clicks : 0;
     const estClicks = Math.round(keyword.clicks * (d.newBid / Math.max(keyword.currentBid, 1)) * 0.8);
@@ -96,9 +99,9 @@ export function gradeBidDecisions(
     )
   );
 
-  // ACoS awareness check
+  // ACoS awareness check (optimized with O(1) Map lookup)
   const hasAcOsAwareness = decisions.some((d) => {
-    const keyword = scenario.keywords.find((k) => k.id === d.keywordId);
+    const keyword = keywordMap.get(d.keywordId);
     if (!keyword || keyword.sales === 0) return false;
     const acos = keyword.spend / keyword.sales;
     return acos > scenario.product.targetAcos && d.newBid < keyword.currentBid; // lowered a high-ACoS keyword
@@ -107,7 +110,7 @@ export function gradeBidDecisions(
     binaryCriterion(
       'acos_awareness',
       hasAcOsAwareness || decisions.every((d) => {
-        const k = scenario.keywords.find((kw) => kw.id === d.keywordId);
+        const k = keywordMap.get(d.keywordId);
         return !k || k.sales === 0 || (k.spend / k.sales) <= scenario.product.targetAcos;
       }),
       'You lowered bids on at least one keyword with ACoS above target (or kept good keywords).',
@@ -115,9 +118,9 @@ export function gradeBidDecisions(
     )
   );
 
-  // Conversion awareness — raise bids on converters
+  // Conversion awareness — raise bids on converters (optimized with O(1) Map lookup)
   const hasConversionRaise = decisions.some((d) => {
-    const keyword = scenario.keywords.find((k) => k.id === d.keywordId);
+    const keyword = keywordMap.get(d.keywordId);
     if (!keyword || keyword.clicks < 5) return false;
     const cvr = keyword.orders / keyword.clicks;
     return cvr >= 0.10 && d.newBid > keyword.currentBid;
@@ -126,7 +129,7 @@ export function gradeBidDecisions(
     binaryCriterion(
       'conversion_awareness',
       hasConversionRaise || decisions.every((d) => {
-        const k = scenario.keywords.find((kw) => kw.id === d.keywordId);
+        const k = keywordMap.get(d.keywordId);
         if (!k || k.clicks < 5) return true;
         const cvr = k.orders / k.clicks;
         return cvr < 0.10 || d.newBid <= k.currentBid;
