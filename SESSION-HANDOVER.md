@@ -376,3 +376,32 @@ Quality Gates still cannot go fully green on `main` even with Issues 1–3 fixed
 ### Suggested next step
 Treat Issues 4 and 5 as their own triage pass, same as this one: reproduce in isolation, read the actually-installed package's types/changelog rather than trusting external doc sites (several gave wrong information for Issue 3), fix, verify with the real command (`pnpm lint` / `pnpm build`), not just an assumption.
 High. It is currently blocking all E2E re-testing because the dev server is unhealthy, and it would block `pnpm build` in CI. Fix alongside the `ActionResult` re-export bug. Either fix alone is not enough: with only `ActionResult` fixed, the server still 500s on `pino-pretty`; with only `pino-pretty` fixed, authenticated pages still 500 on `ActionResult`.
+---
+
+## 2026-07-16 (cont.) — dependency-drift triage part 2: TS 7 root cause for Issues 4 + 5, coverage gate (all fixed)
+
+**Context:** continuation of the triage above. Issues 4 and 5 turned out to share a single root cause, and fixing them exposed a sixth pre-existing break (the coverage gate). All three are fixed and verified below; `main`'s Quality Gates can now go fully green.
+
+### Issues 4 + 5 — one root cause: `typescript@7.0.2` is the native compiler with no JS API (FIXED)
+**Root cause:** `typescript@7.0.2` (npm `latest`) is the native Go-based compiler. Its package `exports` map resolves `require('typescript')` to `lib/version.cjs`, which exports only `{ version, versionMajorMinor }` — there is **no JS compiler API at all** (no `ts.Extension`, no `createProgram`, nothing; `lib/` contains only `version.cjs`, `tsc.js`, `getExePath.js`). Verified by reading the installed package's `package.json` exports and `lib/` directly. `tsc --noEmit` kept working because `bin/tsc` shells out to the native binary — which is why Issue 2/3's typecheck verification never tripped over this.
+- **Issue 4 (lint):** `@typescript-eslint/typescript-estree` reads `ts.Extension.Cjs` at module load → `TypeError: Cannot read properties of undefined (reading 'Cjs')`. Its peer range is `typescript >=4.8.4 <6.1.0` — TS 7 was never supported.
+- **Issue 5 (build):** Next 16.2.10's `verify-typescript-setup` checks for `typescript/lib/typescript.js` (`node_modules/next/dist/lib/verify-typescript-setup.js`, `has-necessary-dependencies.js`). That file doesn't exist in TS 7, so Next marks typescript "missing", auto-runs the pointless reinstall, then `require(deps.resolved.get('typescript'))` gets `undefined` → `The "id" argument must be of type string. Received undefined`.
+
+**Fix:** pinned `typescript` to `~6.0.3` — the last JS-based compiler release (6.0.x is the final line with the full JS API; 6.0.3 is inside typescript-estree's `<6.1.0` peer range). `tsconfig.json` needed no changes: TS 6.0 also rejects `baseUrl`, so Issue 2's fix stands. Added a Dependabot `ignore` for typescript major bumps so it doesn't immediately re-open a PR back to 7.x.
+
+### Issue 4b — second lint break behind the first: `eslint@10.7.0` unsupported by eslint-config-next (FIXED)
+With TS fixed, `pnpm lint` crashed twice more, both ESLint-10-specific:
+- `scopeManager.addGlobals is not a function` — ESLint 10 requires `ScopeManager#addGlobals`; `eslint-config-next@16.2.10` applies its **own bundled parser** (`eslint-config-next/parser`, block 0 of its flat config, matching `**/*.{js,jsx,mjs,ts,tsx,mts,cts}`) whose bundled scope-manager predates that API. Updating the separate `@typescript-eslint/*` packages to 8.64.0 (which does implement `addGlobals`) did not help because the bundled copy is compiled in.
+- `contextOrFilename.getFilename is not a function` — `eslint-plugin-react@7.37.5` (latest; supports eslint `^9.7` max) uses `context.getFilename()`, removed in ESLint 10.
+
+**Fix:** downgraded `eslint` to `^9.39.5` (the 9.x maintenance line — the newest line eslint-config-next 16.2.x's stack actually works with; no stable or canary eslint-config-next supports 10 yet). Also kept the transitive `typescript-eslint` update to 8.64.0 in the lockfile. Added a Dependabot `ignore` for eslint major bumps. `pnpm lint` now exits 0 (6 pre-existing "unused eslint-disable directive" warnings remain — warnings, not errors; left alone to keep the diff minimal).
+
+### Issue 6 — coverage gate fails on unmodified `main` (FIXED)
+**Root cause:** `pnpm test:coverage` fails the 70% **branches** threshold on `src/lib` (63.71%; lines/functions/statements pass). Verified pre-existing by stashing all changes and re-running against the untouched lockfile — identical numbers. Most likely the vitest 3→4 bump (merged dev-deps PR #14) changed v8 branch counting (vitest 4 uses AST-aware remapping); the prior session only ran `pnpm test`, which doesn't check coverage. Five `src/lib` files had 0% coverage; `paymongo.ts` alone was 0/47 branches.
+**Fix:** wrote real unit tests for the two biggest gaps — `src/lib/__tests__/paymongo.test.ts` (mocked `paymongo` SDK; covers all four wrappers, response-shape fallbacks, and `mapPayMongoError` paths) and `src/lib/__tests__/refunds.test.ts` (pure window/label helpers + db-mocked queries, same `vi.hoisted` mock idiom as `pricing.test.ts`). Branches now 77.65%, all four metrics pass both vitest's thresholds and `scripts/check-coverage.js`.
+
+### Verified (all with the real commands, local, `DATABASE_URL` set as in CI)
+`pnpm typecheck` clean · `pnpm lint` exit 0 · `prisma format --check` + `prisma validate` OK · `pnpm test:coverage` 200/200 tests, all thresholds pass · `node scripts/check-coverage.js` pass · `pnpm build` exit 0 (full route table, no reinstall, no worker crash).
+
+### Net effect
+All six pre-existing breaks on `main` are fixed. The 9 open Dependabot PRs can now be re-run against a green base. Note for future triage: any Dependabot PR bumping `typescript` to 7.x or `eslint` to 10.x must be declined until typescript-eslint/eslint-config-next support them (the dependabot.yml ignores now prevent these PRs from opening).
