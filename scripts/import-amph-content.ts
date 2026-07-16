@@ -7,11 +7,20 @@
  *   - content/curriculum/quiz-questions.json (8 quizzes, ~40 questions)
  *
  * Targets:
- *   Course         "Project Amazon PH Academy"
+ *   Course x2      "PPC Foundations" (modules 0-4), "Accelerated Mastery" (modules 5-8)
  *   Module x9      One per AMPH module (0-onboarding through 8-competitive)
  *   Lesson x31     One per MDX file
  *   Quiz x8        One per quiz in the JSON
  *   QuizQuestion   For each question in each quiz
+ *
+ * NOTE: this used to be a single course ("amph-foundations") tied to one
+ * pricing tier. It is now split across the ppc-foundations and
+ * accelerated-mastery pricing tiers per docs/CONTENT-UPDATE-PLAN.md §4 —
+ * Module/Lesson slugs for modules 5-8 changed prefix accordingly (from
+ * amph-foundations-* to accelerated-mastery-*). Re-running this script
+ * against a database that still has the old amph-foundations-5..8 rows will
+ * create new rows rather than update them; reconcile or migrate the old
+ * rows before running this against production data.
  *
  * Currency handling:
  *   AMPH lessons use USD throughout. Filipino VA audience wants PHP.
@@ -40,35 +49,58 @@ const SOURCE_ROOT = join(REPO_ROOT, 'content/curriculum');
 const MODULES_DIR = join(SOURCE_ROOT, 'modules');
 const QUIZ_FIXTURE = join(SOURCE_ROOT, 'quiz-questions.json');
 
-// Course metadata — single course for now
-const COURSE = {
-  slug: 'amph-foundations',
-  title: 'Project Amazon PH Academy',
-  description:
-    'Amazon advertising training for Filipino virtual assistants. Master CPC, ACoS, ROAS, campaign architecture, bidding, search term triage, and competitive intelligence through structured modules and interactive tools.',
-  difficulty: 'FOUNDATIONS' as CourseDifficulty,
-  // Attached at import time by looking up the PPC Foundations PricingTier.
-  pricingTierSlug: 'ppc-foundations',
-  estimatedHours: 25,
-};
+// Course metadata — two real courses, one per pricing tier.
+// PPC Foundations (modules 0-4) and Accelerated Mastery (modules 5-8) both
+// exist today. Ultimate Transformation has no course yet — its modules
+// (10-13 per docs/CURRICULUM-REDESIGN.md) haven't been authored, so it gets
+// no Course row until that content ships. See docs/CONTENT-UPDATE-PLAN.md §4.
+const COURSES: Array<{
+  slug: string;
+  title: string;
+  description: string;
+  difficulty: CourseDifficulty;
+  pricingTierSlug: string;
+  estimatedHours: number;
+}> = [
+  {
+    slug: 'ppc-foundations',
+    title: 'PPC Foundations',
+    description:
+      'Amazon advertising fundamentals for Filipino virtual assistants: onboarding, the Big Six metrics, keyword research, listing optimization, and campaign architecture.',
+    difficulty: 'FOUNDATIONS',
+    pricingTierSlug: 'ppc-foundations',
+    estimatedHours: 15,
+  },
+  {
+    slug: 'accelerated-mastery',
+    title: 'Accelerated Mastery',
+    description:
+      'Account-level PPC operation: portfolio strategy, bidding, search term triage, and competitive intelligence.',
+    difficulty: 'MASTERY',
+    pricingTierSlug: 'accelerated-mastery',
+    estimatedHours: 10,
+  },
+];
 
-// Module metadata (order matches AMPH file structure)
+// Module metadata (order matches AMPH file structure). courseSlug assigns
+// each module to one of the COURSES above.
 const MODULE_META: Array<{
   dirName: string;
   moduleNumber: number;
   title: string;
   description: string;
   estimatedMinutes: number;
+  courseSlug: string;
 }> = [
-  { dirName: '0-onboarding', moduleNumber: 0, title: 'Onboarding', description: 'Get oriented to Project Amazon PH Academy and the Amazon advertising landscape.', estimatedMinutes: 30 },
-  { dirName: '1-foundations', moduleNumber: 1, title: 'PPC Foundations', description: 'The Big Six metrics: CPC, CTR, ACoS, TACoS, ROAS, conversion rate. The numbers every operator lives by.', estimatedMinutes: 90 },
-  { dirName: '2-keyword-research', moduleNumber: 2, title: 'Keyword Research', description: 'Match types, negative keywords, keyword grouping, and the research workflow.', estimatedMinutes: 75 },
-  { dirName: '3-listing-optimization', moduleNumber: 3, title: 'Listing Optimization', description: 'Listing quality score, listing anatomy, A+ content. The conversion foundation under every campaign.', estimatedMinutes: 60 },
-  { dirName: '4-campaign-architecture', moduleNumber: 4, title: 'Campaign Architecture', description: 'Sponsored Products, Brands, and Display. How to structure campaigns for scale.', estimatedMinutes: 80 },
-  { dirName: '5-portfolio-strategy', moduleNumber: 5, title: 'Portfolio Strategy', description: 'Portfolios, budget pacing, seasonal strategy. Operating at the account level.', estimatedMinutes: 60 },
-  { dirName: '6-bidding-lab', moduleNumber: 6, title: 'Bidding Lab', description: 'Bid strategies, placement adjustments, and prep for the Bid Elevator simulator.', estimatedMinutes: 60 },
-  { dirName: '7-search-term-triage', moduleNumber: 7, title: 'Search Term Triage', description: 'STR analysis, negative keyword extraction, prep for the STR Triage simulator.', estimatedMinutes: 60 },
-  { dirName: '8-competitive-intelligence', moduleNumber: 8, title: 'Competitive Intelligence', description: 'Brand Analytics, share of voice, competitor benchmarking.', estimatedMinutes: 60 },
+  { dirName: '0-onboarding', moduleNumber: 0, title: 'Onboarding', description: 'Get oriented to Project Amazon PH Academy and the Amazon advertising landscape.', estimatedMinutes: 30, courseSlug: 'ppc-foundations' },
+  { dirName: '1-foundations', moduleNumber: 1, title: 'PPC Foundations', description: 'The Big Six metrics: CPC, CTR, ACoS, TACoS, ROAS, conversion rate. The numbers every operator lives by.', estimatedMinutes: 90, courseSlug: 'ppc-foundations' },
+  { dirName: '2-keyword-research', moduleNumber: 2, title: 'Keyword Research', description: 'Match types, negative keywords, keyword grouping, and the research workflow.', estimatedMinutes: 75, courseSlug: 'ppc-foundations' },
+  { dirName: '3-listing-optimization', moduleNumber: 3, title: 'Listing Optimization', description: 'Listing and ad relevance signals, listing anatomy, A+ content. The conversion foundation under every campaign.', estimatedMinutes: 60, courseSlug: 'ppc-foundations' },
+  { dirName: '4-campaign-architecture', moduleNumber: 4, title: 'Campaign Architecture', description: 'Sponsored Products, Brands, and Display. How to structure campaigns for scale.', estimatedMinutes: 80, courseSlug: 'ppc-foundations' },
+  { dirName: '5-portfolio-strategy', moduleNumber: 5, title: 'Portfolio Strategy', description: 'Portfolios, budget pacing, seasonal strategy. Operating at the account level.', estimatedMinutes: 60, courseSlug: 'accelerated-mastery' },
+  { dirName: '6-bidding-lab', moduleNumber: 6, title: 'Bidding Lab', description: 'Bid strategies, placement adjustments, and prep for the Bid Elevator tool.', estimatedMinutes: 60, courseSlug: 'accelerated-mastery' },
+  { dirName: '7-search-term-triage', moduleNumber: 7, title: 'Search Term Triage', description: 'STR analysis, negative keyword extraction, prep for the Search Term Triage tool.', estimatedMinutes: 60, courseSlug: 'accelerated-mastery' },
+  { dirName: '8-competitive-intelligence', moduleNumber: 8, title: 'Competitive Intelligence', description: 'Brand Analytics, share of voice, competitor benchmarking.', estimatedMinutes: 60, courseSlug: 'accelerated-mastery' },
 ];
 
 /**
@@ -120,47 +152,60 @@ function makeExcerpt(body: string): string {
   return text.slice(0, 200).trim() + (text.length > 200 ? '...' : '');
 }
 
-async function importCourse(): Promise<string> {
-  // Look up the PricingTier CUID by slug so the course is tiered, not free.
-  const tier = await prisma.pricingTier.findUnique({
-    where: { slug: COURSE.pricingTierSlug },
-    select: { id: true, tier: true },
-  });
+async function importCourses(): Promise<Map<string, string>> {
+  const courseIdBySlug = new Map<string, string>();
 
-  const course = await prisma.course.upsert({
-    where: { slug: COURSE.slug },
-    update: {
-      title: COURSE.title,
-      description: COURSE.description,
-      difficulty: COURSE.difficulty,
-      estimatedHours: COURSE.estimatedHours,
-      pricingTierId: tier?.id ?? null,
-    },
-    create: {
-      slug: COURSE.slug,
-      title: COURSE.title,
-      description: COURSE.description,
-      difficulty: COURSE.difficulty,
-      estimatedHours: COURSE.estimatedHours,
-      pricingTierId: tier?.id ?? null,
-      isPublished: true,
-      publishedAt: new Date(),
-    },
-  });
+  for (const c of COURSES) {
+    // Look up the PricingTier CUID by slug so the course is tiered, not free.
+    const tier = await prisma.pricingTier.findUnique({
+      where: { slug: c.pricingTierSlug },
+      select: { id: true, tier: true },
+    });
 
-  if (tier) {
-    console.log(`  ✓ Course: ${course.title} (tier: ${tier.tier})`);
-  } else {
-    console.log(`  ✓ Course: ${course.title} (no tier attached — run prisma/seed.ts first)`);
+    const course = await prisma.course.upsert({
+      where: { slug: c.slug },
+      update: {
+        title: c.title,
+        description: c.description,
+        difficulty: c.difficulty,
+        estimatedHours: c.estimatedHours,
+        pricingTierId: tier?.id ?? null,
+      },
+      create: {
+        slug: c.slug,
+        title: c.title,
+        description: c.description,
+        difficulty: c.difficulty,
+        estimatedHours: c.estimatedHours,
+        pricingTierId: tier?.id ?? null,
+        isPublished: true,
+        publishedAt: new Date(),
+      },
+    });
+
+    courseIdBySlug.set(c.slug, course.id);
+
+    if (tier) {
+      console.log(`  ✓ Course: ${course.title} (tier: ${tier.tier})`);
+    } else {
+      console.log(`  ✓ Course: ${course.title} (no tier attached — run prisma/seed.ts first)`);
+    }
   }
-  return course.id;
+
+  return courseIdBySlug;
 }
 
-async function importModules(courseId: string): Promise<Map<number, string>> {
+async function importModules(courseIdBySlug: Map<string, string>): Promise<Map<number, string>> {
   const moduleIdByNumber = new Map<number, string>();
 
   for (const meta of MODULE_META) {
-    const slug = `${COURSE.slug}-${meta.dirName}`;
+    const courseId = courseIdBySlug.get(meta.courseSlug);
+    if (!courseId) {
+      console.warn(`  ! Skipping module ${meta.moduleNumber} — course "${meta.courseSlug}" not found`);
+      continue;
+    }
+
+    const slug = `${meta.courseSlug}-${meta.dirName}`;
     const module_ = await prisma.module.upsert({
       where: { slug },
       update: {
@@ -215,7 +260,7 @@ async function importLessons(moduleIdByNumber: Map<number, string>): Promise<num
 
       // Build slug from filename: "1.1-what-is-ppc.mdx" → "1-1-what-is-ppc"
       const fileSlug = file.replace('.mdx', '');
-      const lessonSlug = `${COURSE.slug}-${fileSlug}`;
+      const lessonSlug = `${meta.courseSlug}-${fileSlug}`;
 
       // Parse lesson number from filename: "1.1-..." → 1
       const lessonNumberMatch = fileSlug.match(/^(\d+)\.(\d+)/);
@@ -296,7 +341,7 @@ async function importQuizzes(): Promise<number> {
     const files = readdirSync(dir).filter((f) => f.endsWith('.mdx')).sort();
     const lastFile = files[files.length - 1];
     if (!lastFile) continue;
-    const lastLessonSlug = `${COURSE.slug}-${lastFile.replace('.mdx', '')}`;
+    const lastLessonSlug = `${meta.courseSlug}-${lastFile.replace('.mdx', '')}`;
 
     const lesson = await prisma.lesson.findUnique({ where: { slug: lastLessonSlug } });
     if (!lesson) {
@@ -356,11 +401,11 @@ async function importQuizzes(): Promise<number> {
 async function main(): Promise<void> {
   console.log('Importing AMPH-Academy content into amph-v2...\n');
 
-  console.log('Step 1: Course');
-  const courseId = await importCourse();
+  console.log('Step 1: Courses');
+  const courseIdBySlug = await importCourses();
 
   console.log('\nStep 2: Modules');
-  const moduleIdByNumber = await importModules(courseId);
+  const moduleIdByNumber = await importModules(courseIdBySlug);
 
   console.log('\nStep 3: Lessons');
   const lessonCount = await importLessons(moduleIdByNumber);

@@ -441,3 +441,45 @@ Validated Dependabot's grouped bump (sentry 9→10.66, jose 5→6.2.3, pino 9→
 
 ### Issue 7 — quality job typechecks before `prisma generate` (FIXED)
 Surfaced only once CI got past the earlier breaks: ci.yml's quality job ran `pnpm typecheck` right after install, with "Generate Prisma client" several steps later. Prisma 5's `@prisma/client` postinstall auto-generated the client so the order never mattered; Prisma 7 removed install-time generation, so CI typechecked against the ungenerated stub (`Module '"@prisma/client"' has no exported member 'PrismaClient'` + ~60 implicit-any errors). Invisible locally (generate was always run first) and on every earlier CI run (they died before typecheck's dependence showed). Fix: moved the generate step to immediately after `pnpm install` in the quality job; e2e and lighthouse jobs already generated before use.
+
+---
+
+## 2026-07-16 (cont.) — Content track: Release 1 plan + execution (issue #24, P0 #3 and #4)
+
+**Owner of this section:** continuation of the "Content track kickoff" entry above. **Context for the next agent:** this closes out most of issue #24's Release 1 ("Trust and safety") checklist — legacy product references, the five factual corrections, fact-card metadata, and the course/tier split. Read `docs/CONTENT-UPDATE-PLAN.md` first — it's the spec this section executed against, with exact file/line references for every change.
+
+### What was asked
+User asked for a written content-update plan first (not an immediate rewrite), then — in a follow-up turn — said "Execute," then later "Document, handoff then commit and merge everything." This section covers all three turns.
+
+### What was done
+
+**1. Plan (`docs/CONTENT-UPDATE-PLAN.md`, commit `91b94d6`):** file-by-file work order mapping every remaining Release 1 P0 in `docs/CONTENT-AUDIT-2026-07-16.md` to exact files and lines — legacy references, the five factual corrections (portfolios, attribution, auction, quality score, dayparting), fact-card placement, and a course/tier split proposal.
+
+**2. Legacy references removed (commit `0163791`):** AdCraft, AI Mentor, Formula Calculator, and "STR Triage Arena" purged from `0.1-welcome.mdx`, `0.2-platform-tour.mdx`, `0.3-first-simulation.mdx`, `1.5-metrics-in-practice.mdx`, and the module 4/6/7 practice-prep lessons. Replaced with the real platform: Project Amazon PH Academy, its actual 4-tab bottom nav (Home/Courses/Tools/Profile, per `src/components/ui/BottomNav.tsx`), and its five real tools (`src/engine/registry.ts`) — not the legacy "three simulations." `0.2-platform-tour.mdx` was rewritten most heavily; its old five-module table only listed modules 0/1/4/6/7 (skipping 2/3/5/8 entirely) and invented XP-level titles (Trainee/Analyst/.../500 XP each) that don't exist anywhere in the codebase — removed rather than guessed at.
+
+**3. Five factual corrections + fact cards, one commit each** (`e645dd2`, `8f679c8`, `feb9b5a`, `10f77aa`, `2d938e5`) — each follows the audit's "required replacement" column:
+- **5.1 Portfolios:** removed the claim that portfolios carry shared negative keywords / bid adjustments (they don't — those are campaign-level); qualified the budget-flex example as eligibility-dependent.
+- **7.1 Attribution:** removed the fixed "7-day SP / 14-day SB" claim; taught as an account-level setting to verify, not a constant.
+- **6.1 Auction:** removed the "modified second-price, pay $0.01 above next bid" mechanic; reframed around setting a bid ceiling and monitoring realized CPC (also fixed a stray mojibake byte — "三种" — left over in the source MDX).
+- **3.1 + 4 cross-references (3.2, 3.3, 1.2-cpc-ctr.mdx, 8.2-share-of-voice.mdx):** "Listing Quality Score" reframed as "listing and ad relevance signals" — a teaching shorthand, not a real, inspectable Amazon metric. Kept the underlying factor table (CTR, CVR, completeness, reviews, price, stock — genuinely observable inputs).
+- **5.2 + 8.2/8.3 dayparting:** qualified as "where eligible" with a console-validation step and a manual (non-automated) fallback.
+
+Each fix added an Amazon Ads Fact Card (source URL, scope, owner/date placeholders for the content owner to fill in — not fabricated by this pass).
+
+**4. Course/tier split (commit `c0556f5`):** `scripts/import-amph-content.ts` previously created a single 9-module course bound only to the `ppc-foundations` tier — `accelerated-mastery` and `ultimate-transformation` had no course to attach to. Split into two `Course` rows: `ppc-foundations` (modules 0-4, 5 modules) and `accelerated-mastery` (modules 5-8, 4 modules) — matches `Course.pricingTierId`'s existing one-course-one-tier schema with no migration needed (the audit's "Recommended" option over module-level entitlements). `prisma/seed.ts` tier copy updated to match (Foundations' "5 core modules" bullet already matched by coincidence; Accelerated Mastery's "All 8 modules" claim was wrong post-split and is now "Foundations + Accelerated Mastery, ~25 hours total"). `ultimate-transformation` deliberately left with no course — its modules (10-13) don't exist yet (Release 3).
+
+### Explicitly NOT done
+- **Full lesson rewrites to the 10-block lesson-production standard** (client outcome, decision card, worked case, etc.) — out of scope by design; that's Release 2, tracked separately in `docs/CURRICULUM-REDESIGN.md`.
+- **The MDX renderer gap** (`src/lib/mdx.ts` can't render tables/ordered lists/links/images/video) — P0 #2 in the original audit, untouched, still open, still a separate code-side issue.
+- **Running `scripts/import-amph-content.ts` against a real database.** No `DATABASE_URL` was available in this session. The script was reviewed for correctness (course/module/lesson slug wiring traced by hand) but never executed. **Important:** the script's slug prefix for modules 5-8 changed from `amph-foundations-*` to `accelerated-mastery-*` — if this has ever been run against a real database before, re-running it now will create new Module/Lesson rows alongside the old ones rather than updating them. Reconcile (or clear and re-seed) before running it for real. This is called out in a comment at the top of the script itself.
+- **Ultimate Transformation's checkout/enrollment gap.** Even before this change, nobody could enroll into the `ultimate-transformation` tier (no `Course` row existed for it, and `Enrollment` requires a `courseId`). This pass didn't create one (correctly, per the plan — there's no content for it yet), but the gap is pre-existing and unchanged, not introduced here. Worth its own issue when Release 3 content is ready.
+- **Slugs/filenames were not renamed**, even where a lesson's framing changed a lot (e.g., `3.1-listing-quality-score.mdx`, `0.3-first-simulation.mdx`). Only the frontmatter `title` field (display text) was updated. Renaming the slug would break `Lesson.slug`-keyed upserts and any existing progress/enrollment references — flagged in the plan as a decision for the content owner, not made unilaterally here.
+
+### Verification performed
+Re-ran the audit's own evidence-gathering greps (`adcraft`, `ai mentor`, `formula calculator`, `simulation`, `triage arena`, the five factual-claim patterns) across `content/curriculum/modules/` after every edit — zero hits remain outside internal frontmatter `type`/`slug` fields (not learner-facing copy) and the corrected/qualified statements themselves. **Not verified:** `pnpm typecheck` / `pnpm build` against the `scripts/import-amph-content.ts` change — no `node_modules` existed in this session (fresh checkout, install not run) and installing was out of scope for a content-focused pass; the earlier `npx tsc` attempt only surfaced pre-existing missing-dependency errors, not anything from this change. Recommend a full `pnpm install && pnpm typecheck` pass before this reaches a database with real data.
+
+### Next steps for whoever picks this up
+1. Run `pnpm install && DATABASE_URL=<test-db> pnpm typecheck` and, against a **non-production** database, `pnpm tsx scripts/import-amph-content.ts` — confirm the two-course split lands cleanly and reconcile any orphaned `amph-foundations-5..8` rows if this has run before.
+2. Fill in the fact cards' `Last verified` / `Next review due` / `Owner` placeholders — deliberately left blank rather than guessed.
+3. Decide whether to open a dedicated issue for the Ultimate Transformation checkout gap now, or defer it to when Release 3 content is scoped.
+4. Move on to Release 2 (full lesson rewrites to the 10-block standard) per `docs/CURRICULUM-REDESIGN.md`'s production order — issue #24's Release 1 checklist should be fully closed after this section's work merges.

@@ -85,10 +85,10 @@ async function upsertPricingTiers(): Promise<void> {
       tier: CourseTier.ACCELERATED_MASTERY,
       pricePhp: 599900, // PHP 5,999.00
       description:
-        'Everything in Foundations, plus advanced modules and all scenario packs across five product categories.',
+        'The Foundations course, plus the Accelerated Mastery course: 4 more modules and all scenario packs across five product categories.',
       features: JSON.stringify({
         bullets: [
-          'All 8 modules (~30 hours)',
+          'Foundations (5 modules) + Accelerated Mastery (4 modules), ~25 hours total',
           'Every scenario pack: kitchen, electronics, garden, fitness, beauty',
           'All downloadable resources and templates',
           'Live class recordings library',
@@ -108,7 +108,7 @@ async function upsertPricingTiers(): Promise<void> {
         'Everything in Mastery, plus weekly live classes with Ryan and a monthly 1-on-1 portfolio review.',
       features: JSON.stringify({
         bullets: [
-          'All 8 modules + early-access new content',
+          'Foundations + Accelerated Mastery, plus early-access new content',
           'Weekly live classes with Ryan',
           '1-on-1 portfolio review every month',
           'Private community channel',

@@ -27,7 +27,7 @@ First, understand the rules of the game:
 | **Daily budget = average** | Your daily budget is a 7-day average, not a hard cap | Can spend up to 2x in one day if it balances out within the week |
 | **Over-delivery** | Amazon may overspend your daily budget by up to 25% | You're not charged more than your daily budget — Amazon covers the difference |
 | **Lifetime budget** | Not available for Sponsored Products | Only for Sponsored Brands campaigns with end dates |
-| **Portfolio budget** | Shared pool across campaigns | Prevents single-campaign cap issues |
+| **Portfolio budget** | Spend cap across campaigns, where eligible | Prevents single-campaign cap issues |
 | **Budget rule** | Increase/decrease based on performance triggers | Automate pacing adjustments |
 
 ### The 7-Day Average in Practice
@@ -114,7 +114,7 @@ Amazon traffic is not uniform. Here's a typical pattern:
 | Sunday | 0.5x | ₱500 |
 | **Weekly Total** | | **₱6,800** |
 
-Use **dayparting** (scheduling bid adjustments by time of day) to align spend with traffic patterns:
+Where your account has access to scheduled bidding or budget rules by time of day, use them to align spend with traffic patterns — this control isn't available or configured the same way on every account, so confirm it's there before you plan around it:
 
 - **Morning (6-9AM):** Increase bids 10-20% — commuters browsing on mobile
 - **Work hours (9AM-3PM):** Standard bids — office workers and parents
@@ -122,7 +122,9 @@ Use **dayparting** (scheduling bid adjustments by time of day) to align spend wi
 - **Evening (7-11PM):** Increase bids 15-25% — peak shopping time
 - **Late night (11PM-6AM):** Decrease bids 30-50% — low conversion, wasted spend
 
-> 💡 **Tip**: For most Filipino VA-managed accounts (Philippine time, serving US market), the peak buying window is 8PM-12AM PHT (7AM-11AM EST). That's when US shoppers are at work and making purchase decisions. Schedule your highest bids in this window.
+If your account doesn't have scheduled bid rules available, the fallback is manual: check performance by hour in your reports and adjust bids by hand at known peak and low-traffic windows.
+
+> 💡 **Tip**: For most Filipino VA-managed accounts (Philippine time, serving US market), the peak buying window is 8PM-12AM PHT (7AM-11AM EST). That's when US shoppers are at work and making purchase decisions. If you have schedule-based bidding available, put your highest bids in this window.
 
 ---
 
@@ -179,7 +181,22 @@ Keep this tracker in a spreadsheet. Update daily. It takes 2 minutes and saves y
 > 📌 **Key Takeaways:**
 > - Amazon's daily budget is a **7-day average** — you can spend up to 2x in one day
 > - **Burn rate** tells you how fast you're spending per hour — check it daily
-> - **Dayparting** aligns your bids with peak shopping hours (8PM-12AM PHT)
+> - **Scheduled bid rules, where available,** align your bids with peak shopping hours (8PM-12AM PHT) — confirm the control exists on your account, and fall back to manual bid checks if it doesn't
 > - If you hit budget by midday, **increase the budget or use portfolio pooling**
 > - **Weekly patterns matter** — Friday may need 30% more budget than Sunday
 > - Track daily pacing in a **simple spreadsheet** — 2 minutes/day saves thousands
+
+---
+
+## Amazon Ads Fact Card
+
+```text
+Product or feature: Scheduled bidding / dayparting-style budget and bid rules
+What the learner can do: Where available, schedule bid or budget changes by time of day to match traffic patterns
+Who can access it: Availability and exact controls vary by account and campaign type — verify in-console
+Retailer or marketplace scope: Amazon Advertising Console; do not assume parity across marketplaces
+Official source URL: https://advertising.amazon.com/help/GTGPQGUXNCTHE2DS
+Last verified: [content owner to fill in at rewrite time]
+Next review due: [content owner to fill in at rewrite time]
+Owner: [content owner]
+```

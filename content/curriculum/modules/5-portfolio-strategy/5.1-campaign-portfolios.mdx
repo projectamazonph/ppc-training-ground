@@ -20,11 +20,11 @@ When you have 5 campaigns, you can manage them one by one. When you have 50 — 
 
 Portfolios let you:
 
-1. **Share a budget across multiple campaigns** — Prevents one campaign from starving while another overspends
+1. **Set a spend cap across multiple campaigns** — Where eligible, a portfolio budget caps total spend for every campaign inside it, combined
 2. **View performance at a strategic level** — See how your "New Product Launches" segment is doing as a whole
-3. **Apply portfolio-level negative keywords** — Block irrelevant traffic across all campaigns in the portfolio
-4. **Set portfolio-level bid adjustments** — Apply placement or schedule adjustments to a whole group
-5. **Run portfolio-level reports** — Pull data for a business segment in one report
+3. **Group campaigns for reporting** — Pull data for a business segment in one report
+
+Negative keywords and bid adjustments are **campaign-level controls** — a portfolio doesn't apply them for you. Each campaign inside a portfolio needs its own negatives and its own bids (see Module 2 for negative-keyword strategy and Module 6 for bidding).
 
 ---
 
@@ -103,33 +103,29 @@ But if Campaign A is performing well and could use ₱200 more:
 → Total never exceeds ₱2,000
 ```
 
-**Without portfolio budgeting:** Each campaign has a hard ₱667/day cap. If one is on fire, it hits the ceiling. You're leaving sales on the table.
+**Without a portfolio budget:** Each campaign has its own hard daily cap. If one is on fire, it hits its own ceiling regardless of what the others are spending.
 
-**With portfolio budgeting:** The portfolio has a ₱2,000/day cap. Campaigns flex within it. Winners get more budget naturally.
+**With a portfolio budget (where eligible):** The portfolio caps total spend across all campaigns inside it for the period. This is a ceiling on the group, not a guarantee that a winning campaign automatically pulls budget from a slower one in real time — confirm exactly how your account's portfolio budget behaves before you plan around it.
 
-> 💡 **Tip**: Set portfolio budgets 10-20% HIGHER than your expected daily spend. This gives campaigns room to flex on good days without hitting caps. Amazon's algorithm likes consistency — a campaign that hits its budget at 3PM and stops running loses momentum.
+> 💡 **Tip**: Set portfolio budgets 10-20% higher than your expected combined daily spend. This gives the group room to flex on good days without the whole portfolio hitting its cap and pausing.
 
 ---
 
-## Portfolio-Level Negative Keywords
+## Negatives Still Live at the Campaign Level
 
-One of the most powerful features: you can add negatives that apply to **every campaign** in the portfolio.
+Portfolios don't carry a shared negative-keyword list. When you group campaigns into a portfolio, each campaign keeps managing its own negatives:
 
 ```
 PORTFOLIO: Core Products
-├── Portfolio Negatives:
-│   ├── free (phrase)
-│   ├── cheap (phrase)
-│   ├── used (phrase)
-│   ├── how to (phrase)
-│   └── replacement parts (phrase)
-│
 ├── SP - Bamboo Board - Broad
+│   └── Negatives: free, cheap, used, how to, replacement parts
 ├── SP - Bamboo Board - Phrase
+│   └── Negatives: free, cheap, used, how to, replacement parts
 └── SP - Bamboo Board - Exact
+    └── Negatives: (usually fewer needed — exact match is already narrow)
 ```
 
-Any campaign you add to this portfolio automatically inherits these negatives. New campaign for a new product? Drop it in the portfolio and it's instantly protected.
+New campaign for a new product? Drop it in the portfolio for shared budget and reporting, but still build its negative list from scratch (or copy one over) — the portfolio won't do it for you.
 
 ---
 
@@ -181,15 +177,30 @@ TEST - Bamboo Board - Image A/B
 |---------|-------------|-----|
 | **Too many portfolios** | Spreads budget too thin | Group by strategy, keep 4-6 max per account |
 | **Mixing match types** | Blurs performance data | Keep separate portfolios for different match types if budgets differ |
-| **No portfolio negatives** | Duplicate work | Always set portfolio-level negatives first |
+| **Assuming negatives carry across the portfolio** | Irrelevant traffic slips through new campaigns | Copy your negative list into every new campaign — portfolios don't apply negatives for you |
 | **Static budget allocation** | Misses opportunities | Review allocation monthly, shift budget to winning portfolios |
 | **Skipping seasonal portfolio** | Reactive instead of proactive | Pre-budget for known seasonal events |
 | **Not using portfolio reports** | Flying blind | Run portfolio-level performance reports weekly |
 
 > 📌 **Key Takeaways:**
-> - Portfolios **group campaigns for shared budgeting and reporting** — essential at 10+ campaigns
+> - Portfolios **group campaigns for shared budgeting (where eligible) and reporting** — useful at 10+ campaigns
 > - Use the **60/20/10/10 allocation** as a starting point: Core / Launches / Brand / Seasonal
-> - **Portfolio budgets flex** — winning campaigns can overspend within the pool instead of hitting hard caps
-> - **Portfolio-level negatives** protect every campaign in the group automatically
+> - **Portfolio budgets cap total spend for the group** — confirm your account's exact flex behavior before planning around it
+> - **Negative keywords and bid adjustments are campaign-level, not portfolio-level** — each campaign in the group needs its own
 > - Keep **4-6 portfolios max** — more than that and you lose the benefit of consolidation
 > - **Review allocation monthly** — shift budget from low-performers to high-performers
+
+---
+
+## Amazon Ads Fact Card
+
+```text
+Product or feature: Campaign portfolios — budget and reporting grouping
+What the learner can do: Group campaigns for shared reporting; where eligible, cap combined spend with a portfolio budget
+Who can access it: Sponsored Products advertisers (eligibility for portfolio budgets varies by account)
+Retailer or marketplace scope: Amazon Advertising Console, US marketplace (verify for other marketplaces)
+Official source URL: https://advertising.amazon.com/help/GPEJN2E6R52G7C2T (portfolios), https://advertising.amazon.com/help/GU7E77PGF96FMW3X (portfolio budgets)
+Last verified: [content owner to fill in at rewrite time]
+Next review due: [content owner to fill in at rewrite time]
+Owner: [content owner]
+```
