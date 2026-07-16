@@ -1,10 +1,10 @@
 #!/usr/bin/env tsx
 /**
- * Import AMPH-Academy content into the new amph-v2 Prisma database.
+ * Import curriculum content into the amph-v2 Prisma database.
  *
- * Source: AMPH-Academy project content directory:
- *   - content/modules (9 module directories, 31 MDX lesson files)
- *   - fixtures/quiz-questions.json (8 quizzes, ~40 questions)
+ * Source: content/curriculum in this repository:
+ *   - content/curriculum/modules (9 module directories, 31 MDX lesson files)
+ *   - content/curriculum/quiz-questions.json (8 quizzes, ~40 questions)
  *
  * Targets:
  *   Course         "Project Amazon PH Academy"
@@ -27,16 +27,18 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import type { CourseDifficulty } from '../src/lib/enums';
 import { readFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL environment variable is not set.');
 }
 const prisma = new PrismaClient({ adapter: new PrismaPg(process.env.DATABASE_URL) });
 
-const SOURCE_ROOT = '/storage/emulated/0/Hermes Projects/projects/AMPH-Academy/project';
-const MODULES_DIR = join(SOURCE_ROOT, 'content/modules');
-const QUIZ_FIXTURE = join(SOURCE_ROOT, 'fixtures/quiz-questions.json');
+const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+const SOURCE_ROOT = join(REPO_ROOT, 'content/curriculum');
+const MODULES_DIR = join(SOURCE_ROOT, 'modules');
+const QUIZ_FIXTURE = join(SOURCE_ROOT, 'quiz-questions.json');
 
 // Course metadata — single course for now
 const COURSE = {

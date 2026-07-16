@@ -34,7 +34,7 @@ PayMongo for payments (one-time, Philippine peso, GCash/Maya/card/bank). Three p
 
 ## The Curriculum
 
-Lessons are planned and audited in `docs/`. Source content is NOT yet versioned in this repo — `scripts/import-amph-content.ts` still reads from a hard-coded Android path outside the repo (P0 finding in `docs/CONTENT-AUDIT-2026-07-16.md`). Target structure: three courses (PPC Foundations, Accelerated Mastery, Ultimate Transformation) per `docs/CURRICULUM-REDESIGN.md`. Audio-visual scripts: `docs/VIDEO-EXPLAINER-SCRIPTS.md`. Sample lessons: `docs/0-1-welcome-to-amph.md`, `docs/1-1-read-ppc-data-before-you-change-it.md`. Follow the lesson-production standard and the voice rules when authoring content.
+Lessons are planned and audited in `docs/`. Source content now lives in `content/curriculum/` (31 legacy MDX lessons in `modules/`, quiz fixture in `quiz-questions.json`); `scripts/import-amph-content.ts` reads from that repo-relative path. That legacy content still describes a different product (AdCraft, AI Mentor, three simulations) and needs a rewrite pass before the next release (remaining P0 findings in `docs/CONTENT-AUDIT-2026-07-16.md`). Target structure: three courses (PPC Foundations, Accelerated Mastery, Ultimate Transformation) per `docs/CURRICULUM-REDESIGN.md`. Audio-visual scripts: `docs/VIDEO-EXPLAINER-SCRIPTS.md`. Sample lessons: `docs/0-1-welcome-to-amph.md`, `docs/1-1-read-ppc-data-before-you-change-it.md`. Follow the lesson-production standard and the voice rules when authoring content.
 
 ## Code Style
 
