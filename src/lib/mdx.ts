@@ -1,21 +1,19 @@
 /**
- * Lightweight MDX → HTML renderer.
+ * MDX (markdown subset) -> HTML renderer for lesson content.
  *
- * Handles the markdown subset we use in lessons:
- *   - Headings (# ## ### ####)
- *   - Paragraphs
- *   - Bold/italic (**text**, *text*)
- *   - Inline code (`code`) and code blocks (```)
- *   - Bullet lists (- item)
- *   - Blockquotes (> text)
- *   - Horizontal rules (---)
+ * Backed by `marked` (CommonMark + GFM) so lessons can use tables, ordered
+ * and nested lists, links, and images, none of which the hand-rolled
+ * predecessor of this module supported.
  *
- * No JSX components — pure markdown. For interactive components
- * (e.g., drag-drop simulations) we'll need a real MDX setup, but the
- * current AMPH content is markdown-only.
+ * No JSX/component support — pure markdown. Interactive components would
+ * need a real MDX compile step; current AMPH content is markdown-only.
  *
- * Security: all output is HTML-escaped. No raw HTML passes through.
+ * Security: raw HTML (block or inline) is escaped rather than passed
+ * through, and link/image URLs are restricted to http(s), mailto, and
+ * relative/anchor paths — everything else is dropped to its text content.
  */
+
+import { Marked, type Tokens } from 'marked';
 
 function escapeHtml(text: string): string {
   return text
@@ -26,122 +24,40 @@ function escapeHtml(text: string): string {
     .replace(/'/g, '&#39;');
 }
 
-function renderInline(text: string): string {
-  let out = escapeHtml(text);
-  // Bold
-  out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-  // Italic
-  out = out.replace(/(?<!\w)\*([^*]+)\*(?!\w)/g, '<em>$1</em>');
-  // Inline code
-  out = out.replace(/`([^`]+)`/g, '<code>$1</code>');
-  return out;
+function isSafeUrl(href: string): boolean {
+  const trimmed = href.trim();
+  if (
+    trimmed.startsWith('#') ||
+    trimmed.startsWith('/') ||
+    trimmed.startsWith('./') ||
+    trimmed.startsWith('../')
+  ) {
+    return true;
+  }
+  return /^(https?|mailto):/i.test(trimmed);
 }
 
+const renderer = new Marked({ gfm: true, breaks: false });
+
+renderer.use({
+  renderer: {
+    html(token: Tokens.HTML | Tokens.Tag) {
+      return escapeHtml(token.text);
+    },
+    link({ href, title, tokens }: Tokens.Link) {
+      const body = this.parser.parseInline(tokens);
+      if (!isSafeUrl(href)) return body;
+      const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
+      return `<a href="${escapeHtml(href)}"${titleAttr} rel="noopener noreferrer">${body}</a>`;
+    },
+    image({ href, title, text }: Tokens.Image) {
+      if (!isSafeUrl(href)) return escapeHtml(text);
+      const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
+      return `<img src="${escapeHtml(href)}" alt="${escapeHtml(text)}"${titleAttr}>`;
+    },
+  },
+});
+
 export function renderLesson(markdown: string): string {
-  const lines = markdown.split('\n');
-  const html: string[] = [];
-  let inCodeBlock = false;
-  let codeBuffer: string[] = [];
-  let inList = false;
-  let inParagraph = false;
-  let paragraphBuffer: string[] = [];
-
-  function flushParagraph() {
-    if (paragraphBuffer.length > 0) {
-      const text = paragraphBuffer.join(' ').trim();
-      if (text) {
-        html.push(`<p>${renderInline(text)}</p>`);
-      }
-      paragraphBuffer = [];
-    }
-    inParagraph = false;
-  }
-
-  function flushList() {
-    if (inList) {
-      html.push('</ul>');
-      inList = false;
-    }
-  }
-
-  for (const line of lines) {
-    // Code blocks
-    if (line.trim().startsWith('```')) {
-      flushParagraph();
-      flushList();
-      if (inCodeBlock) {
-        html.push(`<pre><code>${escapeHtml(codeBuffer.join('\n'))}</code></pre>`);
-        inCodeBlock = false;
-        codeBuffer = [];
-      } else {
-        inCodeBlock = true;
-        codeBuffer = [];
-      }
-      continue;
-    }
-    if (inCodeBlock) {
-      codeBuffer.push(line);
-      continue;
-    }
-
-    // Headings
-    const headingMatch = line.match(/^(#{1,4})\s+(.+)$/);
-    if (headingMatch && headingMatch[1] && headingMatch[2]) {
-      flushParagraph();
-      flushList();
-      const level = headingMatch[1].length;
-      const text = renderInline(headingMatch[2].trim());
-      html.push(`<h${level}>${text}</h${level}>`);
-      continue;
-    }
-
-    // Horizontal rule
-    if (line.trim() === '---' || line.trim() === '***') {
-      flushParagraph();
-      flushList();
-      html.push('<hr />');
-      continue;
-    }
-
-    // Blockquote
-    const blockquoteMatch = line.match(/^>\s*(.*)$/);
-    if (blockquoteMatch && blockquoteMatch[1]) {
-      flushParagraph();
-      flushList();
-      html.push(`<blockquote>${renderInline(blockquoteMatch[1])}</blockquote>`);
-      continue;
-    }
-
-    // Bullet list
-    const listMatch = line.match(/^[-*]\s+(.+)$/);
-    if (listMatch && listMatch[1]) {
-      flushParagraph();
-      if (!inList) {
-        html.push('<ul>');
-        inList = true;
-      }
-      html.push(`<li>${renderInline(listMatch[1])}</li>`);
-      continue;
-    }
-
-    // Empty line: end current block
-    if (line.trim() === '') {
-      flushParagraph();
-      flushList();
-      continue;
-    }
-
-    // Plain text: accumulate paragraph
-    inParagraph = true;
-    paragraphBuffer.push(line.trim());
-  }
-
-  // Final flush
-  flushParagraph();
-  flushList();
-  if (inCodeBlock) {
-    html.push(`<pre><code>${escapeHtml(codeBuffer.join('\n'))}</code></pre>`);
-  }
-
-  return html.join('\n');
+  return renderer.parse(markdown, { async: false });
 }
