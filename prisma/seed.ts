@@ -369,7 +369,7 @@ async function grandfatherFreeEnrollment(): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  console.log('Seeding AMPH Academy v2...\n');
+  console.log('Seeding Project Amazon PH Academy v2...\n');
 
   await upsertAdminUser();
   await upsertPricingTiers();

@@ -7,7 +7,7 @@
 
 ## Description
 
-Instrument AMPH Academy with Sentry across client, server, and edge runtimes.
+Instrument Project Amazon PH Academy with Sentry across client, server, and edge runtimes.
 
 ## Acceptance Criteria
 

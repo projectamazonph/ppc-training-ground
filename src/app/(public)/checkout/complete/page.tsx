@@ -17,6 +17,7 @@ import { Icon } from '@/components/ui/Icon';
 import { db } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import { CheckoutStatus } from '@/lib/enums';
+import { BRAND_NAME } from '@/lib/brand';
 import styles from './complete.module.css';
 
 interface PageProps {
@@ -24,7 +25,7 @@ interface PageProps {
 }
 
 export const metadata = {
-  title: 'Payment complete — AMPH Academy',
+  title: `Payment complete — ${BRAND_NAME}`,
   robots: { index: false },
 };
 

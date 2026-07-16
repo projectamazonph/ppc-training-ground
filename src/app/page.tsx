@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { BRAND_NAME, BRAND_NAME_UPPER } from '@/lib/brand';
 import styles from './home.module.css';
 
 export default function HomePage() {
@@ -7,12 +8,12 @@ export default function HomePage() {
       {/* ── Hero ─────────────────────────────────────────────── */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
-          <p className={styles.heroEyebrow}>AMPH ACADEMY</p>
+          <p className={styles.heroEyebrow}>{BRAND_NAME_UPPER}</p>
           <h1 className={styles.heroTitle}>
             Three courses. One outcome: become the Amazon ads specialist clients retain.
           </h1>
           <p className={styles.heroSub}>
-            AMPH Academy teaches Filipino VAs the Amazon advertising work that pays
+            {`${BRAND_NAME} teaches Filipino VAs the Amazon advertising work that pays `}
             ₱60,000 to ₱80,000 a month. Practice with real campaign tools, not just theory.
           </p>
           <div className={styles.heroActions}>
@@ -125,7 +126,7 @@ export default function HomePage() {
       <footer className={styles.footer}>
         <div className={styles.footerGrid}>
           <div className={styles.footerBrand}>
-            <strong>AMPH Academy</strong>
+            <strong>{BRAND_NAME}</strong>
             <p>
               Amazon PPC coaching for Filipino virtual assistants.
               Learn the work that pays ₱60k–₱80k/month.

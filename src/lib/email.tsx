@@ -1,5 +1,5 @@
 /**
- * Email sending via Resend — transactional email for AMPH Academy.
+ * Email sending via Resend — transactional email for Project Amazon PH Academy.
  *
  * Sprint 8 — STORY-035 / STORY-036 / STORY-037.
  *
@@ -11,6 +11,7 @@
  */
 
 import { Resend } from 'resend';
+import { BRAND_NAME } from '@/lib/brand';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -63,7 +64,7 @@ export async function sendEnrollmentConfirmationEmail({
 }: EnrollmentEmailProps): Promise<void> {
   await sendEmail({
     to,
-    subject: `You're enrolled — ${tierName} on AMPH Academy`,
+    subject: `You're enrolled — ${tierName} on ${BRAND_NAME}`,
     react: (
       <EnrollmentConfirmationEmail
         studentName={studentName}
@@ -105,7 +106,7 @@ function EnrollmentConfirmationEmail({
             margin: '0 0 8px',
           }}
         >
-          AMPH Academy
+          {BRAND_NAME}
         </p>
         <h1
           style={{
@@ -147,7 +148,7 @@ function EnrollmentConfirmationEmail({
           margin: '20px 0 0',
         }}
       >
-        AMPH Academy · projectamazonph.com
+        {`${BRAND_NAME} · projectamazonph.com`}
       </p>
     </div>
   );
@@ -258,7 +259,7 @@ function RefundStatusEmail({
             margin: '0 0 8px',
           }}
         >
-          AMPH Academy
+          {BRAND_NAME}
         </p>
         <h1
           style={{
@@ -345,7 +346,7 @@ function RefundStatusEmail({
           margin: '20px 0 0',
         }}
       >
-        AMPH Academy · projectamazonph.com
+        {`${BRAND_NAME} · projectamazonph.com`}
       </p>
     </div>
   );
@@ -446,7 +447,7 @@ function LiveClassReminderEmail({
             margin: '0 0 8px',
           }}
         >
-          AMPH Academy · Live Class
+          {`${BRAND_NAME} · Live Class`}
         </p>
         <h1
           style={{
@@ -543,7 +544,7 @@ function LiveClassReminderEmail({
           margin: '20px 0 0',
         }}
       >
-        AMPH Academy · projectamazonph.com
+        {`${BRAND_NAME} · projectamazonph.com`}
       </p>
     </div>
   );

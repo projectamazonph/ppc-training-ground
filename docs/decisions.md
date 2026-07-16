@@ -1,10 +1,10 @@
-# Architecture Decision Records — AMPH Academy v2
+# Architecture Decision Records — Project Amazon PH Academy v2
 
 **Status:** Active
 **Owner:** Ryan Roland Dabao
 **Date:** 2026-07-07
 
-This document collects the ADRs that govern AMPH Academy's architecture. New ADRs append below. Each follows the [Michael Nygard format](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions).
+This document collects the ADRs that govern Project Amazon PH Academy's architecture. New ADRs append below. Each follows the [Michael Nygard format](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions).
 
 ---
 
@@ -23,7 +23,7 @@ This document collects the ADRs that govern AMPH Academy's architecture. New ADR
 ## ADR-002: PostgreSQL for All Environments
 
 **Status:** Accepted (2026-07-01)
-**Context:** AMPH Academy starts solo with low traffic. Postgres adds hosting cost and operational complexity.
+**Context:** Project Amazon PH Academy starts solo with low traffic. Postgres adds hosting cost and operational complexity.
 **Decision:** Use PostgreSQL everywhere (dev + production). Consistent environment eliminates provider-specific bugs. CI uses PostgreSQL service container, local dev uses local or remote PostgreSQL.
 **Consequences:**
 - Schema uses no SQLite-specific features
@@ -73,7 +73,7 @@ This document collects the ADRs that govern AMPH Academy's architecture. New ADR
 ## ADR-006: PayMongo for Payments
 
 **Status:** Accepted (2026-07-07)
-**Context:** AMPH Academy sells in Philippine pesos. Need payment provider that supports PHP, GCash, Maya, and bank transfer with strong DX and reliable webhooks.
+**Context:** Project Amazon PH Academy sells in Philippine pesos. Need payment provider that supports PHP, GCash, Maya, and bank transfer with strong DX and reliable webhooks.
 **Decision:** PayMongo as primary payment provider. Native PHP support, clean API, strong webhook reliability for Philippine market.
 **Consequences:**
 - Native PHP support, no conversion fees
@@ -88,7 +88,7 @@ This document collects the ADRs that govern AMPH Academy's architecture. New ADR
 
 **Status:** Accepted (2026-07-07)
 **Context:** Need transactional email for receipts, refund confirmations, class reminders.
-**Decision:** Resend. Free tier (3,000 emails/month) covers AMPH Academy scale. React Email for templates.
+**Decision:** Resend. Free tier (3,000 emails/month) covers Project Amazon PH Academy scale. React Email for templates.
 **Consequences:**
 - Simple API, good DX
 - Templates as React components (type-safe)
@@ -112,7 +112,7 @@ This document collects the ADRs that govern AMPH Academy's architecture. New ADR
 
 **Status:** Accepted (2026-07-07)
 **Context:** No observability today. Bugs ship to production silently.
-**Decision:** Sentry for error tracking and performance monitoring. Free tier covers AMPH Academy.
+**Decision:** Sentry for error tracking and performance monitoring. Free tier covers Project Amazon PH Academy.
 **Consequences:**
 - Errors captured with stack traces and user context
 - Performance transactions for server actions (target: p95 < 500ms)
@@ -177,7 +177,7 @@ This document collects the ADRs that govern AMPH Academy's architecture. New ADR
 - Immutable audit trail (no update/delete on AuditLog)
 - 2-year retention, then archival
 - Viewable in `/admin/audit-log`
-- Required for SOC 2 / GDPR compliance if AMPH Academy ever seeks certification
+- Required for SOC 2 / GDPR compliance if Project Amazon PH Academy ever seeks certification
 - **Revisit when:** AuditLog > 1M rows (partition by month).
 
 ## ADR-015: Refuse Multi-Tenancy Until Evidence
@@ -190,7 +190,7 @@ This document collects the ADRs that govern AMPH Academy's architecture. New ADR
 - No tenant isolation work needed
 - Migration to multi-tenant later is non-trivial (requires backfill, middleware, RLS)
 - See `db-hardening-spec.md` for `orgId` decision
-- **Revisit when:** Enterprise customer requests isolated data, or AMPH Academy offers white-label.
+- **Revisit when:** Enterprise customer requests isolated data, or Project Amazon PH Academy offers white-label.
 
 ## ADR-016: i18n Deferred
 

@@ -5,10 +5,11 @@ import { Icon } from '@/components/ui/Icon';
 import { CourseTier } from '@/lib/enums';
 import { userMeetsTierRequirement, listActivePricingTiers } from '@/lib/tier-gate';
 import { listUpcomingClasses, listPastClasses } from '@/lib/live-classes';
+import { BRAND_NAME } from '@/lib/brand';
 import styles from './live-classes.module.css';
 
 export const metadata = {
-  title: 'Live Classes — AMPH Academy',
+  title: `Live Classes — ${BRAND_NAME}`,
 };
 
 export default async function LiveClassesIndexPage() {

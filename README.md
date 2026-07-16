@@ -1,4 +1,4 @@
-# AMPH Academy v2
+# Project Amazon PH Academy v2
 
 ### Amazon PPC Training for Filipino Virtual Assistants
 
@@ -10,9 +10,9 @@ Three courses. One outcome: become the Amazon ads specialist clients retain.
 
 ---
 
-## What is AMPH Academy?
+## What is Project Amazon PH Academy?
 
-AMPH Academy is an online training platform built specifically for Filipino virtual assistants who want to specialize in Amazon advertising. It's not a generic course site — every lesson, tool, and feature is designed around real-world Amazon PPC work.
+Project Amazon PH Academy is an online training platform built specifically for Filipino virtual assistants who want to specialize in Amazon advertising. It's not a generic course site — every lesson, tool, and feature is designed around real-world Amazon PPC work.
 
 You learn by doing. Interactive simulators let you practice with real campaign scenarios before touching a client's account.
 
@@ -117,7 +117,7 @@ Pay once, access forever. No subscriptions, no recurring fees.
 
 ## 📱 Mobile-First Design
 
-Most Filipino VAs learn on their phones. AMPH Academy is built for mobile first — every page works at 390px width. No app to install. Just open your browser.
+Most Filipino VAs learn on their phones. Project Amazon PH Academy is built for mobile first — every page works at 390px width. No app to install. Just open your browser.
 
 ![Student Dashboard](docs/screenshots/student-dashboard.png)
 
@@ -135,7 +135,7 @@ Most Filipino VAs learn on their phones. AMPH Academy is built for mobile first 
 
 ## ⚙️ Admin Panel
 
-For the team running AMPH Academy. A full admin dashboard to manage everything:
+For the team running Project Amazon PH Academy. A full admin dashboard to manage everything:
 
 - **Dashboard** — real-time stats on users, enrollments, revenue, and engagement
 - **User Management** — search, view, and manage student accounts

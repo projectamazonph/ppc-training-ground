@@ -4,6 +4,7 @@ import { requireAdmin } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { formatPhp, formatDate } from '@/lib/format';
 import Link from 'next/link';
+import { BRAND_NAME } from '@/lib/brand';
 import styles from './page.module.css';
 
 export const metadata = {
@@ -51,7 +52,7 @@ export default async function AdminDashboardPage() {
       <header className={styles.header}>
         <h1 className={styles.greeting}>Welcome, {admin.name ?? admin.email}</h1>
         <p className={styles.subtitle}>
-          AMPH Academy Admin — {activeUsers} active users, {publishedCourses} published courses
+          {`${BRAND_NAME} Admin — ${activeUsers} active users, ${publishedCourses} published courses`}
         </p>
       </header>
 

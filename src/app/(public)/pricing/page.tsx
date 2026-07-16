@@ -12,10 +12,11 @@ import { Card, CardHeader, CardTitle, CardDescription, Badge } from '@/component
 import { getTierDisplay, type TierDisplay } from '@/lib/pricing';
 import { getSession } from '@/lib/auth';
 import { CheckoutButton } from './CheckoutButton';
+import { BRAND_NAME } from '@/lib/brand';
 import styles from './pricing.module.css';
 
 export const metadata = {
-  title: 'Pricing — AMPH Academy',
+  title: `Pricing — ${BRAND_NAME}`,
   description:
     'Three Amazon PPC coaching tiers for Filipino virtual assistants. Pick the path that matches where you are now.',
 };

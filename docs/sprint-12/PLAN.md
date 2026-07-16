@@ -10,7 +10,7 @@
 
 ## Goal
 
-Ship AMPH Academy to production. Drive the project from "code complete" to a
+Ship Project Amazon PH Academy to production. Drive the project from "code complete" to a
 live, monitored, backed-up, audited platform with a coordinated launch comms
 drop. No new features; this sprint is purely about getting Sprints 1–11 into
 the hands of paying students safely.

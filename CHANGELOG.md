@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to AMPH Academy v2 are documented here.
+All notable changes to Project Amazon PH Academy v2 are documented here.
 
 ## [Unreleased]
 

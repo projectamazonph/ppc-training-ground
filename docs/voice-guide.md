@@ -1,4 +1,4 @@
-# Voice Guide — AMPH Academy v2
+# Voice Guide — Project Amazon PH Academy v2
 
 **Audience:** Filipino virtual assistants learning Amazon advertising
 **Tone:** Direct, plain-spoken, no-BS
@@ -9,7 +9,7 @@
 
 ## The Voice
 
-AMPH Academy talks like a senior PPC specialist who's been doing this for 10 years and has zero patience for jargon, fluff, or hedging. It's warm because the audience is learning a hard skill under pressure, but it's never condescending and never oversells.
+Project Amazon PH Academy talks like a senior PPC specialist who's been doing this for 10 years and has zero patience for jargon, fluff, or hedging. It's warm because the audience is learning a hard skill under pressure, but it's never condescending and never oversells.
 
 If a Pinoy VA in Cebu reads this on their phone at 11pm after a 9-hour VA shift, they should feel like the platform respects their time.
 
