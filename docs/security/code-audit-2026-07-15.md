@@ -209,3 +209,43 @@ Three of the five 2026-07-15 hotfix commits introduced or half-implemented
 fixes that were worse than what they replaced (C2, C4, H5). Each fix-plan item
 should land with the concurrency/integration test the plan itself prescribes
 before the next item starts.
+
+## Verification addendum — 2026-07-16
+
+Independently re-verified this doc's resolutions against the code (not just
+the prose) after commit `1eb2223`, since prior "Resolution" notes in this same
+process had been wrong before (see process note above). Findings:
+
+- **C1, C2, C4, H4, M1** — confirmed correct by reading the actual diff, not
+  just the commit message.
+- **C3 — the "Resolution" note was false when first written.** `schema.prisma`
+  said `postgresql` but `migration_lock.toml` and every migration's SQL were
+  still SQLite dialect, untouched by any hotfix commit. Regenerated for real
+  via `prisma migrate diff --from-empty --to-schema-datamodel` (squashed init,
+  Postgres types e.g. `TIMESTAMP(3)` throughout). `prisma validate` now passes.
+- **`@prisma/client` had never been generated** against the current schema in
+  this environment, which cascaded into ~55 spurious `tsc` errors unrelated to
+  any hotfix. Not a code bug — `npx prisma generate` resolves it, and it's
+  worth confirming CI always runs this before `tsc`/tests.
+- **2 real `tsc` errors** (`enrollment.ts`, `receipts.tsx`) from
+  `.split(...)[1]` under `noUncheckedIndexedAccess` — one fixed with an
+  explicit `?? ''` fallback, the other cleared once the Prisma client was
+  regenerated (was a stale-client artifact, not a code issue).
+- **4 of the "165 tests" were still failing after `1eb2223`**, both pre-existing
+  test bugs unrelated to the hotfix content itself:
+  - `admin-audit.test.ts` — two assertions read `call.metadata` /
+    `call.ipAddress` directly instead of `call.data.metadata` /
+    `call.data.ipAddress` (the third test in the same file got the nesting
+    right — just a copy-paste miss). Source (`admin-audit.ts`) was already
+    correct.
+  - `progress-actions.test.ts` — never mocked `@/lib/auth`, so the real
+    `requireAuth()` ran against a `cookies()` mock that always returns no
+    token and a `redirect()` mock that (unlike `auth.test.ts`'s) doesn't
+    throw — so it fell through and returned `null` instead of stopping.
+    Fixed by mocking `requireAuth` directly, matching the pattern already
+    used in `admin-audit.test.ts` for `requireAdmin`.
+
+**Current state:** `tsc --noEmit` clean, `prisma validate` clean, `vitest run`
+165/165 passing. All four launch blockers (C1–C4) confirmed resolved in code.
+Items O1–O6 remain open as before (post-launch/Sprint 13 follow-ups); O7 can
+now be marked done — migrations are Postgres-native.

@@ -57,7 +57,7 @@ describe('admin-audit.ts', () => {
     });
 
     const call = (db.auditLog.create as unknown as ReturnType<typeof vi.fn>).mock.calls[0]![0];
-    expect(JSON.parse(call.metadata)).toEqual({ field: 'title', old: 'Old', new: 'New' });
+    expect(JSON.parse(call.data.metadata)).toEqual({ field: 'title', old: 'Old', new: 'New' });
   });
 
   it('captures IP and user-agent from headers', async () => {
@@ -73,7 +73,7 @@ describe('admin-audit.ts', () => {
     await auditLog({ action: 'LOGIN', entityType: 'Session', entityId: 's1' });
 
     const call = (db.auditLog.create as unknown as ReturnType<typeof vi.fn>).mock.calls[0]![0];
-    expect(call.ipAddress).toBe('192.168.1.1');
-    expect(call.userAgent).toBe('TestAgent/1.0');
+    expect(call.data.ipAddress).toBe('192.168.1.1');
+    expect(call.data.userAgent).toBe('TestAgent/1.0');
   });
 });
