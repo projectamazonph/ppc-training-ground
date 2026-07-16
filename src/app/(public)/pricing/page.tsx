@@ -25,7 +25,7 @@ export default async function PricingPage() {
   const [tiers, session] = await Promise.all([getTierDisplay(), getSession()]);
 
   return (
-    <main className={styles.page}>
+    <main id="main-content" className={styles.page}>
       <header className={styles.header}>
         <p className={styles.eyebrow}>PRICING</p>
         <h1 className={styles.title}>Pick the tier that matches where you are.</h1>
@@ -35,6 +35,8 @@ export default async function PricingPage() {
           to move.
         </p>
       </header>
+
+      <h2 className="visually-hidden">Compare tiers</h2>
 
       <div className={styles.tierGrid}>
         {tiers.map((tier: TierDisplay) => (
