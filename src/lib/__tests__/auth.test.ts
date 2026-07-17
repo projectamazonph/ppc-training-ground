@@ -11,6 +11,8 @@ import {
   getSession,
   requireAuth,
   requireAdmin,
+  generateClaimToken,
+  verifyClaimToken,
   AUTH_COOKIE_NAME,
   AUTH_TOKEN_TTL_SECONDS,
 } from '@/lib/auth';
@@ -263,3 +265,37 @@ describe('auth.ts', () => {
     expect(await verifyToken(badToken)).toBeNull();
   });
 });
+
+  // ── Claim token functions (C4) ──────────────────────────────────────────
+
+  it('generateClaimToken produces 48-char hex raw token', () => {
+    const { rawToken, tokenHash } = generateClaimToken();
+    expect(rawToken).toMatch(/^[0-9a-f]{48}$/);
+    expect(tokenHash).toMatch(/^[0-9a-f]{64}$/);
+    expect(rawToken).not.toBe(tokenHash);
+  });
+
+  it('verifyClaimToken accepts valid token within expiry', () => {
+    const { rawToken, tokenHash } = generateClaimToken();
+    const future = new Date(Date.now() + 60 * 60 * 1000); // 1 hour from now
+    expect(verifyClaimToken(rawToken, tokenHash, future)).toBe(true);
+  });
+
+  it('verifyClaimToken rejects expired token', () => {
+    const { rawToken, tokenHash } = generateClaimToken();
+    const past = new Date(Date.now() - 60 * 60 * 1000); // 1 hour ago
+    expect(verifyClaimToken(rawToken, tokenHash, past)).toBe(false);
+  });
+
+  it('verifyClaimToken rejects wrong token', () => {
+    const { tokenHash } = generateClaimToken();
+    const future = new Date(Date.now() + 60 * 60 * 1000);
+    expect(verifyClaimToken('wrong-token', tokenHash, future)).toBe(false);
+  });
+
+  it('verifyClaimToken rejects null expiry', () => {
+    const { rawToken, tokenHash } = generateClaimToken();
+    expect(verifyClaimToken(rawToken, tokenHash, null)).toBe(false);
+  });
+
+
