@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Build a Safe Sponsored Products Campaign</title>
+    <script src="node_modules/gsap/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --bg: #fdfae7;
+        --primary: #1e2bfa;
+        --text: #111111;
+        --text-muted: #4a4a4a;
+        --text-light: #6b6b6b;
+        --accent-light: rgba(30, 43, 250, 0.08);
+        --accent-medium: rgba(30, 43, 250, 0.15);
+        --border: rgba(30, 43, 250, 0.2);
+        --card-bg: rgba(30, 43, 250, 0.04);
+        --positive: #059669;
+        --negative: #dc2626;
+        --font-display: "Space Grotesk", sans-serif;
+        --font-body: "Inter", sans-serif;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--bg);
+      }
+      body {
+        font-family: var(--font-body);
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        background: var(--bg);
+        overflow: hidden;
+      }
+      .frame {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 96px 120px 180px;
+      }
+      .eyebrow {
+        font-family: var(--font-display);
+        font-size: 26px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--primary);
+        margin-bottom: 24px;
+      }
+      .headline {
+        font-family: var(--font-display);
+        font-size: 60px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        color: var(--text);
+        max-width: 1500px;
+        margin-bottom: 16px;
+      }
+      .headline .accent {
+        color: var(--primary);
+      }
+      .accent-line {
+        width: 60px;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--primary);
+        margin-bottom: 28px;
+      }
+
+      /* ---- Frame 1: campaign brief ---- */
+      .brief-card {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 48px 64px;
+        max-width: 1400px;
+      }
+      .brief-row {
+        display: grid;
+        grid-template-columns: 480px 1fr;
+        gap: 24px;
+        padding: 20px 0;
+        border-bottom: 1.5px solid var(--border);
+      }
+      .brief-row:last-child {
+        border-bottom: none;
+      }
+      .brief-row .b-q {
+        font-family: var(--font-display);
+        font-size: 30px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .brief-row .b-a {
+        font-family: var(--font-body);
+        font-size: 28px;
+        color: var(--text-muted);
+        align-self: center;
+      }
+      .brief-row.ready .b-a {
+        font-family: var(--font-display);
+        font-weight: 700;
+        color: var(--primary);
+      }
+
+      /* ---- Frame 2: naming formula ---- */
+      .naming-wrap {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 40px;
+      }
+      .naming-example {
+        font-family: var(--font-display);
+        font-size: 52px;
+        font-weight: 700;
+        color: var(--primary);
+        background: var(--accent-light);
+        border: 1.5px solid var(--primary);
+        border-radius: 14px;
+        padding: 32px 44px;
+        text-align: center;
+      }
+      .naming-example .plain {
+        color: var(--text);
+      }
+      .naming-parts {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+      }
+      .naming-pill {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        padding: 22px 20px;
+        text-align: center;
+        font-family: var(--font-body);
+        font-size: 24px;
+        color: var(--text-muted);
+      }
+      .naming-footnote {
+        font-family: var(--font-body);
+        font-size: 27px;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+
+      /* ---- Frame 3: structure grid ---- */
+      .structure-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 28px;
+        margin-top: 24px;
+        flex: 1;
+        align-content: start;
+      }
+      .structure-card {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 36px 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .structure-card .s-title {
+        font-family: var(--font-display);
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--primary);
+      }
+      .structure-card .s-desc {
+        font-family: var(--font-body);
+        font-size: 22px;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+      .structure-footnote {
+        font-family: var(--font-body);
+        font-size: 26px;
+        color: var(--text-muted);
+        margin-top: 32px;
+        line-height: 1.5;
+        max-width: 1400px;
+      }
+
+      /* ---- Frame 4: bid & budget ---- */
+      .bid-wrap {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 64px;
+      }
+      .bid-card {
+        flex: 1;
+        max-width: 540px;
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 44px 40px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .bid-card.chosen {
+        border: 1.5px solid var(--primary);
+        background: var(--accent-light);
+      }
+      .bid-card .bd-label {
+        font-family: var(--font-display);
+        font-size: 22px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+      }
+      .bid-card .bd-value {
+        font-family: var(--font-display);
+        font-size: 68px;
+        font-weight: 700;
+        color: var(--text-light);
+      }
+      .bid-card.chosen .bd-value {
+        color: var(--primary);
+      }
+      .budget-footnote {
+        background: var(--accent-light);
+        border-left: 4px solid var(--primary);
+        border-radius: 12px;
+        padding: 30px 36px;
+        margin-top: 48px;
+      }
+      .budget-footnote p {
+        font-family: var(--font-body);
+        font-size: 26px;
+        color: var(--text-muted);
+        line-height: 1.6;
+      }
+      .budget-footnote strong {
+        color: var(--text);
+      }
+
+      /* ---- Frame 5: QA checklist ---- */
+      .qa-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px 40px;
+        margin-top: 20px;
+      }
+      .qa-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        padding: 18px 26px;
+      }
+      .qa-item .qa-check {
+        font-family: var(--font-display);
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--primary);
+        flex-shrink: 0;
+      }
+      .qa-item .qa-text {
+        font-family: var(--font-body);
+        font-size: 24px;
+        color: var(--text-muted);
+      }
+      .baseline-note {
+        background: var(--accent-light);
+        border-left: 4px solid var(--primary);
+        border-radius: 12px;
+        padding: 24px 32px;
+        margin-top: 28px;
+        max-width: 1400px;
+      }
+      .baseline-note p {
+        font-family: var(--font-body);
+        font-size: 26px;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+      .baseline-note strong {
+        color: var(--text);
+      }
+
+      /* ---- Frame 6: closing ---- */
+      .closing-frame {
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+      .closing-frame .headline {
+        max-width: 1500px;
+        text-align: center;
+      }
+      .closing-frame .accent-line {
+        align-self: center;
+      }
+      .task-card {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 36px 48px;
+        max-width: 1200px;
+        margin-bottom: 36px;
+        text-align: left;
+      }
+      .task-card .t-line {
+        font-family: var(--font-body);
+        font-size: 28px;
+        color: var(--text-muted);
+        line-height: 1.6;
+      }
+      .task-card .t-line strong {
+        color: var(--text);
+        font-family: var(--font-display);
+      }
+      .cta-button {
+        background: var(--primary);
+        color: var(--bg);
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 30px;
+        padding: 24px 56px;
+        border-radius: 100px;
+      }
+      .rings {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 900px;
+        height: 900px;
+        border-radius: 50%;
+        border: 1.5px solid var(--border);
+        z-index: -1;
+      }
+      .rings::before,
+      .rings::after {
+        content: "";
+        position: absolute;
+        inset: 120px;
+        border-radius: 50%;
+        border: 1.5px solid var(--border);
+      }
+      .rings::after {
+        inset: 260px;
+      }
+
+      /* ---- captions ---- */
+      .caption-band {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 64px;
+        display: flex;
+        justify-content: center;
+        z-index: 50;
+      }
+      .caption-card {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 22px 44px;
+        max-width: 1500px;
+      }
+      .caption-card p {
+        font-family: var(--font-display);
+        font-weight: 500;
+        font-size: 30px;
+        color: var(--text);
+        text-align: center;
+        line-height: 1.4;
+      }
+
+      /* ---- progress bar ---- */
+      .progress-track {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 3px;
+        background: var(--accent-light);
+        z-index: 60;
+      }
+      #progress-fill {
+        display: block;
+        height: 100%;
+        width: 0%;
+        background: var(--primary);
+      }
+      .counter {
+        position: absolute;
+        right: 40px;
+        bottom: 16px;
+        font-family: var(--font-display);
+        font-size: 20px;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        color: #444444;
+        z-index: 60;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="300"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- Frame 1: 0-35s — campaign brief -->
+      <div id="frame-1" class="frame clip" data-start="0" data-duration="35" data-track-index="1">
+        <div class="eyebrow">Module 4 &middot; Campaign Architecture</div>
+        <div class="headline">Start with the brief, <span class="accent">not the wizard.</span></div>
+        <div class="accent-line"></div>
+        <div class="brief-card">
+          <div class="brief-row">
+            <div class="b-q">What is the product?</div>
+            <div class="b-a">ASIN, category, price point</div>
+          </div>
+          <div class="brief-row">
+            <div class="b-q">What is the objective?</div>
+            <div class="b-a">Launch, defend, scale, or profit</div>
+          </div>
+          <div class="brief-row">
+            <div class="b-q">What is the budget?</div>
+            <div class="b-a">Daily or monthly spend limit</div>
+          </div>
+          <div class="brief-row">
+            <div class="b-q">What is the target ACoS?</div>
+            <div class="b-a">The client-approved operating goal</div>
+          </div>
+          <div class="brief-row ready">
+            <div class="b-q">Is the item ready to advertise?</div>
+            <div class="b-a">In stock, priced, retail-ready</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 2: 35-80s — naming formula -->
+      <div id="frame-2" class="frame clip" data-start="35" data-duration="45" data-track-index="1">
+        <div class="eyebrow">Name It To Be Read</div>
+        <div class="headline">A name <span class="accent">anyone can read</span> without opening it.</div>
+        <div class="accent-line"></div>
+        <div class="naming-wrap">
+          <div class="naming-example">YB<span class="plain">-</span>Exact<span class="plain">-</span>Proven</div>
+          <div class="naming-parts">
+            <div class="naming-pill">Brand</div>
+            <div class="naming-pill">Product or ASIN</div>
+            <div class="naming-pill">Ad type</div>
+            <div class="naming-pill">Strategy</div>
+            <div class="naming-pill">Targeting type</div>
+            <div class="naming-pill">Match type</div>
+            <div class="naming-pill">Theme</div>
+          </div>
+          <div class="naming-footnote">Clear names make bulk work, reporting, and handovers safer.</div>
+        </div>
+      </div>
+
+      <!-- Frame 3: 80-140s — structure by purpose -->
+      <div id="frame-3" class="frame clip" data-start="80" data-duration="60" data-track-index="1">
+        <div class="eyebrow">Separate By Purpose</div>
+        <div class="headline">Every structure <span class="accent">answers one question.</span></div>
+        <div class="accent-line"></div>
+        <div class="structure-grid">
+          <div class="structure-card" id="s-1">
+            <div class="s-title">Discovery</div>
+            <div class="s-desc">Finds information &mdash; broad and auto targeting.</div>
+          </div>
+          <div class="structure-card" id="s-2">
+            <div class="s-title">Exact</div>
+            <div class="s-desc">Controls proven search terms.</div>
+          </div>
+          <div class="structure-card" id="s-3">
+            <div class="s-title">Product targeting</div>
+            <div class="s-desc">Tests detail-page opportunities.</div>
+          </div>
+          <div class="structure-card" id="s-4">
+            <div class="s-title">Branded</div>
+            <div class="s-desc">Protects and measures branded demand.</div>
+          </div>
+        </div>
+        <div class="structure-footnote">The exact layout can change by account, but the purpose must remain clear.</div>
+      </div>
+
+      <!-- Frame 4: 140-200s — bid and budget -->
+      <div id="frame-4" class="frame clip" data-start="140" data-duration="60" data-track-index="1">
+        <div class="eyebrow">Set Bids From The Math</div>
+        <div class="headline">Bid from your <span class="accent">maximum-CPC logic.</span></div>
+        <div class="accent-line"></div>
+        <div class="bid-wrap">
+          <div class="bid-card" id="bid-console">
+            <div class="bd-label">Console suggestion</div>
+            <div class="bd-value">$1.10</div>
+          </div>
+          <div class="bid-card chosen" id="bid-sheet">
+            <div class="bd-label">Your max-CPC sheet</div>
+            <div class="bd-value">$0.75</div>
+          </div>
+        </div>
+        <div class="budget-footnote">
+          <p>Amazon budgets are an <strong>average over the month</strong>, not a promise that spend stops at the exact daily amount every day. Check the budget policy and your account settings before launch.</p>
+        </div>
+      </div>
+
+      <!-- Frame 5: 200-260s — launch QA checklist -->
+      <div id="frame-5" class="frame clip" data-start="200" data-duration="60" data-track-index="1">
+        <div class="eyebrow">Before You Launch</div>
+        <div class="headline">Run the <span class="accent">launch QA checklist.</span></div>
+        <div class="accent-line"></div>
+        <div class="qa-grid">
+          <div class="qa-item"><span class="qa-check">&check;</span><span class="qa-text">Product eligibility</span></div>
+          <div class="qa-item"><span class="qa-check">&check;</span><span class="qa-text">Stock &amp; retail readiness</span></div>
+          <div class="qa-item"><span class="qa-check">&check;</span><span class="qa-text">Targeting &amp; negatives</span></div>
+          <div class="qa-item"><span class="qa-check">&check;</span><span class="qa-text">Bids &amp; budgets</span></div>
+          <div class="qa-item"><span class="qa-check">&check;</span><span class="qa-text">Dates &amp; naming</span></div>
+          <div class="qa-item"><span class="qa-check">&check;</span><span class="qa-text">Measurement plan</span></div>
+        </div>
+        <div class="baseline-note">
+          <p><strong>Capture the baseline.</strong> If you do not know the starting point, you cannot explain the result later.</p>
+        </div>
+      </div>
+
+      <!-- Frame 6: 260-300s — Campaign Builder entry -->
+      <div id="frame-6" class="frame closing-frame clip" data-start="260" data-duration="40" data-track-index="1">
+        <div class="rings"></div>
+        <div class="eyebrow">Your Task</div>
+        <div class="headline">Build it in <span class="accent">Campaign Builder.</span></div>
+        <div class="accent-line"></div>
+        <div class="task-card">
+          <div class="t-line">Build the structure from your keyword map, then write two sentences:</div>
+          <div class="t-line"><strong>1.</strong> What the campaign is designed to learn.</div>
+          <div class="t-line"><strong>2.</strong> What would make you review it next week.</div>
+        </div>
+        <div class="cta-button">Open Campaign Builder</div>
+      </div>
+
+      <!-- Captions -->
+      <div id="caption-1" class="caption-band clip" data-start="0" data-duration="3" data-track-index="2">
+        <div class="caption-card"><p>Start with the brief, not the wizard.</p></div>
+      </div>
+      <div id="caption-2" class="caption-band clip" data-start="3.5" data-duration="2.5" data-track-index="2">
+        <div class="caption-card"><p>What is the product?</p></div>
+      </div>
+      <div id="caption-3" class="caption-band clip" data-start="6.5" data-duration="2.5" data-track-index="2">
+        <div class="caption-card"><p>What is the objective?</p></div>
+      </div>
+      <div id="caption-4" class="caption-band clip" data-start="9.5" data-duration="2.5" data-track-index="2">
+        <div class="caption-card"><p>What is the budget?</p></div>
+      </div>
+      <div id="caption-5" class="caption-band clip" data-start="12.5" data-duration="3" data-track-index="2">
+        <div class="caption-card"><p>What is the target ACoS?</p></div>
+      </div>
+      <div id="caption-6" class="caption-band clip" data-start="16" data-duration="3.5" data-track-index="2">
+        <div class="caption-card"><p>Is the item ready to advertise?</p></div>
+      </div>
+      <div id="caption-7" class="caption-band clip" data-start="20" data-duration="5" data-track-index="2">
+        <div class="caption-card"><p>A campaign is a business decision before it becomes a console setting.</p></div>
+      </div>
+
+      <div id="caption-8" class="caption-band clip" data-start="35" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>Use a name that another person can read without opening the campaign.</p></div>
+      </div>
+      <div id="caption-9" class="caption-band clip" data-start="40" data-duration="5.5" data-track-index="2">
+        <div class="caption-card"><p>Include brand, product or ASIN, ad type, strategy, targeting type, match type, and theme.</p></div>
+      </div>
+      <div id="caption-10" class="caption-band clip" data-start="46" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>Clear names make bulk work, reporting, and handovers safer.</p></div>
+      </div>
+
+      <div id="caption-11" class="caption-band clip" data-start="80" data-duration="2.5" data-track-index="2">
+        <div class="caption-card"><p>Separate work by purpose.</p></div>
+      </div>
+      <div id="caption-12" class="caption-band clip" data-start="83" data-duration="3" data-track-index="2">
+        <div class="caption-card"><p>Discovery campaigns find information.</p></div>
+      </div>
+      <div id="caption-13" class="caption-band clip" data-start="86.5" data-duration="3.5" data-track-index="2">
+        <div class="caption-card"><p>Exact campaigns control proven search terms.</p></div>
+      </div>
+      <div id="caption-14" class="caption-band clip" data-start="90.5" data-duration="3.5" data-track-index="2">
+        <div class="caption-card"><p>Product targeting tests detail-page opportunities.</p></div>
+      </div>
+      <div id="caption-15" class="caption-band clip" data-start="94.5" data-duration="3.5" data-track-index="2">
+        <div class="caption-card"><p>Branded campaigns protect and measure branded demand.</p></div>
+      </div>
+      <div id="caption-16" class="caption-band clip" data-start="98.5" data-duration="5" data-track-index="2">
+        <div class="caption-card"><p>The exact layout can change by account, but the purpose must remain clear.</p></div>
+      </div>
+
+      <div id="caption-17" class="caption-band clip" data-start="140" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>Set bids from your maximum-CPC logic, not from the console suggestion alone.</p></div>
+      </div>
+      <div id="caption-18" class="caption-band clip" data-start="145" data-duration="3" data-track-index="2">
+        <div class="caption-card"><p>Set a budget you can sustain.</p></div>
+      </div>
+      <div id="caption-19" class="caption-band clip" data-start="149" data-duration="6" data-track-index="2">
+        <div class="caption-card"><p>Remember that Amazon budgets are an average over the month, not a promise that spend stops at the exact daily amount every day.</p></div>
+      </div>
+      <div id="caption-20" class="caption-band clip" data-start="156" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>Check the budget policy and your account settings before launch.</p></div>
+      </div>
+
+      <div id="caption-21" class="caption-band clip" data-start="200" data-duration="6" data-track-index="2">
+        <div class="caption-card"><p>Before you launch, check product eligibility, stock, retail readiness, targeting, negatives, bids, budgets, dates, naming, and measurement.</p></div>
+      </div>
+      <div id="caption-22" class="caption-band clip" data-start="207" data-duration="2.5" data-track-index="2">
+        <div class="caption-card"><p>Capture the baseline.</p></div>
+      </div>
+      <div id="caption-23" class="caption-band clip" data-start="210.5" data-duration="4.5" data-track-index="2">
+        <div class="caption-card"><p>If you do not know the starting point, you cannot explain the result later.</p></div>
+      </div>
+
+      <div id="caption-24" class="caption-band clip" data-start="260" data-duration="2.5" data-track-index="2">
+        <div class="caption-card"><p>Open Campaign Builder.</p></div>
+      </div>
+      <div id="caption-25" class="caption-band clip" data-start="263" data-duration="3" data-track-index="2">
+        <div class="caption-card"><p>Build the structure from your keyword map.</p></div>
+      </div>
+      <div id="caption-26" class="caption-band clip" data-start="266.5" data-duration="6" data-track-index="2">
+        <div class="caption-card"><p>When you finish, write two sentences: what the campaign is designed to learn, and what would make you review it next week.</p></div>
+      </div>
+
+      <!-- Persistent chrome -->
+      <div class="progress-track">
+        <span id="progress-fill" class="clip" data-start="0" data-duration="300" data-track-index="90"></span>
+      </div>
+      <div class="counter clip" data-start="0" data-duration="300" data-track-index="91" id="counter">00:00 / 05:00</div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Frame 1
+      tl.from("#frame-1 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 0);
+      tl.from("#frame-1 .brief-card", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 0.4);
+      tl.from("#frame-1 .brief-row", { opacity: 0, y: 12, duration: 0.4, ease: "power2.out", stagger: 0.12 }, 0.8);
+
+      // Frame 2
+      tl.from("#frame-2 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 35);
+      tl.from("#frame-2 .naming-example", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 35.4);
+      tl.from("#frame-2 .naming-pill", { opacity: 0, y: 16, duration: 0.4, ease: "power2.out", stagger: 0.08 }, 36.2);
+      tl.from("#frame-2 .naming-footnote", { opacity: 0, y: 12, duration: 0.5, ease: "power2.out" }, 37.4);
+
+      // Frame 3
+      tl.from("#frame-3 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 80);
+      tl.from("#frame-3 .structure-card", { opacity: 0, y: 24, duration: 0.5, ease: "power2.out", stagger: 0.12 }, 80.4);
+      tl.from("#frame-3 .structure-footnote", { opacity: 0, y: 12, duration: 0.5, ease: "power2.out" }, 81.5);
+
+      // Frame 4
+      tl.from("#frame-4 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 140);
+      tl.from("#bid-console", { opacity: 0, x: -30, duration: 0.5, ease: "power2.out" }, 140.4);
+      tl.from("#bid-sheet", { opacity: 0, x: 30, duration: 0.5, ease: "power2.out" }, 140.6);
+      tl.from("#frame-4 .budget-footnote", { opacity: 0, y: 16, duration: 0.5, ease: "power2.out" }, 141.4);
+
+      // Frame 5
+      tl.from("#frame-5 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 200);
+      tl.from("#frame-5 .qa-item", { opacity: 0, y: 16, duration: 0.4, ease: "power2.out", stagger: 0.08 }, 200.4);
+      tl.from("#frame-5 .baseline-note", { opacity: 0, y: 16, duration: 0.5, ease: "power2.out" }, 201.6);
+
+      // Frame 6
+      tl.from("#frame-6 .rings", { opacity: 0, scale: 0.85, duration: 1, ease: "power2.out" }, 260);
+      tl.from("#frame-6 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 260.3);
+      tl.from("#frame-6 .task-card", { opacity: 0, y: 20, duration: 0.5, ease: "power2.out" }, 260.9);
+      tl.from("#frame-6 .cta-button", { opacity: 0, y: 16, duration: 0.5, ease: "power2.out" }, 261.5);
+
+      // Persistent progress bar
+      tl.to("#progress-fill", { width: "100%", duration: 300, ease: "none" }, 0);
+
+      window.__timelines["main"] = tl;
+
+      function formatTime(s) {
+        var m = Math.floor(s / 60);
+        var sec = Math.floor(s % 60);
+        return (m < 10 ? "0" + m : m) + ":" + (sec < 10 ? "0" + sec : sec);
+      }
+
+      var counterEl = document.getElementById("counter");
+      tl.eventCallback("onUpdate", function () {
+        counterEl.textContent = formatTime(tl.time()) + " / 05:00";
+      });
+      counterEl.textContent = formatTime(tl.time()) + " / 05:00";
+    </script>
+  </body>
+</html>

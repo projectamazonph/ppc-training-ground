@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Break-Even ACoS and Maximum CPC</title>
+    <script src="node_modules/gsap/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --bg: #fdfae7;
+        --primary: #1e2bfa;
+        --text: #111111;
+        --text-muted: #4a4a4a;
+        --text-light: #6b6b6b;
+        --accent-light: rgba(30, 43, 250, 0.08);
+        --accent-medium: rgba(30, 43, 250, 0.15);
+        --border: rgba(30, 43, 250, 0.2);
+        --card-bg: rgba(30, 43, 250, 0.04);
+        --positive: #059669;
+        --negative: #dc2626;
+        --font-display: "Space Grotesk", sans-serif;
+        --font-body: "Inter", sans-serif;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--bg);
+      }
+      body {
+        font-family: var(--font-body);
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        background: var(--bg);
+        overflow: hidden;
+      }
+      .frame {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 96px 120px 180px;
+      }
+      .eyebrow {
+        font-family: var(--font-display);
+        font-size: 26px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--primary);
+        margin-bottom: 24px;
+      }
+      .headline {
+        font-family: var(--font-display);
+        font-size: 60px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        color: var(--text);
+        max-width: 1500px;
+        margin-bottom: 16px;
+      }
+      .headline .accent {
+        color: var(--primary);
+      }
+      .accent-line {
+        width: 60px;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--primary);
+        margin-bottom: 28px;
+      }
+
+      /* ---- Frame 1: product economics card ---- */
+      .product-wrap {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 56px;
+      }
+      .product-card {
+        flex: 1;
+        max-width: 560px;
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 44px 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .product-card .p-label {
+        font-family: var(--font-display);
+        font-size: 22px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--text-light);
+      }
+      .product-card .p-value {
+        font-family: var(--font-display);
+        font-size: 64px;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .product-card.negative .p-value {
+        color: var(--negative);
+      }
+      .arrow-op {
+        font-family: var(--font-display);
+        font-size: 56px;
+        font-weight: 700;
+        color: var(--text-light);
+      }
+      .product-card.result {
+        border: 1.5px solid var(--primary);
+        background: var(--accent-light);
+      }
+      .product-card.result .p-value {
+        color: var(--primary);
+      }
+      .product-card.result .p-label {
+        color: var(--text-muted);
+      }
+
+      /* ---- Frames 2-3: formula reveal ---- */
+      .formula-wrap {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 40px;
+      }
+      .formula-card {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 48px 56px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      .formula-name {
+        font-family: var(--font-display);
+        font-size: 24px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--primary);
+      }
+      .formula-expr {
+        font-family: var(--font-display);
+        font-size: 42px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .formula-sub {
+        font-family: var(--font-body);
+        font-size: 30px;
+        color: var(--text-muted);
+      }
+      .formula-result-row {
+        display: flex;
+        align-items: baseline;
+        gap: 20px;
+      }
+      .formula-result-row .r-label {
+        font-family: var(--font-body);
+        font-size: 30px;
+        color: var(--text-muted);
+      }
+      .formula-result-row .r-value {
+        font-family: var(--font-display);
+        font-size: 72px;
+        font-weight: 700;
+        color: var(--primary);
+      }
+      .footnote-box {
+        background: var(--accent-light);
+        border-left: 4px solid var(--primary);
+        border-radius: 12px;
+        padding: 30px 36px;
+      }
+      .footnote-box p {
+        font-family: var(--font-body);
+        font-size: 27px;
+        color: var(--text-muted);
+        line-height: 1.6;
+      }
+      .footnote-box strong {
+        color: var(--text);
+      }
+
+      /* ---- Frame 4: bid comparison ---- */
+      .compare-wrap {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 64px;
+      }
+      .compare-card {
+        flex: 1;
+        max-width: 520px;
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 48px 40px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .compare-card .c-label {
+        font-family: var(--font-display);
+        font-size: 22px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--text-light);
+      }
+      .compare-card .c-value {
+        font-family: var(--font-display);
+        font-size: 84px;
+        font-weight: 700;
+      }
+      .compare-card.market .c-value {
+        color: var(--negative);
+      }
+      .compare-card.max .c-value {
+        color: var(--primary);
+      }
+      .compare-card.max {
+        border: 1.5px solid var(--primary);
+      }
+      .vs-badge {
+        font-family: var(--font-display);
+        font-size: 30px;
+        font-weight: 700;
+        color: var(--text-light);
+      }
+      .options-list {
+        margin-top: 36px;
+        display: flex;
+        gap: 24px;
+      }
+      .option-pill {
+        background: var(--accent-light);
+        border: 1.5px solid var(--border);
+        border-radius: 100px;
+        padding: 16px 28px;
+        font-family: var(--font-body);
+        font-size: 22px;
+        color: var(--text);
+      }
+
+      /* ---- Frame 5: three assumptions ---- */
+      .assumptions-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 32px;
+        margin-top: 24px;
+        flex: 1;
+        align-content: start;
+      }
+      .assumption-card {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 40px 32px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .assumption-card .a-icon {
+        font-family: var(--font-display);
+        font-size: 40px;
+        font-weight: 700;
+        color: var(--primary);
+      }
+      .assumption-card .a-title {
+        font-family: var(--font-display);
+        font-size: 28px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .assumption-card .a-desc {
+        font-family: var(--font-body);
+        font-size: 22px;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+
+      /* ---- Frame 6: workbook / closing ---- */
+      .closing-frame {
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+      .closing-frame .headline {
+        max-width: 1500px;
+        text-align: center;
+      }
+      .closing-frame .accent-line {
+        align-self: center;
+      }
+      .workbook-grid {
+        display: flex;
+        gap: 32px;
+        margin-bottom: 36px;
+      }
+      .workbook-card {
+        flex: 1;
+        max-width: 560px;
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 28px 30px;
+        text-align: left;
+      }
+      .workbook-card .w-num {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 24px;
+        color: var(--primary);
+        margin-bottom: 10px;
+      }
+      .workbook-card .w-field {
+        font-family: var(--font-body);
+        font-size: 22px;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+      .sentence-template {
+        background: var(--accent-light);
+        border-left: 4px solid var(--primary);
+        border-radius: 12px;
+        padding: 28px 40px;
+        margin-bottom: 40px;
+        max-width: 1200px;
+      }
+      .sentence-template p {
+        font-family: var(--font-display);
+        font-size: 30px;
+        font-weight: 500;
+        color: var(--text);
+      }
+      .cta-button {
+        background: var(--primary);
+        color: var(--bg);
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 30px;
+        padding: 24px 56px;
+        border-radius: 100px;
+      }
+      .rings {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 900px;
+        height: 900px;
+        border-radius: 50%;
+        border: 1.5px solid var(--border);
+        z-index: -1;
+      }
+      .rings::before,
+      .rings::after {
+        content: "";
+        position: absolute;
+        inset: 120px;
+        border-radius: 50%;
+        border: 1.5px solid var(--border);
+      }
+      .rings::after {
+        inset: 260px;
+      }
+
+      /* ---- captions ---- */
+      .caption-band {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 64px;
+        display: flex;
+        justify-content: center;
+        z-index: 50;
+      }
+      .caption-card {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 22px 44px;
+        max-width: 1500px;
+      }
+      .caption-card p {
+        font-family: var(--font-display);
+        font-weight: 500;
+        font-size: 30px;
+        color: var(--text);
+        text-align: center;
+        line-height: 1.4;
+      }
+
+      /* ---- progress bar ---- */
+      .progress-track {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 3px;
+        background: var(--accent-light);
+        z-index: 60;
+      }
+      #progress-fill {
+        display: block;
+        height: 100%;
+        width: 0%;
+        background: var(--primary);
+      }
+      .counter {
+        position: absolute;
+        right: 40px;
+        bottom: 16px;
+        font-family: var(--font-display);
+        font-size: 20px;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        color: #444444;
+        z-index: 60;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="300"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- Frame 1: 0-35s — product economics card -->
+      <div id="frame-1" class="frame clip" data-start="0" data-duration="35" data-track-index="1">
+        <div class="eyebrow">Module 1 &middot; After the Big Six</div>
+        <div class="headline">Before you judge ACoS, <span class="accent">know the economics.</span></div>
+        <div class="accent-line"></div>
+        <div class="product-wrap">
+          <div class="product-card" id="p-price">
+            <div class="p-label">Selling price</div>
+            <div class="p-value">$30</div>
+          </div>
+          <div class="arrow-op">&minus;</div>
+          <div class="product-card negative" id="p-costs">
+            <div class="p-label">Product, shipping, Amazon fees &amp; other direct costs</div>
+            <div class="p-value">$21</div>
+          </div>
+          <div class="arrow-op">=</div>
+          <div class="product-card result" id="p-margin">
+            <div class="p-label">Profit before advertising</div>
+            <div class="p-value">$9</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 2: 35-80s — break-even ACoS formula -->
+      <div id="frame-2" class="frame clip" data-start="35" data-duration="45" data-track-index="1">
+        <div class="eyebrow">The Ceiling</div>
+        <div class="headline">Break-even ACoS: <span class="accent">advertising pays for itself.</span></div>
+        <div class="accent-line"></div>
+        <div class="formula-wrap">
+          <div class="formula-card" id="be-card">
+            <div class="formula-name">Break-even ACoS</div>
+            <div class="formula-expr">Profit before ads &divide; Selling price</div>
+            <div class="formula-sub">$9 &divide; $30</div>
+            <div class="formula-result-row">
+              <span class="r-label">=</span>
+              <span class="r-value">30%</span>
+            </div>
+          </div>
+          <div class="footnote-box" id="be-footnote">
+            <p>At 30% ACoS, advertising is covering itself &mdash; <strong>it is not creating extra profit.</strong> Your client may choose a lower operating target depending on growth, overhead, and business goal.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 3: 80-130s — maximum CPC formula -->
+      <div id="frame-3" class="frame clip" data-start="80" data-duration="50" data-track-index="1">
+        <div class="eyebrow">The Bid Ceiling</div>
+        <div class="headline">Calculate a <span class="accent">maximum CPC.</span></div>
+        <div class="accent-line"></div>
+        <div class="formula-wrap">
+          <div class="formula-card" id="cpc-card">
+            <div class="formula-name">Maximum CPC</div>
+            <div class="formula-expr">Selling price &times; Target ACoS &times; Conversion rate</div>
+            <div class="formula-sub">$30 &times; 25% &times; 10%</div>
+            <div class="formula-result-row">
+              <span class="r-label">=</span>
+              <span class="r-value">$0.75</span>
+            </div>
+          </div>
+          <div class="footnote-box" id="cpc-footnote">
+            <p>This uses a <strong>25% target ACoS</strong> &mdash; a client-chosen goal, not the 30% break-even figure from the product's own economics. They are different numbers for a reason.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 4: 130-180s — market bid vs max CPC -->
+      <div id="frame-4" class="frame clip" data-start="130" data-duration="50" data-track-index="1">
+        <div class="eyebrow">The Reality Check</div>
+        <div class="headline">The market bid is <span class="accent">not the target.</span></div>
+        <div class="accent-line"></div>
+        <div class="compare-wrap">
+          <div class="compare-card market" id="cmp-market">
+            <div class="c-label">Market click cost</div>
+            <div class="c-value">$1.20</div>
+          </div>
+          <div class="vs-badge">vs</div>
+          <div class="compare-card max" id="cmp-max">
+            <div class="c-label">Maximum CPC affordable</div>
+            <div class="c-value">$0.75</div>
+          </div>
+        </div>
+        <div class="options-list" id="cmp-options">
+          <div class="option-pill">Bid below market</div>
+          <div class="option-pill">Improve conversion</div>
+          <div class="option-pill">Accept a different objective</div>
+          <div class="option-pill">Find less expensive traffic</div>
+        </div>
+      </div>
+
+      <!-- Frame 5: 180-240s — three assumptions -->
+      <div id="frame-5" class="frame clip" data-start="180" data-duration="60" data-track-index="1">
+        <div class="eyebrow">Not Permanent</div>
+        <div class="headline">Maximum CPC changes <span class="accent">when the inputs change.</span></div>
+        <div class="accent-line"></div>
+        <div class="assumptions-grid">
+          <div class="assumption-card" id="a-1">
+            <div class="a-icon">$</div>
+            <div class="a-title">Price</div>
+            <div class="a-desc">The selling price you use in the formula.</div>
+          </div>
+          <div class="assumption-card" id="a-2">
+            <div class="a-icon">%</div>
+            <div class="a-title">Target ACoS</div>
+            <div class="a-desc">The operating goal the client has chosen.</div>
+          </div>
+          <div class="assumption-card" id="a-3">
+            <div class="a-icon">&#8644;</div>
+            <div class="a-title">Conversion rate</div>
+            <div class="a-desc">How often a click on this keyword becomes a sale.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 6: 240-300s — workbook task / closing CTA -->
+      <div id="frame-6" class="frame closing-frame clip" data-start="240" data-duration="60" data-track-index="1">
+        <div class="rings"></div>
+        <div class="eyebrow">Your Task</div>
+        <div class="headline">Complete <span class="accent">two calculations.</span></div>
+        <div class="accent-line"></div>
+        <div class="workbook-grid">
+          <div class="workbook-card">
+            <div class="w-num">Scenario 01</div>
+            <div class="w-field">Our maximum CPC is <b>___</b> because <b>___</b>.</div>
+          </div>
+          <div class="workbook-card">
+            <div class="w-num">Scenario 02</div>
+            <div class="w-field">Our maximum CPC is <b>___</b> because <b>___</b>.</div>
+          </div>
+        </div>
+        <div class="sentence-template">
+          <p>"Our maximum CPC is ___ because ___."</p>
+        </div>
+        <div class="cta-button">Open the Max-CPC Worksheet</div>
+      </div>
+
+      <!-- Captions -->
+      <div id="caption-1" class="caption-band clip" data-start="0" data-duration="3" data-track-index="2">
+        <div class="caption-card"><p>Before you judge ACoS, know the economics.</p></div>
+      </div>
+      <div id="caption-2" class="caption-band clip" data-start="3.5" data-duration="3.5" data-track-index="2">
+        <div class="caption-card"><p>This product sells for thirty dollars.</p></div>
+      </div>
+      <div id="caption-3" class="caption-band clip" data-start="7.5" data-duration="5" data-track-index="2">
+        <div class="caption-card"><p>Product cost, shipping, Amazon fees, and other direct costs total twenty-one dollars.</p></div>
+      </div>
+      <div id="caption-4" class="caption-band clip" data-start="13" data-duration="3.5" data-track-index="2">
+        <div class="caption-card"><p>Nine dollars remain before advertising.</p></div>
+      </div>
+
+      <div id="caption-5" class="caption-band clip" data-start="35" data-duration="4.5" data-track-index="2">
+        <div class="caption-card"><p>Break-even ACoS is the highest advertising cost you can carry</p></div>
+      </div>
+      <div id="caption-6" class="caption-band clip" data-start="40" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>before ad-attributed sales stop producing contribution profit.</p></div>
+      </div>
+      <div id="caption-7" class="caption-band clip" data-start="44.5" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>Here, nine divided by thirty equals thirty percent.</p></div>
+      </div>
+      <div id="caption-8" class="caption-band clip" data-start="49" data-duration="3.5" data-track-index="2">
+        <div class="caption-card"><p>At thirty percent ACoS, advertising is covering itself.</p></div>
+      </div>
+      <div id="caption-9" class="caption-band clip" data-start="53" data-duration="3" data-track-index="2">
+        <div class="caption-card"><p>It is not creating extra profit.</p></div>
+      </div>
+      <div id="caption-10" class="caption-band clip" data-start="56.5" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>Your client may choose a lower operating target</p></div>
+      </div>
+      <div id="caption-11" class="caption-band clip" data-start="61" data-duration="3.5" data-track-index="2">
+        <div class="caption-card"><p>depending on growth, overhead, and business goal.</p></div>
+      </div>
+
+      <div id="caption-12" class="caption-band clip" data-start="80" data-duration="3" data-track-index="2">
+        <div class="caption-card"><p>Next, calculate a maximum CPC.</p></div>
+      </div>
+      <div id="caption-13" class="caption-band clip" data-start="83.5" data-duration="4.5" data-track-index="2">
+        <div class="caption-card"><p>Use selling price multiplied by target ACoS multiplied by conversion rate.</p></div>
+      </div>
+      <div id="caption-14" class="caption-band clip" data-start="88.5" data-duration="4.5" data-track-index="2">
+        <div class="caption-card"><p>If the client uses a twenty-five percent ACoS target</p></div>
+      </div>
+      <div id="caption-15" class="caption-band clip" data-start="93.5" data-duration="3.5" data-track-index="2">
+        <div class="caption-card"><p>and the keyword converts at ten percent,</p></div>
+      </div>
+      <div id="caption-16" class="caption-band clip" data-start="97.5" data-duration="5" data-track-index="2">
+        <div class="caption-card"><p>the maximum CPC is thirty times point two five times point one.</p></div>
+      </div>
+      <div id="caption-17" class="caption-band clip" data-start="103" data-duration="3" data-track-index="2">
+        <div class="caption-card"><p>That is seventy-five cents.</p></div>
+      </div>
+
+      <div id="caption-18" class="caption-band clip" data-start="130" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>If market clicks cost one dollar twenty,</p></div>
+      </div>
+      <div id="caption-19" class="caption-band clip" data-start="134.5" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>that does not mean you force the bid to one dollar twenty.</p></div>
+      </div>
+      <div id="caption-20" class="caption-band clip" data-start="139" data-duration="4.5" data-track-index="2">
+        <div class="caption-card"><p>The math says the keyword cannot meet the target</p></div>
+      </div>
+      <div id="caption-21" class="caption-band clip" data-start="144" data-duration="3" data-track-index="2">
+        <div class="caption-card"><p>at that conversion rate.</p></div>
+      </div>
+      <div id="caption-22" class="caption-band clip" data-start="147.5" data-duration="3.5" data-track-index="2">
+        <div class="caption-card"><p>Your options are to bid below the market,</p></div>
+      </div>
+      <div id="caption-23" class="caption-band clip" data-start="151.5" data-duration="3.5" data-track-index="2">
+        <div class="caption-card"><p>improve conversion, accept a different objective,</p></div>
+      </div>
+      <div id="caption-24" class="caption-band clip" data-start="155.5" data-duration="3" data-track-index="2">
+        <div class="caption-card"><p>or find less expensive traffic.</p></div>
+      </div>
+
+      <div id="caption-25" class="caption-band clip" data-start="180" data-duration="3" data-track-index="2">
+        <div class="caption-card"><p>Maximum CPC is not permanent.</p></div>
+      </div>
+      <div id="caption-26" class="caption-band clip" data-start="183.5" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>It changes when price, target ACoS, or conversion rate changes.</p></div>
+      </div>
+      <div id="caption-27" class="caption-band clip" data-start="188" data-duration="3.5" data-track-index="2">
+        <div class="caption-card"><p>Record your assumptions beside every calculation.</p></div>
+      </div>
+      <div id="caption-28" class="caption-band clip" data-start="192" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>A client or manager should be able to see</p></div>
+      </div>
+      <div id="caption-29" class="caption-band clip" data-start="196.5" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>why you picked the bid and when you need to recalculate it.</p></div>
+      </div>
+
+      <div id="caption-30" class="caption-band clip" data-start="240" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>Now complete two calculations in the worksheet.</p></div>
+      </div>
+      <div id="caption-31" class="caption-band clip" data-start="244.5" data-duration="3.5" data-track-index="2">
+        <div class="caption-card"><p>Write one sentence for each:</p></div>
+      </div>
+      <div id="caption-32" class="caption-band clip" data-start="248.5" data-duration="4.5" data-track-index="2">
+        <div class="caption-card"><p>"Our maximum CPC is ___ because ___."</p></div>
+      </div>
+      <div id="caption-33" class="caption-band clip" data-start="253.5" data-duration="5" data-track-index="2">
+        <div class="caption-card"><p>This is the sentence you will use</p></div>
+      </div>
+      <div id="caption-34" class="caption-band clip" data-start="259" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>when someone asks why you did not simply bid higher.</p></div>
+      </div>
+
+      <!-- Persistent chrome -->
+      <div class="progress-track">
+        <span id="progress-fill" class="clip" data-start="0" data-duration="300" data-track-index="90"></span>
+      </div>
+      <div class="counter clip" data-start="0" data-duration="300" data-track-index="91" id="counter">00:00 / 05:00</div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Frame 1
+      tl.from("#frame-1 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 0);
+      tl.from("#p-price", { opacity: 0, y: 24, duration: 0.5, ease: "power2.out" }, 0.4);
+      tl.from("#p-costs", { opacity: 0, y: 24, duration: 0.5, ease: "power2.out" }, 0.7);
+      tl.from("#p-margin", { opacity: 0, y: 24, duration: 0.5, ease: "power2.out" }, 1.0);
+
+      // Frame 2
+      tl.from("#frame-2 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 35);
+      tl.from("#be-card", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 35.4);
+      tl.from("#be-footnote", { opacity: 0, y: 16, duration: 0.5, ease: "power2.out" }, 36.5);
+
+      // Frame 3
+      tl.from("#frame-3 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 80);
+      tl.from("#cpc-card", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 80.4);
+      tl.from("#cpc-footnote", { opacity: 0, y: 16, duration: 0.5, ease: "power2.out" }, 81.5);
+
+      // Frame 4
+      tl.from("#frame-4 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 130);
+      tl.from("#cmp-market", { opacity: 0, x: -30, duration: 0.5, ease: "power2.out" }, 130.4);
+      tl.from("#cmp-max", { opacity: 0, x: 30, duration: 0.5, ease: "power2.out" }, 130.6);
+      tl.from("#cmp-options .option-pill", { opacity: 0, y: 16, duration: 0.4, ease: "power2.out", stagger: 0.12 }, 131.3);
+
+      // Frame 5
+      tl.from("#frame-5 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 180);
+      tl.from("#a-1", { opacity: 0, y: 24, duration: 0.5, ease: "power2.out" }, 180.4);
+      tl.from("#a-2", { opacity: 0, y: 24, duration: 0.5, ease: "power2.out" }, 180.6);
+      tl.from("#a-3", { opacity: 0, y: 24, duration: 0.5, ease: "power2.out" }, 180.8);
+
+      // Frame 6
+      tl.from("#frame-6 .rings", { opacity: 0, scale: 0.85, duration: 1, ease: "power2.out" }, 240);
+      tl.from("#frame-6 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 240.3);
+      tl.from("#frame-6 .workbook-card", { opacity: 0, y: 20, duration: 0.5, ease: "power2.out", stagger: 0.15 }, 240.7);
+      tl.from("#frame-6 .sentence-template", { opacity: 0, y: 16, duration: 0.5, ease: "power2.out" }, 241.5);
+      tl.from("#frame-6 .cta-button", { opacity: 0, y: 16, duration: 0.5, ease: "power2.out" }, 242.0);
+
+      // Persistent progress bar
+      tl.to("#progress-fill", { width: "100%", duration: 300, ease: "none" }, 0);
+
+      window.__timelines["main"] = tl;
+
+      function formatTime(s) {
+        var m = Math.floor(s / 60);
+        var sec = Math.floor(s % 60);
+        return (m < 10 ? "0" + m : m) + ":" + (sec < 10 ? "0" + sec : sec);
+      }
+
+      var counterEl = document.getElementById("counter");
+      tl.eventCallback("onUpdate", function () {
+        counterEl.textContent = formatTime(tl.time()) + " / 05:00";
+      });
+      counterEl.textContent = formatTime(tl.time()) + " / 05:00";
+    </script>
+  </body>
+</html>

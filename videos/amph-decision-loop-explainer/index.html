@@ -1,0 +1,838 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>The PPC Decision Loop</title>
+    <script src="node_modules/gsap/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --bg: #fdfae7;
+        --primary: #1e2bfa;
+        --text: #111111;
+        --text-muted: #4a4a4a;
+        --text-light: #6b6b6b;
+        --accent-light: rgba(30, 43, 250, 0.08);
+        --accent-medium: rgba(30, 43, 250, 0.15);
+        --border: rgba(30, 43, 250, 0.2);
+        --card-bg: rgba(30, 43, 250, 0.04);
+        --positive: #059669;
+        --negative: #dc2626;
+        --font-display: "Space Grotesk", sans-serif;
+        --font-body: "Inter", sans-serif;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--bg);
+      }
+      body {
+        font-family: var(--font-body);
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        background: var(--bg);
+        overflow: hidden;
+      }
+      .frame {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 96px 120px 180px;
+      }
+      .eyebrow {
+        font-family: var(--font-display);
+        font-size: 26px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--primary);
+        margin-bottom: 24px;
+      }
+      .headline {
+        font-family: var(--font-display);
+        font-size: 60px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        color: var(--text);
+        max-width: 1500px;
+        margin-bottom: 16px;
+      }
+      .headline .accent {
+        color: var(--primary);
+      }
+      .accent-line {
+        width: 60px;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--primary);
+        margin-bottom: 28px;
+      }
+
+      /* ---- Frame 1: search term report row ---- */
+      .report-wrap {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 40px;
+      }
+      .report-card {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 44px 52px;
+      }
+      .report-term {
+        font-family: var(--font-display);
+        font-size: 28px;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 32px;
+      }
+      .report-term span {
+        color: var(--text);
+      }
+      .report-row {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 24px;
+      }
+      .report-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .report-cell .label {
+        font-family: var(--font-display);
+        font-size: 20px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+      }
+      .report-cell .value {
+        font-family: var(--font-display);
+        font-size: 46px;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .report-cell.acos {
+        background: var(--accent-light);
+        border-radius: 10px;
+        padding: 12px 20px;
+        margin: -12px -20px;
+      }
+      .report-cell.acos .value {
+        color: var(--primary);
+        font-size: 56px;
+      }
+      .context-line {
+        font-family: var(--font-body);
+        font-size: 32px;
+        color: var(--text-muted);
+        line-height: 1.6;
+        max-width: 1300px;
+      }
+
+      /* ---- Frame 2: four question cards ---- */
+      .question-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 32px;
+        margin-top: 20px;
+        flex: 1;
+        align-content: start;
+      }
+      .question-card {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 36px 40px;
+        display: flex;
+        gap: 26px;
+        align-items: flex-start;
+      }
+      .q-badge {
+        width: 68px;
+        height: 68px;
+        min-width: 68px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 30px;
+        color: var(--bg);
+      }
+      .q-body .q-label {
+        font-family: var(--font-display);
+        font-size: 22px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--primary);
+        margin-bottom: 8px;
+      }
+      .q-body .q-text {
+        font-family: var(--font-body);
+        font-size: 28px;
+        color: var(--text);
+        line-height: 1.4;
+      }
+
+      /* ---- Frames 3-5: worked examples ---- */
+      .example-wrap {
+        display: flex;
+        gap: 48px;
+        margin-top: 24px;
+        flex: 1;
+      }
+      .example-col {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+      }
+      .example-tag {
+        display: inline-flex;
+        align-self: flex-start;
+        background: var(--primary);
+        color: var(--bg);
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 22px;
+        padding: 12px 28px;
+        border-radius: 100px;
+      }
+      .stat-card {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 32px 36px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .stat-card .k {
+        font-family: var(--font-body);
+        font-size: 26px;
+        color: var(--text-muted);
+      }
+      .stat-card .v {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 38px;
+        color: var(--text);
+      }
+      .stat-card.flag .v {
+        color: var(--negative);
+      }
+      .checklist {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 36px 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .checklist .cl-title {
+        font-family: var(--font-display);
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--primary);
+        margin-bottom: 6px;
+      }
+      .checklist .cl-item {
+        font-family: var(--font-body);
+        font-size: 28px;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .checklist .cl-item::before {
+        content: "";
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--primary);
+        display: inline-block;
+        flex: none;
+      }
+      .verdict-box {
+        background: var(--accent-light);
+        border-left: 4px solid var(--primary);
+        border-radius: 12px;
+        padding: 32px 36px;
+      }
+      .verdict-box p {
+        font-family: var(--font-body);
+        font-size: 27px;
+        color: var(--text-muted);
+        line-height: 1.6;
+      }
+      .verdict-box strong {
+        color: var(--text);
+      }
+
+      /* formula box for example C */
+      .formula-box {
+        background: var(--accent-light);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 36px 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .formula-box .f-label {
+        font-family: var(--font-display);
+        font-size: 22px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--primary);
+      }
+      .formula-box .f-line {
+        font-family: var(--font-display);
+        font-size: 30px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .formula-box .f-sub {
+        font-family: var(--font-body);
+        font-size: 24px;
+        color: var(--text-muted);
+      }
+      .formula-box .f-result {
+        font-family: var(--font-display);
+        font-size: 46px;
+        font-weight: 700;
+        color: var(--primary);
+      }
+
+      /* ---- Frame 6: worksheet / closing ---- */
+      .closing-frame {
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+      .closing-frame .headline {
+        max-width: 1500px;
+        text-align: center;
+      }
+      .closing-frame .accent-line {
+        align-self: center;
+      }
+      .worksheet-grid {
+        display: flex;
+        gap: 32px;
+        margin-bottom: 44px;
+      }
+      .worksheet-card {
+        flex: 1;
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 28px 30px;
+        text-align: left;
+      }
+      .worksheet-card .w-num {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 24px;
+        color: var(--primary);
+        margin-bottom: 10px;
+      }
+      .worksheet-card .w-field {
+        font-family: var(--font-body);
+        font-size: 22px;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+      .worksheet-card .w-field b {
+        color: var(--text);
+        font-family: var(--font-display);
+      }
+      .cta-button {
+        background: var(--primary);
+        color: var(--bg);
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 30px;
+        padding: 24px 56px;
+        border-radius: 100px;
+      }
+      .rings {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 900px;
+        height: 900px;
+        border-radius: 50%;
+        border: 1.5px solid var(--border);
+        z-index: -1;
+      }
+      .rings::before,
+      .rings::after {
+        content: "";
+        position: absolute;
+        inset: 120px;
+        border-radius: 50%;
+        border: 1.5px solid var(--border);
+      }
+      .rings::after {
+        inset: 260px;
+      }
+
+      /* ---- captions ---- */
+      .caption-band {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 64px;
+        display: flex;
+        justify-content: center;
+        z-index: 50;
+      }
+      .caption-card {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 22px 44px;
+        max-width: 1500px;
+      }
+      .caption-card p {
+        font-family: var(--font-display);
+        font-weight: 500;
+        font-size: 30px;
+        color: var(--text);
+        text-align: center;
+        line-height: 1.4;
+      }
+
+      /* ---- progress bar ---- */
+      .progress-track {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 3px;
+        background: var(--accent-light);
+        z-index: 60;
+      }
+      #progress-fill {
+        display: block;
+        height: 100%;
+        width: 0%;
+        background: var(--primary);
+      }
+      .counter {
+        position: absolute;
+        right: 40px;
+        bottom: 16px;
+        font-family: var(--font-display);
+        font-size: 20px;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        color: #444444;
+        z-index: 60;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="240"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- Frame 1: 0-25s — the search term report row -->
+      <div id="frame-1" class="frame clip" data-start="0" data-duration="25" data-track-index="1">
+        <div class="eyebrow">Module 1 &middot; Before the Big Six</div>
+        <div class="headline">A number is <span class="accent">not a decision.</span></div>
+        <div class="accent-line"></div>
+        <div class="report-wrap">
+          <div class="report-card" id="report-card">
+            <div class="report-term">Search term &middot; <span>"kitchen storage containers"</span></div>
+            <div class="report-row">
+              <div class="report-cell">
+                <div class="label">Impressions</div>
+                <div class="value">18,400</div>
+              </div>
+              <div class="report-cell">
+                <div class="label">Clicks</div>
+                <div class="value">142</div>
+              </div>
+              <div class="report-cell">
+                <div class="label">Spend</div>
+                <div class="value">$186</div>
+              </div>
+              <div class="report-cell">
+                <div class="label">Sales</div>
+                <div class="value">$466</div>
+              </div>
+              <div class="report-cell acos">
+                <div class="label">ACoS</div>
+                <div class="value">40%</div>
+              </div>
+            </div>
+          </div>
+          <div class="context-line" id="context-line">ACoS at 40% does not automatically mean lower the bid. First, you need context.</div>
+        </div>
+      </div>
+
+      <!-- Frame 2: 25-70s — four question cards -->
+      <div id="frame-2" class="frame clip" data-start="25" data-duration="45" data-track-index="1">
+        <div class="eyebrow">Ask In This Order</div>
+        <div class="headline">Four questions <span class="accent">before you act.</span></div>
+        <div class="accent-line"></div>
+        <div class="question-grid">
+          <div class="question-card" id="q-1">
+            <div class="q-badge" style="background: #3a45fb">1</div>
+            <div class="q-body">
+              <div class="q-label">Objective</div>
+              <div class="q-text">What is the campaign trying to do?</div>
+            </div>
+          </div>
+          <div class="question-card" id="q-2">
+            <div class="q-badge" style="background: #565fce">2</div>
+            <div class="q-body">
+              <div class="q-label">Data maturity</div>
+              <div class="q-text">Do we have enough data?</div>
+            </div>
+          </div>
+          <div class="question-card" id="q-3">
+            <div class="q-badge" style="background: #6a72b8">3</div>
+            <div class="q-body">
+              <div class="q-label">Traffic quality</div>
+              <div class="q-text">Is the traffic relevant?</div>
+            </div>
+          </div>
+          <div class="question-card" id="q-4">
+            <div class="q-badge" style="background: #7a80a8">4</div>
+            <div class="q-body">
+              <div class="q-label">Conversion readiness</div>
+              <div class="q-text">Can the listing convert the traffic we send?</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 3: 70-125s — Example A: high impressions, low CTR -->
+      <div id="frame-3" class="frame clip" data-start="70" data-duration="55" data-track-index="1">
+        <div class="eyebrow">Example One</div>
+        <div class="headline">High impressions, <span class="accent">very few clicks.</span></div>
+        <div class="accent-line"></div>
+        <div class="example-wrap">
+          <div class="example-col">
+            <div class="example-tag" id="ex1-tag">Broad target</div>
+            <div class="stat-card" id="ex1-stat1">
+              <span class="k">Impressions</span><span class="v">52,000</span>
+            </div>
+            <div class="stat-card flag" id="ex1-stat2">
+              <span class="k">CTR</span><span class="v">0.27%</span>
+            </div>
+            <div class="stat-card flag" id="ex1-stat3">
+              <span class="k">Main image</span><span class="v">Uncompetitive</span>
+            </div>
+          </div>
+          <div class="example-col">
+            <div class="checklist" id="ex1-checklist">
+              <div class="cl-title">Traffic-match / click-appeal check</div>
+              <div class="cl-item">Search terms</div>
+              <div class="cl-item">The target</div>
+              <div class="cl-item">Main image</div>
+              <div class="cl-item">Price</div>
+              <div class="cl-item">Featured offer</div>
+            </div>
+            <div class="verdict-box" id="ex1-verdict">
+              <p>Lowering the bid might save money, but it does not solve <strong>why shoppers ignore the ad.</strong></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 4: 125-175s — Example B: clicks, low conversion -->
+      <div id="frame-4" class="frame clip" data-start="125" data-duration="50" data-track-index="1">
+        <div class="eyebrow">Example Two</div>
+        <div class="headline">Clicks arrive, <span class="accent">orders don't.</span></div>
+        <div class="accent-line"></div>
+        <div class="example-wrap">
+          <div class="example-col">
+            <div class="example-tag" id="ex2-tag">Conversion problem</div>
+            <div class="stat-card" id="ex2-stat1">
+              <span class="k">Clicks</span><span class="v">310</span>
+            </div>
+            <div class="stat-card flag" id="ex2-stat2">
+              <span class="k">Orders</span><span class="v">3</span>
+            </div>
+            <div class="stat-card flag" id="ex2-stat3">
+              <span class="k">CVR</span><span class="v">0.97%</span>
+            </div>
+          </div>
+          <div class="example-col">
+            <div class="checklist" id="ex2-checklist">
+              <div class="cl-title">Listing audit</div>
+              <div class="cl-item">Stock</div>
+              <div class="cl-item">Price</div>
+              <div class="cl-item">Reviews</div>
+              <div class="cl-item">Images</div>
+              <div class="cl-item">Product fit</div>
+            </div>
+            <div class="verdict-box" id="ex2-verdict">
+              <p>Don't punish a relevant keyword before you know if <strong>the listing is the real constraint.</strong></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 5: 175-215s — Example C: good CVR, high CPC -->
+      <div id="frame-5" class="frame clip" data-start="175" data-duration="40" data-track-index="1">
+        <div class="eyebrow">Example Three</div>
+        <div class="headline">It converts, <span class="accent">but CPC is too high.</span></div>
+        <div class="accent-line"></div>
+        <div class="example-wrap">
+          <div class="example-col">
+            <div class="example-tag" id="ex3-tag">Bidding is the lever</div>
+            <div class="stat-card" id="ex3-stat1">
+              <span class="k">CVR</span><span class="v">14%</span>
+            </div>
+            <div class="stat-card flag" id="ex3-stat2">
+              <span class="k">Current bid</span><span class="v">$2.10</span>
+            </div>
+          </div>
+          <div class="example-col">
+            <div class="formula-box" id="ex3-formula">
+              <div class="f-label">Maximum CPC you can afford</div>
+              <div class="f-line">Price &times; target ACoS &times; CVR</div>
+              <div class="f-sub">$25 &times; 20% &times; 14%</div>
+              <div class="f-result">= $0.70 max CPC</div>
+            </div>
+            <div class="verdict-box" id="ex3-verdict">
+              <p>A converting term may still be valuable. <strong>Expensive does not always mean irrelevant.</strong></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 6: 215-240s — Decision Loop worksheet / closing CTA -->
+      <div id="frame-6" class="frame closing-frame clip" data-start="215" data-duration="25" data-track-index="1">
+        <div class="rings"></div>
+        <div class="eyebrow">In PPC</div>
+        <div class="headline">Diagnosis comes <span class="accent">before adjustment.</span></div>
+        <div class="accent-line"></div>
+        <div class="worksheet-grid">
+          <div class="worksheet-card">
+            <div class="w-num">01</div>
+            <div class="w-field">Likely problem: <b>___</b></div>
+          </div>
+          <div class="worksheet-card">
+            <div class="w-num">02</div>
+            <div class="w-field">Likely problem: <b>___</b></div>
+          </div>
+          <div class="worksheet-card">
+            <div class="w-num">03</div>
+            <div class="w-field">Likely problem: <b>___</b></div>
+          </div>
+        </div>
+        <div class="cta-button">Open the Decision Loop Worksheet</div>
+      </div>
+
+      <!-- Captions -->
+      <div id="caption-1" class="caption-band clip" data-start="0" data-duration="3.2" data-track-index="2">
+        <div class="caption-card"><p>A number is not a decision.</p></div>
+      </div>
+      <div id="caption-2" class="caption-band clip" data-start="3.5" data-duration="5" data-track-index="2">
+        <div class="caption-card"><p>ACoS at 40% does not automatically mean lower the bid.</p></div>
+      </div>
+      <div id="caption-3" class="caption-band clip" data-start="9" data-duration="3.5" data-track-index="2">
+        <div class="caption-card"><p>First, you need context.</p></div>
+      </div>
+
+      <div id="caption-4" class="caption-band clip" data-start="25" data-duration="3.5" data-track-index="2">
+        <div class="caption-card"><p>Ask four questions in this order.</p></div>
+      </div>
+      <div id="caption-5" class="caption-band clip" data-start="29" data-duration="3.5" data-track-index="2">
+        <div class="caption-card"><p>What is the campaign trying to do?</p></div>
+      </div>
+      <div id="caption-6" class="caption-band clip" data-start="33" data-duration="3" data-track-index="2">
+        <div class="caption-card"><p>Do we have enough data?</p></div>
+      </div>
+      <div id="caption-7" class="caption-band clip" data-start="36.5" data-duration="2.5" data-track-index="2">
+        <div class="caption-card"><p>Is the traffic relevant?</p></div>
+      </div>
+      <div id="caption-8" class="caption-band clip" data-start="39.5" data-duration="3.5" data-track-index="2">
+        <div class="caption-card"><p>Can the listing convert the traffic we send?</p></div>
+      </div>
+      <div id="caption-9" class="caption-band clip" data-start="43.5" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>The same ACoS can mean very different things</p></div>
+      </div>
+      <div id="caption-10" class="caption-band clip" data-start="48" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>for a launch campaign, a mature exact campaign,</p></div>
+      </div>
+      <div id="caption-11" class="caption-band clip" data-start="52.5" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>and a product with a weak listing.</p></div>
+      </div>
+
+      <div id="caption-12" class="caption-band clip" data-start="70" data-duration="2.5" data-track-index="2">
+        <div class="caption-card"><p>Example one.</p></div>
+      </div>
+      <div id="caption-13" class="caption-band clip" data-start="73" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>The campaign has high impressions but very few clicks.</p></div>
+      </div>
+      <div id="caption-14" class="caption-band clip" data-start="77.5" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>This is usually a traffic-match or click-appeal problem.</p></div>
+      </div>
+      <div id="caption-15" class="caption-band clip" data-start="82" data-duration="4.5" data-track-index="2">
+        <div class="caption-card"><p>Check the search terms, the target, main image,</p></div>
+      </div>
+      <div id="caption-16" class="caption-band clip" data-start="87" data-duration="3" data-track-index="2">
+        <div class="caption-card"><p>price, and featured offer.</p></div>
+      </div>
+      <div id="caption-17" class="caption-band clip" data-start="90.5" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>Lowering a bid might save money,</p></div>
+      </div>
+      <div id="caption-18" class="caption-band clip" data-start="95" data-duration="4.5" data-track-index="2">
+        <div class="caption-card"><p>but it does not solve why shoppers ignore the ad.</p></div>
+      </div>
+
+      <div id="caption-19" class="caption-band clip" data-start="125" data-duration="2.5" data-track-index="2">
+        <div class="caption-card"><p>Example two.</p></div>
+      </div>
+      <div id="caption-20" class="caption-band clip" data-start="128" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>The campaign receives clicks but few orders.</p></div>
+      </div>
+      <div id="caption-21" class="caption-band clip" data-start="132.5" data-duration="3.5" data-track-index="2">
+        <div class="caption-card"><p>This is often a conversion problem.</p></div>
+      </div>
+      <div id="caption-22" class="caption-band clip" data-start="136.5" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>Check stock, price, reviews, images, and product fit.</p></div>
+      </div>
+      <div id="caption-23" class="caption-band clip" data-start="141" data-duration="4.5" data-track-index="2">
+        <div class="caption-card"><p>Do not punish a relevant keyword</p></div>
+      </div>
+      <div id="caption-24" class="caption-band clip" data-start="146" data-duration="5" data-track-index="2">
+        <div class="caption-card"><p>before you know if the listing is the real constraint.</p></div>
+      </div>
+
+      <div id="caption-25" class="caption-band clip" data-start="175" data-duration="2.5" data-track-index="2">
+        <div class="caption-card"><p>Example three.</p></div>
+      </div>
+      <div id="caption-26" class="caption-band clip" data-start="178" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>The keyword converts, but CPC is too high for the target.</p></div>
+      </div>
+      <div id="caption-27" class="caption-band clip" data-start="182.5" data-duration="3" data-track-index="2">
+        <div class="caption-card"><p>Now bidding is the lever.</p></div>
+      </div>
+      <div id="caption-28" class="caption-band clip" data-start="186" data-duration="4.5" data-track-index="2">
+        <div class="caption-card"><p>Calculate the maximum CPC you can afford,</p></div>
+      </div>
+      <div id="caption-29" class="caption-band clip" data-start="191" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>then reduce the bid or placement adjustment.</p></div>
+      </div>
+      <div id="caption-30" class="caption-band clip" data-start="195.5" data-duration="3.5" data-track-index="2">
+        <div class="caption-card"><p>A converting term may still be valuable.</p></div>
+      </div>
+      <div id="caption-31" class="caption-band clip" data-start="199.5" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>Expensive does not always mean irrelevant.</p></div>
+      </div>
+
+      <div id="caption-32" class="caption-band clip" data-start="215" data-duration="3" data-track-index="2">
+        <div class="caption-card"><p>Open the Decision Loop worksheet.</p></div>
+      </div>
+      <div id="caption-33" class="caption-band clip" data-start="218.5" data-duration="4.5" data-track-index="2">
+        <div class="caption-card"><p>For each scenario, name the likely problem before choosing an action.</p></div>
+      </div>
+      <div id="caption-34" class="caption-band clip" data-start="223.5" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>In PPC, diagnosis comes before adjustment.</p></div>
+      </div>
+
+      <!-- Persistent chrome -->
+      <div class="progress-track">
+        <span id="progress-fill" class="clip" data-start="0" data-duration="240" data-track-index="90"></span>
+      </div>
+      <div class="counter clip" data-start="0" data-duration="240" data-track-index="91" id="counter">00:00 / 04:00</div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Frame 1
+      tl.from("#frame-1 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 0);
+      tl.from("#report-card", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 0.3);
+      tl.from("#context-line", { opacity: 0, y: 16, duration: 0.6, ease: "power2.out" }, 0.8);
+
+      // Frame 2
+      tl.from("#frame-2 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 25);
+      tl.from("#q-1", { opacity: 0, y: 30, duration: 0.5, ease: "power2.out" }, 25.4);
+      tl.from("#q-2", { opacity: 0, y: 30, duration: 0.5, ease: "power2.out" }, 25.7);
+      tl.from("#q-3", { opacity: 0, y: 30, duration: 0.5, ease: "power2.out" }, 26.0);
+      tl.from("#q-4", { opacity: 0, y: 30, duration: 0.5, ease: "power2.out" }, 26.3);
+
+      // Frame 3
+      tl.from("#frame-3 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 70);
+      tl.from("#ex1-tag", { opacity: 0, y: 16, duration: 0.5, ease: "power2.out" }, 70.4);
+      tl.from("#ex1-stat1", { opacity: 0, x: -24, duration: 0.5, ease: "power2.out" }, 70.6);
+      tl.from("#ex1-stat2", { opacity: 0, x: -24, duration: 0.5, ease: "power2.out" }, 70.8);
+      tl.from("#ex1-stat3", { opacity: 0, x: -24, duration: 0.5, ease: "power2.out" }, 71.0);
+      tl.from("#ex1-checklist", { opacity: 0, x: 24, duration: 0.5, ease: "power2.out" }, 70.6);
+      tl.from("#ex1-verdict", { opacity: 0, y: 16, duration: 0.5, ease: "power2.out" }, 72.5);
+
+      // Frame 4
+      tl.from("#frame-4 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 125);
+      tl.from("#ex2-tag", { opacity: 0, y: 16, duration: 0.5, ease: "power2.out" }, 125.4);
+      tl.from("#ex2-stat1", { opacity: 0, x: -24, duration: 0.5, ease: "power2.out" }, 125.6);
+      tl.from("#ex2-stat2", { opacity: 0, x: -24, duration: 0.5, ease: "power2.out" }, 125.8);
+      tl.from("#ex2-stat3", { opacity: 0, x: -24, duration: 0.5, ease: "power2.out" }, 126.0);
+      tl.from("#ex2-checklist", { opacity: 0, x: 24, duration: 0.5, ease: "power2.out" }, 125.6);
+      tl.from("#ex2-verdict", { opacity: 0, y: 16, duration: 0.5, ease: "power2.out" }, 127.5);
+
+      // Frame 5
+      tl.from("#frame-5 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 175);
+      tl.from("#ex3-tag", { opacity: 0, y: 16, duration: 0.5, ease: "power2.out" }, 175.4);
+      tl.from("#ex3-stat1", { opacity: 0, x: -24, duration: 0.5, ease: "power2.out" }, 175.6);
+      tl.from("#ex3-stat2", { opacity: 0, x: -24, duration: 0.5, ease: "power2.out" }, 175.8);
+      tl.from("#ex3-formula", { opacity: 0, x: 24, duration: 0.5, ease: "power2.out" }, 176.0);
+      tl.from("#ex3-verdict", { opacity: 0, y: 16, duration: 0.5, ease: "power2.out" }, 177.8);
+
+      // Frame 6
+      tl.from("#frame-6 .rings", { opacity: 0, scale: 0.85, duration: 1, ease: "power2.out" }, 215);
+      tl.from("#frame-6 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 215.3);
+      tl.from("#frame-6 .worksheet-card", { opacity: 0, y: 20, duration: 0.5, ease: "power2.out", stagger: 0.12 }, 215.7);
+      tl.from("#frame-6 .cta-button", { opacity: 0, y: 16, duration: 0.5, ease: "power2.out" }, 216.3);
+
+      // Persistent progress bar
+      tl.to("#progress-fill", { width: "100%", duration: 240, ease: "none" }, 0);
+
+      window.__timelines["main"] = tl;
+
+      function formatTime(s) {
+        var m = Math.floor(s / 60);
+        var sec = Math.floor(s % 60);
+        return (m < 10 ? "0" + m : m) + ":" + (sec < 10 ? "0" + sec : sec);
+      }
+
+      var counterEl = document.getElementById("counter");
+      tl.eventCallback("onUpdate", function () {
+        counterEl.textContent = formatTime(tl.time()) + " / 04:00";
+      });
+      counterEl.textContent = formatTime(tl.time()) + " / 04:00";
+    </script>
+  </body>
+</html>
