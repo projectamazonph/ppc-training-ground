@@ -33,7 +33,13 @@ vi.mock('@/lib/logger', () => ({
   logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() },
 }));
 
-vi.mock('node:crypto', () => ({ randomUUID: () => 'mock-uuid', randomBytes: vi.fn(), createHash: vi.fn() }));
+vi.mock('node:crypto', () => ({
+  randomUUID: () => 'mock-uuid',
+  randomBytes: (size: number) => Buffer.alloc(size, 0xAB),
+  createHash: () => ({
+    update: () => ({ digest: () => 'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890' }),
+  }),
+}));
 vi.mock('@/lib/auth', () => ({
   generateClaimToken: () => ({ rawToken: 'mock-claim-raw-token', tokenHash: 'mock-claim-hash' }),
 }));

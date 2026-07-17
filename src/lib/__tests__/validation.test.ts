@@ -91,8 +91,10 @@ describe('validation.ts', () => {
   });
 
   it('validateRedirectUrl rejects paths with control characters', () => {
-    expect(validateRedirectUrl('/path\n')).toBe('/');
-    expect(validateRedirectUrl('/path\r')).toBe('/');
+    // Use actual control characters via String.fromCharCode
+    expect(validateRedirectUrl('/path' + String.fromCharCode(10))).toBe('/');
+    expect(validateRedirectUrl('/path' + String.fromCharCode(13))).toBe('/');
+    expect(validateRedirectUrl('/path' + String.fromCharCode(0))).toBe('/');
   });
 
   it('validateRedirectUrl returns fallback for null/undefined/empty', () => {
