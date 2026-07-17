@@ -206,6 +206,20 @@ export const submitQuizAction = createSafeAction(submitQuizSchema, async (data) 
   const score = Math.round((correctCount / totalQuestions) * 100);
   const passed = score >= lesson.quiz.passThreshold;
 
+  // C6: Award XP only on the atomic transition from non-complete to complete.
+  // Check current progress before creating the attempt — set xpEarned to 0
+  // when the lesson is already completed.
+  const lessonProgress = passed
+    ? await db.lessonProgress.findUnique({
+        where: {
+          userId_lessonId: { userId: user.id, lessonId: lesson.id },
+        },
+        select: { status: true },
+      })
+    : null;
+
+  const alreadyCompleted = lessonProgress?.status === ProgressStatus.COMPLETED;
+
   // Get the next attempt number
   const priorAttempts = await db.quizAttempt.count({
     where: { userId: user.id, quizId: lesson.quiz.id },
@@ -228,20 +242,6 @@ export const submitQuizAction = createSafeAction(submitQuizSchema, async (data) 
       completedAt: new Date(),
     },
   });
-
-  // C6: Award XP only on the atomic transition from non-complete to complete.
-  // Check current progress before creating the attempt — set xpEarned to 0
-  // when the lesson is already completed.
-  const lessonProgress = passed
-    ? await db.lessonProgress.findUnique({
-        where: {
-          userId_lessonId: { userId: user.id, lessonId: lesson.id },
-        },
-        select: { status: true },
-      })
-    : null;
-
-  const alreadyCompleted = lessonProgress?.status === ProgressStatus.COMPLETED;
 
   // If passed and not already completed, mark lesson complete and award XP
   if (passed && !alreadyCompleted) {
