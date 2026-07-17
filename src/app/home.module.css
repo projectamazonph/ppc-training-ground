@@ -1,41 +1,77 @@
+/* Landing page — Screen 1, "Field Manual" design system.
+ * Left-aligned, asymmetric, typographic. See docs/stitch-prompts.md § SCREEN 1.
+ */
+
 .page {
   max-width: var(--max-content);
   margin: 0 auto;
-  padding: var(--space-16) var(--side-pad);
+  padding: 0 var(--side-pad) var(--space-16);
 }
 
-/* ── Hero ──────────────────────────────────────────────────────── */
+/* Shared link-buttons (Link elements, so styled here rather than <Button>) */
+.btnPrimary,
+.tiersLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.btnPrimary {
+  padding: 0 var(--space-6);
+  height: 44px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: var(--radius-md);
+}
+
+.btnPrimary:hover {
+  background: var(--accent-hover);
+  text-decoration: none;
+}
+
+.btnPrimary:active {
+  transform: translateY(1px);
+}
+
+/* ── Hero (asymmetric 60/40, left-aligned) ─────────────────────── */
 .hero {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: var(--space-8);
-  margin-bottom: var(--space-16);
+  align-items: center;
+  padding: var(--space-16) 0 var(--space-12);
 }
 
 .heroContent {
-  max-width: 720px;
+  max-width: 700px;
 }
 
 .heroEyebrow {
   font-size: var(--text-xs);
-  letter-spacing: 4px;
+  letter-spacing: 0.05em;
   color: var(--ink-500);
   text-transform: uppercase;
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--space-4);
 }
 
 .heroTitle {
-  font-size: var(--text-3xl);
-  line-height: 1.1;
-  margin: 0 0 var(--space-4);
+  font-size: clamp(2.25rem, 4vw, 3rem);
+  line-height: var(--leading-tight);
+  margin: 0 0 var(--space-5);
+  max-width: 700px;
 }
 
 .heroSub {
   font-size: var(--text-lg);
   color: var(--ink-700);
   margin: 0 0 var(--space-8);
-  max-width: 600px;
-  line-height: 1.5;
+  max-width: 560px;
+  line-height: var(--leading-normal);
 }
 
 .heroActions {
@@ -48,26 +84,23 @@
   display: none;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 900px) {
   .hero {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+    grid-template-columns: 1.5fr 1fr;
   }
 
   .heroDecorative {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-end;
     gap: var(--space-2);
+    justify-self: end;
     font-family: var(--font-mono);
-    font-size: var(--text-4xl);
+    font-size: clamp(3rem, 8vw, 5.5rem);
     font-weight: 700;
-    color: var(--accent);
-    background: var(--accent-soft);
-    padding: var(--space-8) var(--space-10);
-    border-radius: var(--radius-lg);
-    white-space: nowrap;
+    line-height: 1;
+    color: var(--accent-soft);
+    transform: rotate(-4deg);
   }
 
   .heroDecorativeCaption {
@@ -75,81 +108,385 @@
     font-size: var(--text-xs);
     font-weight: 400;
     color: var(--ink-500);
-    white-space: normal;
-    text-align: center;
+    text-align: right;
+    max-width: 200px;
+    transform: rotate(4deg);
   }
 }
 
-/* ── What You Learn ────────────────────────────────────────────── */
-.learnSection {
-  padding: var(--space-12) 0;
-  border-top: 1px solid var(--border);
+/* ── Social proof bar ──────────────────────────────────────────── */
+.proofBar {
+  background: var(--surface-2);
+  margin: 0 calc(-1 * var(--side-pad));
+  padding: var(--space-6) var(--side-pad);
 }
 
-.learnGrid {
-  list-style: none;
+.proofInner {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-6);
-  margin: var(--space-6) 0 0;
-  padding: 0;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+  max-width: var(--max-content);
+  margin: 0 auto;
+}
+
+.proofStat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-left: var(--space-4);
+  border-left: 1px solid var(--border);
+}
+
+.proofStat:first-child {
+  border-left: 0;
+  padding-left: 0;
+}
+
+.proofNumber {
+  font-weight: 600;
+  font-size: var(--text-xl);
+  color: var(--ink-900);
+}
+
+.proofLabel {
+  font-size: var(--text-sm);
+  color: var(--ink-500);
 }
 
 @media (min-width: 768px) {
-  .learnGrid {
-    grid-template-columns: repeat(3, 1fr);
+  .proofInner {
+    grid-template-columns: repeat(4, 1fr);
   }
+  .proofStat:nth-child(3) {
+    border-left: 1px solid var(--border);
+    padding-left: var(--space-4);
+  }
+}
+
+@media (max-width: 767px) {
+  .proofStat:nth-child(odd) {
+    border-left: 0;
+    padding-left: 0;
+  }
+}
+
+/* ── What you learn (asymmetric 60/40) ─────────────────────────── */
+.learnSection {
+  padding: var(--space-16) 0 var(--space-12);
+}
+
+.learnGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-10);
+  margin-top: var(--space-8);
+}
+
+.learnLead h3 {
+  font-size: var(--text-2xl);
+  margin: 0 0 var(--space-3);
+}
+
+.learnLead p {
+  color: var(--ink-700);
+  font-size: var(--text-lg);
+  line-height: var(--leading-normal);
+  max-width: 520px;
+}
+
+.learnRest {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
 }
 
 .learnItem h3 {
   margin: 0 0 var(--space-2);
-  font-size: var(--text-lg);
+  font-size: var(--text-xl);
 }
 
 .learnItem p {
   color: var(--ink-700);
   margin: 0;
-  line-height: 1.5;
+  line-height: var(--leading-normal);
 }
 
-/* ── Pricing Preview ───────────────────────────────────────────── */
-.pricingSection {
+@media (min-width: 900px) {
+  .learnGrid {
+    grid-template-columns: 3fr 2fr;
+    align-items: start;
+  }
+}
+
+/* ── Three tiers (asymmetric, featured center) ─────────────────── */
+.tiersSection {
   padding: var(--space-12) 0;
   border-top: 1px solid var(--border);
-  text-align: center;
 }
 
-.pricingSection h2 {
+.tiersGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  margin-top: var(--space-8);
+  align-items: stretch;
+}
+
+.tiersSide {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.tierEyebrow {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-500);
+  margin-bottom: var(--space-3);
+}
+
+.tierPrice,
+.tierPriceLarge {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--ink-900);
+  line-height: 1;
+  margin-bottom: var(--space-3);
+}
+
+.tierPrice {
+  font-size: var(--text-2xl);
+}
+
+.tierPriceLarge {
+  font-size: var(--text-3xl);
+}
+
+.tierCurrency {
+  font-size: 0.6em;
+  vertical-align: baseline;
+  margin-right: 2px;
+}
+
+.tierBlurb {
+  color: var(--ink-700);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.tierCompact,
+.tierFeatured {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition:
+    transform var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out);
+}
+
+.tierCompact {
+  padding: var(--space-6);
+  flex: 1;
+}
+
+.tierFeatured {
+  padding: var(--space-8);
+  border-left: 3px solid var(--accent);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  position: relative;
+}
+
+.tierCompact:hover,
+.tierFeatured:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.tierBadge {
+  align-self: flex-start;
+  display: inline-block;
+  background: var(--info-soft);
+  color: var(--info);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
   margin-bottom: var(--space-2);
 }
 
-.pricingSub {
-  color: var(--ink-700);
-  margin: 0 auto var(--space-8);
-  max-width: 600px;
+.tierList {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-4) 0 var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
-/* ── CTA ───────────────────────────────────────────────────────── */
-.ctaSection {
+.tierList li {
+  font-size: var(--text-sm);
+  color: var(--ink-700);
+  padding-left: var(--space-5);
+  position: relative;
+}
+
+.tierList li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+}
+
+.tierFeatured .btnPrimary {
+  align-self: flex-start;
+  margin-top: auto;
+}
+
+.tiersLink {
+  margin-top: var(--space-6);
+  color: var(--accent);
+}
+
+@media (min-width: 900px) {
+  .tiersGrid {
+    grid-template-columns: 1fr 1.3fr;
+  }
+}
+
+/* ── Tools showcase (zig-zag) ──────────────────────────────────── */
+.toolsSection {
   padding: var(--space-12) 0;
   border-top: 1px solid var(--border);
-  text-align: center;
 }
 
-.ctaSection h2 {
-  margin-bottom: var(--space-4);
-}
-
-.ctaSection p {
+.toolsIntro {
   color: var(--ink-700);
-  margin: 0 auto var(--space-6);
-  max-width: 600px;
+  font-size: var(--text-lg);
+  margin: var(--space-3) 0 0;
+  max-width: 560px;
+}
+
+.toolsList {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-8) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.toolRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-6) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.toolRow:last-child {
+  border-bottom: 0;
+}
+
+.toolText h3 {
+  margin: 0 0 var(--space-1);
+}
+
+.toolText p {
+  color: var(--ink-700);
+  margin: 0;
+}
+
+.toolNumber {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  line-height: 1;
+  color: var(--accent-soft);
+}
+
+/* zig-zag: even rows put the number on the left */
+@media (min-width: 700px) {
+  .toolRow:nth-child(even) {
+    grid-template-columns: auto 1fr;
+  }
+  .toolRow:nth-child(even) .toolText {
+    order: 2;
+    text-align: right;
+  }
+  .toolRow:nth-child(even) .toolNumber {
+    order: 1;
+  }
+}
+
+/* ── Ryan / authority (asymmetric) ─────────────────────────────── */
+.ryanSection {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-8);
+  align-items: center;
+  padding: var(--space-12) 0;
+  border-top: 1px solid var(--border);
+}
+
+.ryanText p {
+  color: var(--ink-700);
+  font-size: var(--text-lg);
+  line-height: var(--leading-normal);
+  margin: var(--space-4) 0 0;
+  max-width: 560px;
+}
+
+.ryanNumber {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .ryanSection {
+    grid-template-columns: 1.5fr 1fr;
+  }
+  .ryanNumber {
+    display: block;
+    justify-self: end;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: clamp(3rem, 7vw, 5rem);
+    line-height: 1;
+    color: var(--accent-soft);
+  }
+}
+
+/* ── CTA (dark, left-aligned, full-bleed) ──────────────────────── */
+.ctaSection {
+  background: var(--ink-900);
+  margin: var(--space-16) calc(-1 * var(--side-pad)) 0;
+  padding: var(--space-16) var(--side-pad);
+}
+
+.ctaInner {
+  max-width: var(--max-content);
+  margin: 0 auto;
+}
+
+.ctaHeading {
+  color: var(--surface-0);
+  font-size: var(--text-3xl);
+  margin: 0 0 var(--space-3);
+}
+
+.ctaSub {
+  color: var(--ink-300);
+  font-size: var(--text-lg);
+  margin: 0 0 var(--space-6);
+  max-width: 560px;
 }
 
 /* ── Footer ────────────────────────────────────────────────────── */
 .footer {
-  padding: var(--space-12) 0;
-  border-top: 1px solid var(--border);
+  padding: var(--space-12) 0 0;
 }
 
 .footerGrid {
@@ -168,12 +505,13 @@
   color: var(--ink-700);
   margin: var(--space-2) 0 0;
   font-size: var(--text-sm);
-  line-height: 1.5;
+  line-height: var(--leading-normal);
+  max-width: 360px;
 }
 
 .footerCol h3 {
   font-size: var(--text-xs);
-  letter-spacing: 2px;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--ink-500);
   margin: 0 0 var(--space-3);
@@ -185,16 +523,13 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-1);
 }
 
 /* 24px minimum touch target (WCAG 2.5.8 / Lighthouse target-size) */
 .footerCol ul a {
   display: inline-block;
   padding: var(--space-2) 0;
-}
-
-.footerCol a {
   color: var(--ink-700);
   font-size: var(--text-sm);
   text-decoration: none;
@@ -202,4 +537,39 @@
 
 .footerCol a:hover {
   color: var(--accent);
+}
+
+/* ── Entrance motion (respects prefers-reduced-motion via globals) ── */
+@media (prefers-reduced-motion: no-preference) {
+  .heroEyebrow,
+  .heroTitle,
+  .heroSub,
+  .heroActions {
+    animation: reveal var(--duration-slow) var(--ease-out) both;
+  }
+  .heroTitle { animation-delay: 60ms; }
+  .heroSub { animation-delay: 120ms; }
+  .heroActions { animation-delay: 200ms; }
+
+  /* Opacity-only so the rotate transform survives the animation. */
+  .heroDecorative {
+    animation: fadeIn var(--duration-slow) var(--ease-out) both;
+    animation-delay: 300ms;
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
