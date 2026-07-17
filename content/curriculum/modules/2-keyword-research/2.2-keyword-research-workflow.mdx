@@ -66,23 +66,25 @@ If you have a live campaign, this is your gold mine. Even if it's been running f
 
 ### Source 2: Amazon Brand Analytics (Brand Registry Required)
 
-If you have Brand Registry, Brand Analytics gives you the actual search frequency data for ANY keyword on Amazon, not just your campaigns.
+If you have Brand Registry, Brand Analytics gives you the Search Frequency Rank (SFR) for search terms across all of Amazon, not just your campaigns. Amazon doesn't disclose the actual number of searches behind a term. SFR is a relative ranking: rank 1 is the single most-searched term on Amazon in that period, and higher numbers mean less popular, but the gap between two ranks isn't a fixed size (the difference between rank 5 and rank 6 isn't the same as between rank 100 and 101).
 
 1. Go to Brand Analytics → Amazon Search Terms
 2. Enter your product category
-3. Export the top search terms with frequency
+3. Export the top search terms with their Search Frequency Rank
 
-This shows you **what the market is searching for**, not just what your campaigns triggered.
+This shows you **what the market is searching for, relative to everything else**, not just what your campaigns triggered, and not an exact search count.
 
 **Example, "bamboo cutting board" category top searches:**
 
-| Search Term | Search Frequency | Top 3 Products |
+| Search Term | Search Frequency Rank | Top 3 Products |
 |-------------|-----------------|----------------|
-| bamboo cutting board | 45,200 | Board A, Board B, Board C |
-| cutting board with juice groove | 22,100 | Board X, Board Y, Board Z |
-| large cutting board | 18,500 | Board M, Board N, Board O |
-| wooden cutting board | 15,800 | Board P, Board Q, Board R |
-| cutting board set | 12,300 | Board S, Board T, Board U |
+| bamboo cutting board | 842 | Board A, Board B, Board C |
+| cutting board with juice groove | 2,150 | Board X, Board Y, Board Z |
+| large cutting board | 3,400 | Board M, Board N, Board O |
+| wooden cutting board | 4,890 | Board P, Board Q, Board R |
+| cutting board set | 7,220 | Board S, Board T, Board U |
+
+Lower rank means more searches. "bamboo cutting board" at rank 842 is searched more than "cutting board set" at rank 7,220, but you can't say how many more searches it gets, only that it ranks higher.
 
 ### Source 3: Auto-Campaign Search Term Mining
 
@@ -186,7 +188,7 @@ CAMPAIGN: SP (Sponsored Products) - Bamboo Cutting Boards - Broad
     └── BBQ cutting board (broad)
 ```
 
-Each ad group has a **single theme**. This lets you write ad copy and set bids that match the search intent.
+Each ad group has a **single theme**. Sponsored Products ads don't use custom ad copy the way Sponsored Brands do. The ad itself is your product listing. What theming buys you is bid control and clean reporting: keywords with shared search intent get grouped together, so you can set one bid that fits the group and read performance by theme instead of by one long undifferentiated list.
 
 > **Analogy:** Organizing keywords into themed ad groups is like organizing your toolbox. You don't put hammers in the drill drawer. Each tool has its place. When you need a hammer, you know exactly where to reach.
 

@@ -1,5 +1,7 @@
 # Content Audit — Modules 2 through 8
 
+**Status:** this document is a pre-fix baseline, written before any of its own findings were addressed. The P0 factual/arithmetic bugs, the stale terminology, and the Module 8 frontmatter bug listed below have since been fixed in the same PR that introduced this document (and its immediate follow-up commits), including Module 8's frontmatter and lesson content. Treat every finding below as "this is what was wrong as of 2026-07-16," not as a live list of open issues. Check the PR history and the voice-guide cleanup pass for current status rather than assuming anything here is still outstanding.
+
 **Date:** 2026-07-16
 **Scope:** the 23 MDX lesson files in `content/curriculum/modules/2-keyword-research` through `8-competitive-intelligence`, plus `content/curriculum/quiz-questions.json`'s coverage of those modules. Modules 0 and 1 are out of scope here — they were fully rebuilt in PR #31 (see `docs/CONTENT-AUDIT-2026-07-16.md` and issue #24 for that history).
 

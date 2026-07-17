@@ -40,7 +40,7 @@ The actionable version: set a defensible maximum bid based on your maximum-CPC m
 - Broad match discovery campaigns with intentionally low bids
 
 **The upside**:
-- Maximum cost predictability: you never pay more than your set bid
+- Maximum cost predictability: no real-time algorithmic increases based on conversion likelihood. Your base bid is the ceiling, unless you've also layered a placement adjustment on top of it, which applies regardless of bid strategy
 - Easy to model profitability: bid $1.00, CVR 10%, cost per order ~$10
 - Simple to explain to clients or stakeholders
 
@@ -55,7 +55,7 @@ The actionable version: set a defensible maximum bid based on your maximum-CPC m
 
 ## Strategy 2: Dynamic Bids, Up and Down (The Surge Pricing)
 
-**What it does**: Amazon adjusts your bid both up AND down based on conversion likelihood. If a click looks highly likely to convert, Amazon may increase your bid, up to 100% for standard placements, up to 900% at top-of-search with placement adjustments. If the click looks unlikely to convert, Amazon reduces your bid.
+**What it does**: Amazon adjusts your bid both up AND down based on conversion likelihood. If a click looks highly likely to convert, the dynamic strategy itself can increase your bid, up to 100% at top-of-search and up to 50% at other placements. If the click looks unlikely to convert, Amazon reduces your bid. This is separate from placement adjustments (a manual multiplier of up to 900% you can layer on top for any bid strategy), which stack with whatever the dynamic strategy does.
 
 **When to use it**:
 - You have conversion data (2+ weeks of history)
@@ -90,7 +90,7 @@ The actionable version: set a defensible maximum bid based on your maximum-CPC m
 - You've had bad experiences with Dynamic Up and Down overspending
 
 **The upside**:
-- You'll never pay more than your set bid, guaranteed
+- The dynamic strategy itself never increases your bid above what you set, guaranteed. A placement adjustment you've layered on top is a separate control and still applies regardless of this bid strategy
 - Amazon reduces bids on low-conversion opportunities, saving budget
 - Good middle ground between Fixed and Dynamic Up/Down
 
@@ -129,9 +129,9 @@ Before looking at the framework below, think about these scenarios yourself:
 
 Your strategy directly impacts your ACoS:
 
-**Fixed Bids** → ACoS is relatively predictable. If you set your bid at your maximum CPC for a target ACoS, actual ACoS hovers around that target. Risk: lower volume.
+**Fixed Bids** → ACoS tends to be predictable. If you set your bid at your maximum CPC for a target ACoS, actual ACoS tends to hover near that target, though CVR shifts or auction mix changes can still move it. Risk: lower volume.
 
-**Dynamic Down Only** → ACoS should be equal to or better than Fixed Bids. Same or lower spend + similar or better sales = lower ACoS.
+**Dynamic Down Only** → ACoS tends to be equal to or better than Fixed Bids, since Amazon is only ever pulling your bid down on weaker opportunities, never up. It's a tendency worth confirming with your own data, not a guarantee, since conversion mix still varies day to day.
 
 **Dynamic Up and Down** → ACoS can go either way. More sales (good) but higher average CPC. If additional sales come from high-converting placements, ACoS improves. If from marginal placements, ACoS worsens.
 

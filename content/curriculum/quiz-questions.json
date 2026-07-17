@@ -167,13 +167,13 @@
         },
         {
           "order": 2,
-          "question": "A keyword gets 200 clicks and $150 in ad spend, with $0 in sales. What's the right read?",
+          "question": "A search term surfacing under one of your broader keywords gets 200 clicks and $150 in ad spend, with $0 in sales. What's the right read?",
           "optionA": "Its ACoS (advertising cost of sales, ad spend divided by ad sales) is 100%, which is acceptable",
-          "optionB": "It's a strong candidate for a negative keyword. With zero sales, ACoS is undefined, not a fixed percentage, and this spend is pure waste",
+          "optionB": "It's a strong candidate to add as a negative keyword. With zero sales, ACoS is undefined, not a fixed percentage, and this spend is pure waste",
           "optionC": "It should be given a higher bid to try to generate a sale",
           "optionD": "Nothing needs to change since spend is under $200",
           "correctAnswer": "B",
-          "explanation": "ACoS is spend divided by sales, which is undefined at $0 in sales, not 100%. 200 clicks and $150 spent with zero orders is a clear signal to add this as a negative, not raise its bid."
+          "explanation": "ACoS is spend divided by sales, which is undefined at $0 in sales, not 100%. 200 clicks and $150 spent with zero orders on this search term is a clear signal to add it as a negative so it stops draining budget under your broader keyword."
         },
         {
           "order": 3,
