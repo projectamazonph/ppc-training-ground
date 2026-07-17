@@ -52,8 +52,9 @@ const QUIZ_FIXTURE = join(SOURCE_ROOT, 'quiz-questions.json');
 // Course metadata — two real courses, one per pricing tier.
 // PPC Foundations (modules 0-4) and Accelerated Mastery (modules 5-8) both
 // exist today. Ultimate Transformation has no course yet — its modules
-// (10-13 per docs/CURRICULUM-REDESIGN.md) haven't been authored, so it gets
-// no Course row until that content ships. See docs/CONTENT-UPDATE-PLAN.md §4.
+// haven't been authored or numbered (see the Course 3 section of
+// docs/CURRICULUM-REDESIGN.md), so it gets no Course row until that
+// content ships. See docs/CONTENT-UPDATE-PLAN.md §4.
 const COURSES: Array<{
   slug: string;
   title: string;
