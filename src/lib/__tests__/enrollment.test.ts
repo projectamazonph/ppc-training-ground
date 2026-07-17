@@ -200,14 +200,15 @@ describe('enrollment.ts', () => {
 
       const result = await findOrCreateUserByEmail('new@example.com', 'New User');
 
-      expect(result).toEqual({ id: 'u-new', isNew: true });
+      expect(result).toEqual({ id: 'u-new', isNew: true, rawClaimToken: 'mock-claim-raw-token' });
       expect(mockDb.user.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             email: 'new@example.com',
             name: 'New User',
-            role: 'STUDENT',
-            status: 'ACTIVE',
+            passwordHash: 'placeholder_claim',
+            claimTokenHash: 'mock-claim-hash',
+            claimTokenExpiresAt: expect.any(Date),
           }),
         }),
       );
@@ -221,7 +222,7 @@ describe('enrollment.ts', () => {
 
       expect(mockDb.user.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.objectContaining({ name: 'student' }),
+          data: expect.objectContaining({ name: 'student', passwordHash: 'placeholder_claim' }),
         }),
       );
     });
@@ -388,43 +389,71 @@ describe('enrollment.ts', () => {
 
   describe('handlePaymentRefunded', () => {
     it('updates payment and enrollment within the transaction', async () => {
-      mockDb.processedWebhook.create.mockResolvedValue({ id: 'pw-1' });
-      mockDb.payment.findUnique.mockResolvedValue({ id: 'pay-1' });
-      mockDb.enrollment.findFirst.mockResolvedValue({ id: 'enr-1' });
-      mockDb.payment.update.mockResolvedValue({});
-      mockDb.enrollment.update.mockResolvedValue({});
+      const event = makeRefundedEvent();
+      mockDb.$transaction.mockImplementationOnce(async (cb: Function) => {
+        const tx = {
+          processedWebhook: { create: vi.fn() },
+          payment: { findUnique: vi.fn(), update: vi.fn() },
+          enrollment: { findFirst: vi.fn(), update: vi.fn() },
+        };
+        tx.processedWebhook.create.mockResolvedValueOnce({ id: 'pw-2' });
+        // C7: payment query includes cumulative refund tracking fields
+        tx.payment.findUnique.mockResolvedValueOnce({ id: 'pay-1', amountPhp: 299900, refundAmountPhp: 0, status: 'COMPLETED' });
+        tx.enrollment.findFirst.mockResolvedValueOnce({ id: 'enr-1' });
+        tx.payment.update.mockResolvedValueOnce({});
+        tx.enrollment.update.mockResolvedValueOnce({});
 
-      await handlePaymentRefunded(makeRefundedEvent());
+        await cb(tx);
 
-      expect(mockDb.payment.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { id: 'pay-1' },
-          data: expect.objectContaining({ status: 'REFUNDED' }),
-        }),
-      );
-      expect(mockDb.enrollment.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { id: 'enr-1' },
-          data: expect.objectContaining({ status: 'REFUNDED' }),
-        }),
-      );
+        expect(tx.payment.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            where: { id: 'pay-1' },
+            // C7: 10000 < 299900 → PARTIALLY_REFUNDED (not REFUNDED)
+            data: expect.objectContaining({ status: 'PARTIALLY_REFUNDED', refundAmountPhp: 10000 }),
+          }),
+        );
+        // C7: partial refund should NOT cancel enrollment
+        expect(tx.enrollment.update).not.toHaveBeenCalled();
+      });
+
+      await handlePaymentRefunded(event);
     });
 
     it('skips on duplicate event', async () => {
-      mockDb.processedWebhook.create.mockRejectedValue(p2002());
+      const event = makeRefundedEvent();
+      mockDb.$transaction.mockImplementationOnce(async (cb: Function) => {
+        const tx = {
+          processedWebhook: { create: vi.fn() },
+          payment: { findUnique: vi.fn(), update: vi.fn() },
+          enrollment: { findFirst: vi.fn(), update: vi.fn() },
+        };
+        tx.processedWebhook.create.mockRejectedValue(p2002());
 
-      await handlePaymentRefunded(makeRefundedEvent());
+        await cb(tx);
 
-      expect(mockDb.payment.update).not.toHaveBeenCalled();
+        expect(tx.payment.update).not.toHaveBeenCalled();
+      });
+
+      await handlePaymentRefunded(event);
     });
 
     it('skips when payment not found', async () => {
-      mockDb.processedWebhook.create.mockResolvedValue({ id: 'pw-1' });
-      mockDb.payment.findUnique.mockResolvedValue(null);
+      const event = makeRefundedEvent();
+      mockDb.$transaction.mockImplementationOnce(async (cb: Function) => {
+        const tx = {
+          processedWebhook: { create: vi.fn() },
+          payment: { findUnique: vi.fn(), update: vi.fn() },
+          enrollment: { findFirst: vi.fn(), update: vi.fn() },
+        };
+        tx.processedWebhook.create.mockResolvedValueOnce({ id: 'pw-1' });
+        tx.payment.findUnique.mockResolvedValueOnce(null);
 
-      await handlePaymentRefunded(makeRefundedEvent());
+        await cb(tx);
 
-      expect(mockDb.payment.update).not.toHaveBeenCalled();
+        expect(tx.payment.update).not.toHaveBeenCalled();
+      });
+
+      await handlePaymentRefunded(event);
     });
   });
 });
