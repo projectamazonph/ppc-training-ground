@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>What an Amazon PPC VA Actually Does</title>
+    <script src="node_modules/gsap/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --bg: #fdfae7;
+        --primary: #1e2bfa;
+        --text: #111111;
+        --text-muted: #4a4a4a;
+        --text-light: #6b6b6b;
+        --accent-light: rgba(30, 43, 250, 0.08);
+        --accent-medium: rgba(30, 43, 250, 0.15);
+        --border: rgba(30, 43, 250, 0.2);
+        --card-bg: rgba(30, 43, 250, 0.04);
+        --positive: #059669;
+        --negative: #dc2626;
+        --font-display: "Space Grotesk", sans-serif;
+        --font-body: "Inter", sans-serif;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--bg);
+      }
+      body {
+        font-family: var(--font-body);
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        background: var(--bg);
+        overflow: hidden;
+      }
+      .frame {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 96px 120px 180px;
+      }
+      .eyebrow {
+        font-family: var(--font-display);
+        font-size: 26px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--primary);
+        margin-bottom: 24px;
+      }
+      .headline {
+        font-family: var(--font-display);
+        font-size: 64px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        color: var(--text);
+        max-width: 1400px;
+        margin-bottom: 16px;
+      }
+      .headline .accent {
+        color: var(--primary);
+      }
+      .accent-line {
+        width: 60px;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--primary);
+        margin-bottom: 28px;
+      }
+
+      /* ---- Frame 1: split screen ---- */
+      .split-wrap {
+        display: flex;
+        gap: 48px;
+        margin-top: 48px;
+        flex: 1;
+      }
+      .split-col {
+        flex: 1;
+        border-radius: 14px;
+        padding: 48px 44px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .split-col.noise {
+        background: rgba(0, 0, 0, 0.03);
+        border: 1.5px solid rgba(0, 0, 0, 0.08);
+      }
+      .split-col.clean {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+      }
+      .col-label {
+        font-family: var(--font-display);
+        font-size: 30px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      .noise .col-label {
+        color: var(--text-light);
+      }
+      .clean .col-label {
+        color: var(--primary);
+      }
+      .row-item {
+        font-family: var(--font-body);
+        font-size: 30px;
+        padding: 20px 26px;
+        border-radius: 10px;
+      }
+      .noise .row-item {
+        background: rgba(0, 0, 0, 0.04);
+        color: var(--text-light);
+      }
+      .clean .row-item {
+        background: rgba(255, 255, 255, 0.55);
+        color: var(--text);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+      .step-num {
+        font-family: var(--font-display);
+        font-weight: 700;
+        color: var(--primary);
+        font-size: 30px;
+      }
+
+      /* ---- Frame 2: four-step loop ---- */
+      .loop-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        flex: 1;
+        margin-top: 24px;
+      }
+      .loop-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 300px;
+      }
+      .loop-circle {
+        width: 128px;
+        height: 128px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: var(--bg);
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 28px;
+      }
+      .loop-label {
+        font-family: var(--font-display);
+        font-size: 34px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 10px;
+      }
+      .loop-desc {
+        font-family: var(--font-body);
+        font-size: 24px;
+        color: var(--text-muted);
+        text-align: center;
+        line-height: 1.5;
+      }
+      .loop-arrow {
+        font-family: var(--font-display);
+        font-size: 48px;
+        color: #7178c9;
+        margin: 0 12px;
+      }
+
+      /* ---- Frame 3: four artifacts dashboard ---- */
+      .dash-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 32px;
+        margin-top: 36px;
+        flex: 1;
+        align-content: start;
+      }
+      .metric-card {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 40px 32px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .metric-icon {
+        font-family: var(--font-display);
+        font-size: 44px;
+        font-weight: 700;
+        color: var(--primary);
+      }
+      .metric-title {
+        font-family: var(--font-display);
+        font-size: 28px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .metric-desc {
+        font-family: var(--font-body);
+        font-size: 20px;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+
+      /* ---- Frame 4: client brief ---- */
+      .brief-wrap {
+        display: flex;
+        gap: 56px;
+        margin-top: 32px;
+        flex: 1;
+      }
+      .brief-col-body {
+        flex: 1;
+        font-family: var(--font-body);
+        font-size: 30px;
+        color: var(--text-muted);
+        line-height: 1.7;
+      }
+      .brief-highlight {
+        flex: 1.2;
+        background: var(--accent-light);
+        border-left: 4px solid var(--primary);
+        border-radius: 12px;
+        padding: 40px 44px;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+      }
+      .brief-field {
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--font-body);
+        font-size: 28px;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 16px;
+      }
+      .brief-field:last-child {
+        border-bottom: none;
+      }
+      .brief-field .k {
+        color: var(--text-muted);
+      }
+      .brief-field .v {
+        font-family: var(--font-display);
+        font-weight: 600;
+        color: var(--primary);
+      }
+
+      /* ---- Frame 5: closing / CTA ---- */
+      .closing-frame {
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+      .closing-frame .headline {
+        max-width: 1500px;
+        text-align: center;
+      }
+      .closing-frame .accent-line {
+        align-self: center;
+      }
+      .closing-sub {
+        font-family: var(--font-body);
+        font-size: 30px;
+        color: var(--text-muted);
+        max-width: 1200px;
+        margin-bottom: 48px;
+        line-height: 1.6;
+      }
+      .cta-button {
+        background: var(--primary);
+        color: var(--bg);
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 30px;
+        padding: 24px 56px;
+        border-radius: 100px;
+      }
+      .rings {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 900px;
+        height: 900px;
+        border-radius: 50%;
+        border: 1.5px solid var(--border);
+        z-index: -1;
+      }
+      .rings::before,
+      .rings::after {
+        content: "";
+        position: absolute;
+        inset: 120px;
+        border-radius: 50%;
+        border: 1.5px solid var(--border);
+      }
+      .rings::after {
+        inset: 260px;
+      }
+
+      /* ---- captions ---- */
+      .caption-band {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 64px;
+        display: flex;
+        justify-content: center;
+        z-index: 50;
+      }
+      .caption-card {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 22px 44px;
+        max-width: 1400px;
+      }
+      .caption-card p {
+        font-family: var(--font-display);
+        font-weight: 500;
+        font-size: 30px;
+        color: var(--text);
+        text-align: center;
+        line-height: 1.4;
+      }
+
+      /* ---- progress bar ---- */
+      .progress-track {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 3px;
+        background: var(--accent-light);
+        z-index: 60;
+      }
+      #progress-fill {
+        display: block;
+        height: 100%;
+        width: 0%;
+        background: var(--primary);
+      }
+      .counter {
+        position: absolute;
+        right: 40px;
+        bottom: 16px;
+        font-family: var(--font-display);
+        font-size: 20px;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        color: #444444;
+        z-index: 60;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="180"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- Frame 1: 0-20s — the crowded task list vs. the clean workflow -->
+      <div id="frame-1" class="frame clip" data-start="0" data-duration="20" data-track-index="1">
+        <div class="eyebrow">Module 0 &middot; Start Here</div>
+        <div class="headline">Amazon PPC is not <span class="accent">guessing which button to press.</span></div>
+        <div class="accent-line"></div>
+        <div class="split-wrap">
+          <div class="split-col noise">
+            <div class="col-label">What it looks like from outside</div>
+            <div class="row-item">Check bids</div>
+            <div class="row-item">Check budgets</div>
+            <div class="row-item">Check keywords</div>
+            <div class="row-item">Check... something?</div>
+          </div>
+          <div class="split-col clean">
+            <div class="col-label">What the job actually is</div>
+            <div class="row-item"><span class="step-num">1</span> Read what happened</div>
+            <div class="row-item"><span class="step-num">2</span> Decide what matters</div>
+            <div class="row-item"><span class="step-num">3</span> Make one clear change</div>
+            <div class="row-item"><span class="step-num">4</span> Record why</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 2: 20-55s — the four-step loop -->
+      <div id="frame-2" class="frame clip" data-start="20" data-duration="35" data-track-index="1">
+        <div class="eyebrow">The PPC Work Loop</div>
+        <div class="headline">A strong VA works in a <span class="accent">loop,</span> not a checklist.</div>
+        <div class="accent-line"></div>
+        <div class="loop-wrap">
+          <div class="loop-step" id="loop-1">
+            <div class="loop-circle">1</div>
+            <div class="loop-label">Read</div>
+            <div class="loop-desc">Check what happened in the account.</div>
+          </div>
+          <div class="loop-arrow">&rarr;</div>
+          <div class="loop-step" id="loop-2">
+            <div class="loop-circle" style="background: #3a45fb">2</div>
+            <div class="loop-label">Decide</div>
+            <div class="loop-desc">Work out what the data is telling you.</div>
+          </div>
+          <div class="loop-arrow">&rarr;</div>
+          <div class="loop-step" id="loop-3">
+            <div class="loop-circle" style="background: #565fce">3</div>
+            <div class="loop-label">Change</div>
+            <div class="loop-desc">Make the one approved change.</div>
+          </div>
+          <div class="loop-arrow">&rarr;</div>
+          <div class="loop-step" id="loop-4">
+            <div class="loop-circle" style="background: #6a72b8">4</div>
+            <div class="loop-label">Explain</div>
+            <div class="loop-desc">Say what changed and why, in plain English.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 3: 55-100s — the four artifacts -->
+      <div id="frame-3" class="frame clip" data-start="55" data-duration="45" data-track-index="1">
+        <div class="eyebrow">What You'll Build</div>
+        <div class="headline">By the end, you have <span class="accent">proof,</span> not just a certificate.</div>
+        <div class="accent-line"></div>
+        <div class="dash-grid">
+          <div class="metric-card" id="art-1">
+            <div class="metric-icon">01</div>
+            <div class="metric-title">Profitability &amp; Max-CPC Sheet</div>
+            <div class="metric-desc">Your break-even ACoS and the ceiling bid it supports.</div>
+          </div>
+          <div class="metric-card" id="art-2">
+            <div class="metric-icon">02</div>
+            <div class="metric-title">Keyword Map</div>
+            <div class="metric-desc">Targets organized by intent and match type, not a random list.</div>
+          </div>
+          <div class="metric-card" id="art-3">
+            <div class="metric-icon">03</div>
+            <div class="metric-title">Campaign Brief</div>
+            <div class="metric-desc">The plan and rationale behind a campaign, before you build it.</div>
+          </div>
+          <div class="metric-card" id="art-4">
+            <div class="metric-icon">04</div>
+            <div class="metric-title">Launch QA Checklist</div>
+            <div class="metric-desc">The baseline you capture so you can explain the result later.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 4: 100-150s — the client brief -->
+      <div id="frame-4" class="frame clip" data-start="100" data-duration="50" data-track-index="1">
+        <div class="eyebrow">Before You Touch Anything</div>
+        <div class="headline">A careful <span class="accent">question</span> protects the client.</div>
+        <div class="accent-line"></div>
+        <div class="brief-wrap">
+          <div class="brief-col-body">
+            Before you change a bid, a budget, or a keyword, you need a brief. If you don't know
+            the answer to any of these, you ask before you act. Blind action does not protect the
+            account. A careful question does.
+          </div>
+          <div class="brief-highlight">
+            <div class="brief-field"><span class="k">Goal</span><span class="v">Profitable growth</span></div>
+            <div class="brief-field"><span class="k">ASIN</span><span class="v">B0XXXXXXXX</span></div>
+            <div class="brief-field"><span class="k">Budget</span><span class="v">&#8369;2,000 / day</span></div>
+            <div class="brief-field"><span class="k">Target ACoS</span><span class="v">25%</span></div>
+            <div class="brief-field"><span class="k">In stock?</span><span class="v">Confirmed</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 5: 150-180s — closing / CTA -->
+      <div id="frame-5" class="frame closing-frame clip" data-start="150" data-duration="30" data-track-index="1">
+        <div class="rings"></div>
+        <div class="eyebrow">Your First Task</div>
+        <div class="headline">Start with the <span class="accent">client-brief checklist.</span></div>
+        <div class="accent-line"></div>
+        <div class="closing-sub">Good PPC work begins before the campaign is built. Review the sample brief and complete the intake checklist.</div>
+        <div class="cta-button">Open Module 0 in AMPH</div>
+      </div>
+
+      <!-- Captions: burned-in narration, timed to the script's own scene ranges -->
+      <div id="caption-1" class="caption-band clip" data-start="0" data-duration="7" data-track-index="2">
+        <div class="caption-card"><p>Amazon PPC is not guessing which button to press.</p></div>
+      </div>
+      <div id="caption-2" class="caption-band clip" data-start="7" data-duration="13" data-track-index="2">
+        <div class="caption-card"><p>Your job is to turn account data into a safe next action.</p></div>
+      </div>
+      <div id="caption-3" class="caption-band clip" data-start="20" data-duration="10" data-track-index="2">
+        <div class="caption-card"><p>A strong PPC VA works in a loop.</p></div>
+      </div>
+      <div id="caption-4" class="caption-band clip" data-start="30" data-duration="10" data-track-index="2">
+        <div class="caption-card"><p>Read the data. Decide what it's telling you.</p></div>
+      </div>
+      <div id="caption-5" class="caption-band clip" data-start="40" data-duration="15" data-track-index="2">
+        <div class="caption-card"><p>Make the approved change. Explain the result in plain English.</p></div>
+      </div>
+      <div id="caption-6" class="caption-band clip" data-start="55" data-duration="10" data-track-index="2">
+        <div class="caption-card"><p>By the end of this course, you'll have proof of each part of the job.</p></div>
+      </div>
+      <div id="caption-7" class="caption-band clip" data-start="65" data-duration="15" data-track-index="2">
+        <div class="caption-card"><p>A profitability sheet. A keyword map. A campaign brief. A launch checklist.</p></div>
+      </div>
+      <div id="caption-8" class="caption-band clip" data-start="80" data-duration="20" data-track-index="2">
+        <div class="caption-card"><p>These are work samples that make a beginner easier to trust.</p></div>
+      </div>
+      <div id="caption-9" class="caption-band clip" data-start="100" data-duration="12" data-track-index="2">
+        <div class="caption-card"><p>Before you change anything, you need a brief.</p></div>
+      </div>
+      <div id="caption-10" class="caption-band clip" data-start="112" data-duration="18" data-track-index="2">
+        <div class="caption-card"><p>What's the goal? Is it in stock? What's a safe ACoS target?</p></div>
+      </div>
+      <div id="caption-11" class="caption-band clip" data-start="130" data-duration="20" data-track-index="2">
+        <div class="caption-card"><p>If you don't know, you ask. A careful question protects the client.</p></div>
+      </div>
+      <div id="caption-12" class="caption-band clip" data-start="150" data-duration="15" data-track-index="2">
+        <div class="caption-card"><p>Your first task is simple.</p></div>
+      </div>
+      <div id="caption-13" class="caption-band clip" data-start="165" data-duration="15" data-track-index="2">
+        <div class="caption-card"><p>Review the sample brief and complete the intake checklist.</p></div>
+      </div>
+
+      <!-- Persistent chrome -->
+      <div class="progress-track">
+        <span id="progress-fill" class="clip" data-start="0" data-duration="180" data-track-index="90"></span>
+      </div>
+      <div class="counter clip" data-start="0" data-duration="180" data-track-index="91" id="counter">00:00 / 03:00</div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Frame entrances (seek-safe .from tweens keyed to each frame's own data-start)
+      tl.from("#frame-1 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 0);
+      tl.from("#frame-1 .split-col.noise", { opacity: 0, x: -30, duration: 0.6, ease: "power2.out" }, 0.3);
+      tl.from("#frame-1 .split-col.clean", { opacity: 0, x: 30, duration: 0.6, ease: "power2.out" }, 0.5);
+
+      tl.from("#frame-2 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 20);
+      tl.from("#loop-1", { opacity: 0, y: 30, duration: 0.5, ease: "power2.out" }, 20.6);
+      tl.from("#loop-2", { opacity: 0, y: 30, duration: 0.5, ease: "power2.out" }, 21.1);
+      tl.from("#loop-3", { opacity: 0, y: 30, duration: 0.5, ease: "power2.out" }, 21.6);
+      tl.from("#loop-4", { opacity: 0, y: 30, duration: 0.5, ease: "power2.out" }, 22.1);
+
+      tl.from("#frame-3 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 55);
+      tl.from("#art-1", { opacity: 0, y: 24, duration: 0.5, ease: "power2.out" }, 55.5);
+      tl.from("#art-2", { opacity: 0, y: 24, duration: 0.5, ease: "power2.out" }, 55.7);
+      tl.from("#art-3", { opacity: 0, y: 24, duration: 0.5, ease: "power2.out" }, 55.9);
+      tl.from("#art-4", { opacity: 0, y: 24, duration: 0.5, ease: "power2.out" }, 56.1);
+
+      tl.from("#frame-4 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 100);
+      tl.from("#frame-4 .brief-col-body", { opacity: 0, x: -20, duration: 0.6, ease: "power2.out" }, 100.4);
+      tl.from("#frame-4 .brief-highlight", { opacity: 0, x: 20, duration: 0.6, ease: "power2.out" }, 100.4);
+
+      tl.from("#frame-5 .rings", { opacity: 0, scale: 0.85, duration: 1, ease: "power2.out" }, 150);
+      tl.from("#frame-5 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 150.3);
+      tl.from("#frame-5 .cta-button", { opacity: 0, y: 16, duration: 0.5, ease: "power2.out" }, 150.9);
+
+      // Persistent progress bar, driven by the timeline itself (seek-safe .to tween)
+      tl.to("#progress-fill", { width: "100%", duration: 180, ease: "none" }, 0);
+
+      window.__timelines["main"] = tl;
+
+      function formatTime(s) {
+        var m = Math.floor(s / 60);
+        var sec = Math.floor(s % 60);
+        return (m < 10 ? "0" + m : m) + ":" + (sec < 10 ? "0" + sec : sec);
+      }
+
+      // Deterministic counter text: onUpdate fires on every render() call, including
+      // a direct seek(), unlike tl.call() which only fires crossing an exact position.
+      var counterEl = document.getElementById("counter");
+      tl.eventCallback("onUpdate", function () {
+        counterEl.textContent = formatTime(tl.time()) + " / 03:00";
+      });
+      counterEl.textContent = formatTime(tl.time()) + " / 03:00";
+    </script>
+  </body>
+</html>
