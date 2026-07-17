@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { BRAND_NAME, BRAND_NAME_UPPER } from '@/lib/brand';
 import { Badge } from '@/components/ui';
 import { Icon, type PhosphorIconName } from '@/components/ui/Icon';
+import { RevealSection } from '@/components/RevealSection';
 import styles from './home.module.css';
 
 interface SimMeta {
@@ -71,32 +72,10 @@ export default function HomePage() {
             their account.
           </p>
           <div className={styles.heroActions}>
-            <Link
-              href="/pricing"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                padding: 'var(--space-3) var(--space-6)',
-                background: 'var(--accent)',
-                color: 'var(--accent-ink)',
-                borderRadius: 'var(--radius-md)',
-                fontWeight: 600,
-              }}
-            >
+            <Link href="/pricing" className={styles.btnPrimary}>
               See pricing
             </Link>
-            <Link
-              href="/tools/campaign-builder"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                padding: 'var(--space-3) var(--space-6)',
-                border: '1px solid var(--border-strong)',
-                color: 'var(--ink-900)',
-                borderRadius: 'var(--radius-md)',
-                fontWeight: 600,
-              }}
-            >
+            <Link href="/tools/campaign-builder" className={styles.btnSecondary}>
               Try a tool
             </Link>
           </div>
@@ -108,7 +87,7 @@ export default function HomePage() {
       </section>
 
       {/* ── Pain Points ──────────────────────────────────────── */}
-      <section className={styles.painSection}>
+      <RevealSection className={styles.painSection}>
         <h2>Where most Amazon PPC training falls apart</h2>
         <ul className={styles.painList}>
           <li className={styles.painItem}>
@@ -127,28 +106,28 @@ export default function HomePage() {
             get to make the mistakes that actually teach you something.
           </li>
         </ul>
-      </section>
+      </RevealSection>
 
-      {/* ── Simulators ───────────────────────────────────────── */}
-      <section className={styles.simSection}>
+      {/* ── Simulators (zig-zag) ─────────────────────────────── */}
+      <RevealSection className={styles.simSection}>
         <h2>Five simulators. Five real Amazon Ads Console workflows.</h2>
         <p className={styles.simSub}>
           Each one mirrors what you&apos;d actually do inside Seller Central &mdash; no
           client account required.
         </p>
-        <ul className={styles.simGrid}>
+        <ul className={styles.simList}>
           {SIMULATORS.map((sim) => (
-            <li key={sim.id} className={styles.simItem}>
+            <li key={sim.id} className={styles.simRow}>
               <div className={styles.simScreenshot}>
                 <Image
                   src={sim.screenshot}
                   alt={`${sim.name} simulator screenshot`}
                   width={1000}
                   height={389}
-                  sizes="(min-width: 768px) 33vw, 100vw"
+                  sizes="(min-width: 768px) 50vw, 100vw"
                 />
               </div>
-              <div className={styles.simItemBody}>
+              <div className={styles.simRowBody}>
                 <Icon name={sim.icon} size="lg" />
                 <h3>{sim.name}</h3>
                 <p>{sim.description}</p>
@@ -160,10 +139,10 @@ export default function HomePage() {
           Not only do you learn Amazon PPC from scratch &mdash; you turn that knowledge
           into practical workflows you can apply the moment you&apos;re on the job.
         </p>
-      </section>
+      </RevealSection>
 
       {/* ── Coming Soon ──────────────────────────────────────── */}
-      <section className={styles.accessSection}>
+      <RevealSection className={styles.accessSection}>
         <h2>Two more tools, only for enrolled students</h2>
         <p className={styles.accessSub}>
           Still in development &mdash; enroll now to get access the moment they launch.
@@ -192,52 +171,30 @@ export default function HomePage() {
             </p>
           </li>
         </ul>
-      </section>
+      </RevealSection>
 
       {/* ── Pricing Preview ──────────────────────────────────── */}
-      <section className={styles.pricingSection}>
+      <RevealSection className={styles.pricingSection}>
         <h2>Simple, one-time pricing</h2>
         <p className={styles.pricingSub}>
           No subscriptions. No hidden fees. Pay once, learn forever.
         </p>
-        <Link
-          href="/pricing"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            padding: 'var(--space-3) var(--space-6)',
-            background: 'var(--accent)',
-            color: 'var(--accent-ink)',
-            borderRadius: 'var(--radius-md)',
-            fontWeight: 600,
-          }}
-        >
+        <Link href="/pricing" className={styles.btnPrimary}>
           Compare tiers
         </Link>
-      </section>
+      </RevealSection>
 
       {/* ── CTA ──────────────────────────────────────────────── */}
-      <section className={styles.ctaSection}>
+      <RevealSection className={styles.ctaSection}>
         <h2>Ready to learn the Amazon PPC work that&apos;s in demand right now?</h2>
         <p>
           A structured course, real campaign tools, and a certificate that&apos;s part of the
           ProjectAmazonPH hiring pipeline.
         </p>
-        <Link
-          href="/auth/signup"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            padding: 'var(--space-3) var(--space-6)',
-            background: 'var(--accent)',
-            color: 'var(--accent-ink)',
-            borderRadius: 'var(--radius-md)',
-            fontWeight: 600,
-          }}
-        >
+        <Link href="/auth/signup" className={styles.btnPrimary}>
           Create your account
         </Link>
-      </section>
+      </RevealSection>
 
       {/* ── Footer ───────────────────────────────────────────── */}
       <footer className={styles.footer}>
