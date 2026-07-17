@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { BRAND_NAME, BRAND_NAME_UPPER } from '@/lib/brand';
 import { Badge } from '@/components/ui';
 import { Icon, type PhosphorIconName } from '@/components/ui/Icon';
@@ -9,6 +10,7 @@ interface SimMeta {
   name: string;
   description: string;
   icon: PhosphorIconName;
+  screenshot: string;
 }
 
 const SIMULATORS: SimMeta[] = [
@@ -18,6 +20,7 @@ const SIMULATORS: SimMeta[] = [
     description:
       'Build Sponsored Products, Sponsored Brands, Sponsored Display, and Sponsored TV campaigns. Practice the full Amazon Ads Console campaign wizard, start to finish.',
     icon: 'Rocket',
+    screenshot: '/images/tools/tool-campaign-builder.jpg',
   },
   {
     id: 'bid-elevator',
@@ -25,6 +28,7 @@ const SIMULATORS: SimMeta[] = [
     description:
       'Adjust keyword bids against real performance data. Cut waste, raise your converters, defend ACoS at target.',
     icon: 'ChartLine',
+    screenshot: '/images/tools/tool-bid-elevator.jpg',
   },
   {
     id: 'str-triage',
@@ -32,6 +36,7 @@ const SIMULATORS: SimMeta[] = [
     description:
       'Keep, pause, negate, or re-bid search terms. Practice the weekly triage workflow every PPC specialist runs.',
     icon: 'List',
+    screenshot: '/images/tools/tool-str-triage.jpg',
   },
   {
     id: 'listing-audit',
@@ -39,6 +44,7 @@ const SIMULATORS: SimMeta[] = [
     description:
       "Score a product listing on title, bullets, images, and A+ content. Find what's actually hurting conversion.",
     icon: 'BookOpen',
+    screenshot: '/images/tools/tool-listing-audit.jpg',
   },
   {
     id: 'keyword-research',
@@ -46,6 +52,7 @@ const SIMULATORS: SimMeta[] = [
     description:
       'Categorize keywords as primary, secondary, or negative. Build the keyword list that drives every Sponsored Products campaign.',
     icon: 'MagnifyingGlass',
+    screenshot: '/images/tools/tool-keyword-research.jpg',
   },
 ];
 
@@ -132,9 +139,20 @@ export default function HomePage() {
         <ul className={styles.simGrid}>
           {SIMULATORS.map((sim) => (
             <li key={sim.id} className={styles.simItem}>
-              <Icon name={sim.icon} size="lg" />
-              <h3>{sim.name}</h3>
-              <p>{sim.description}</p>
+              <div className={styles.simScreenshot}>
+                <Image
+                  src={sim.screenshot}
+                  alt={`${sim.name} simulator screenshot`}
+                  width={1000}
+                  height={389}
+                  sizes="(min-width: 768px) 33vw, 100vw"
+                />
+              </div>
+              <div className={styles.simItemBody}>
+                <Icon name={sim.icon} size="lg" />
+                <h3>{sim.name}</h3>
+                <p>{sim.description}</p>
+              </div>
             </li>
           ))}
         </ul>

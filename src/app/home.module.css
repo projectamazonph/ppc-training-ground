@@ -157,9 +157,26 @@
 }
 
 .simItem {
-  padding: var(--space-6);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.simScreenshot {
+  position: relative;
+  line-height: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.simScreenshot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.simItemBody {
+  padding: var(--space-6);
 }
 
 .simItem h3 {
