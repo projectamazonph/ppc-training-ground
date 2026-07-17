@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { BRAND_NAME, BRAND_NAME_UPPER } from '@/lib/brand';
+import { Badge } from '@/components/ui';
 import styles from './home.module.css';
 
 export default function HomePage() {
@@ -13,8 +14,9 @@ export default function HomePage() {
             Three courses. One outcome: become the Amazon ads specialist clients retain.
           </h1>
           <p className={styles.heroSub}>
-            {`${BRAND_NAME} teaches the Amazon advertising skills Filipino VAs are charging `}
-            ₱60,000–₱80,000/month for. Practice with real campaign tools, not just theory.
+            Most VAs don&apos;t touch a real Amazon account until a client hands them the
+            login. {BRAND_NAME} skips that: five practice tools built on real Amazon Ads
+            Console mechanics, so you already know where everything is before that day comes.
           </p>
           <div className={styles.heroActions}>
             <Link
@@ -76,6 +78,40 @@ export default function HomePage() {
             <p>
               Cut the wasted spend on irrelevant clicks without killing the
               keywords that convert.
+            </p>
+          </li>
+        </ul>
+      </section>
+
+      {/* ── Practice Access ──────────────────────────────────── */}
+      <section className={styles.accessSection}>
+        <h2>You don&apos;t need a client&apos;s login to practice this</h2>
+        <p className={styles.accessSub}>
+          Every simulator mirrors real Amazon Ads Console workflows — campaign structure,
+          bid changes, search term triage — without touching a client&apos;s ad spend. Two more
+          tools are in development, and they&apos;ll only be available to enrolled students.
+        </p>
+        <ul className={styles.accessGrid}>
+          <li className={styles.accessItem}>
+            <div className={styles.accessItemHeader}>
+              <h3>Amazon Ads Console simulator</h3>
+              <Badge variant="default">Coming soon · Enrollees only</Badge>
+            </div>
+            <p>
+              A full replica of the Amazon Ads Console — build campaigns, manage keywords
+              and bids, run reports, and get graded on scenario missions. The closest thing
+              to Seller Central access without a client account.
+            </p>
+          </li>
+          <li className={styles.accessItem}>
+            <div className={styles.accessItemHeader}>
+              <h3>Interview Lab</h3>
+              <Badge variant="default">Coming soon · Enrollees only</Badge>
+            </div>
+            <p>
+              AI mock interviews, resume review, and cover letter drafts built for the
+              Amazon VA roles agencies actually hire for. Practice the interview, not just
+              the skill.
             </p>
           </li>
         </ul>

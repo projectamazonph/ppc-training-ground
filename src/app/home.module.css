@@ -112,6 +112,60 @@
   line-height: 1.5;
 }
 
+/* ── Practice Access ───────────────────────────────────────────── */
+.accessSection {
+  padding: var(--space-12) 0;
+  border-top: 1px solid var(--border);
+}
+
+.accessSub {
+  color: var(--ink-700);
+  margin: var(--space-2) 0 0;
+  max-width: 640px;
+  line-height: 1.5;
+}
+
+.accessGrid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  margin: var(--space-6) 0 0;
+  padding: 0;
+}
+
+@media (min-width: 768px) {
+  .accessGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.accessItem {
+  padding: var(--space-6);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.accessItemHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin: 0 0 var(--space-2);
+}
+
+.accessItemHeader h3 {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+
+.accessItem p {
+  color: var(--ink-700);
+  margin: 0;
+  line-height: 1.5;
+}
+
 /* ── Pricing Preview ───────────────────────────────────────────── */
 .pricingSection {
   padding: var(--space-12) 0;
