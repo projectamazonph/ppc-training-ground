@@ -511,11 +511,11 @@ export async function handlePaymentRefunded(
 // ---------------------------------------------------------------------------
 
 /**
- * Handle \`source.chargeable\` webhook.
+ * Handle `source.chargeable` webhook.
  *
  * This fires when a Source (GCash, Maya, GrabPay) becomes chargeable after
  * the user authorizes the payment on PayMongo's hosted page. We must call
- * \`createPaymentFromSource\` to convert the source into an actual Payment.
+ * `createPaymentFromSource` to convert the source into an actual Payment.
  *
  * If the Payment is returned with status=paid, we also create the local
  * Payment + Enrollment immediately.
@@ -534,7 +534,7 @@ export async function handleSourceChargeable(
       'source.chargeable',
       'source',
       sourceId,
-      \`amount=\${amountCentavos}\`,
+      `amount=${amountCentavos}`,
       200,
       tx,
     );
@@ -573,7 +573,7 @@ export async function handleSourceChargeable(
       const payment = await createPaymentFromSource({
         amountCentavos,
         sourceId,
-        description: \`Checkout \${checkout.id} — Amazon PH Academy\`,
+        description: `Checkout ${checkout.id} — Amazon PH Academy`,
         metadata: { checkoutId: checkout.id, ...metadata },
       });
 
@@ -604,10 +604,10 @@ export async function handleSourceChargeable(
 }
 
 /**
- * Handle \`payment.paid\` webhook.
+ * Handle `payment.paid` webhook.
  *
  * Fires when a Payment (created from a Source or Payment Intent) reaches
- * \`paid\` status. We reconcile with the CheckoutSession and create the
+ * `paid` status. We reconcile with the CheckoutSession and create the
  * local Payment + Enrollment.
  */
 export async function handlePaymentPaid(
@@ -624,7 +624,7 @@ export async function handlePaymentPaid(
       'payment.paid',
       'payment',
       paymentIdPm,
-      \`amount=\${amountCentavos}\`,
+      `amount=${amountCentavos}`,
       200,
       tx,
     );
