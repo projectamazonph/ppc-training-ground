@@ -21,6 +21,7 @@ export function RevealSection({ children, className }: RevealSectionProps) {
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
+        if (!entry) return;
         // Reveal on normal scroll-into-view, and also if the element is
         // already above the viewport (e.g. a hash-link landed past it) —
         // otherwise content scrolled past before ever intersecting would
