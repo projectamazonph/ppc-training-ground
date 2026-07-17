@@ -196,6 +196,7 @@ export async function approveRefundAction(
           paymongoPaymentId: true,
           amountPhp: true,
           status: true,
+          refundAmountPhp: true,
           pricingTier: { select: { name: true } },
         },
       },
