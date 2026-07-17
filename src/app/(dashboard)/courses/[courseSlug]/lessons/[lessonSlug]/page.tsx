@@ -82,6 +82,9 @@ export default async function LessonPage({ params }: PageProps) {
     where: { userId: user.id, lessonId: lesson.id, deletedAt: null },
   });
   const isComplete = progress?.status === ProgressStatus.COMPLETED;
+  // H1: when a published quiz gates the lesson, passing it is the ONLY way to
+  // complete — hide the manual button so the UI matches the server rule.
+  const isQuizGated = Boolean(lesson.quiz?.isPublished);
 
   // Find prev/next lessons
   const moduleLessons = lesson.module.lessons;
@@ -120,7 +123,7 @@ export default async function LessonPage({ params }: PageProps) {
       />
 
       <div className={styles.actions}>
-        {!isComplete && (
+        {!isComplete && !isQuizGated && (
           <form
             action={
               markLessonCompleteAction
@@ -134,6 +137,11 @@ export default async function LessonPage({ params }: PageProps) {
               Mark as complete (+{lesson.xpReward} XP)
             </Button>
           </form>
+        )}
+        {!isComplete && isQuizGated && (
+          <p style={{ color: 'var(--ink-500)', fontSize: 'var(--text-sm)' }}>
+            Pass the knowledge check below to complete this lesson.
+          </p>
         )}
         {isComplete && (
           <Badge variant="success">
