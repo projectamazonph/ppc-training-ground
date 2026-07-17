@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { signUpSchema, signInSchema, createSafeAction, validateRedirectUrl } from '@/lib/validation';
+import { signUpSchema, signInSchema, createSafeAction } from '@/lib/validation';
+import { validateRedirectUrl } from '@/lib/redirect-url';
 
 describe('validation.ts', () => {
   it('signUpSchema accepts valid input', () => {

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button, Input } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
 import { signInAction, signUpAction } from '@/app/actions/auth';
-import { validateRedirectUrl } from '@/lib/validation';
+import { validateRedirectUrl } from '@/lib/redirect-url';
 import { Toast } from '@/components/ui/Toast';
 import styles from './auth.module.css';
 

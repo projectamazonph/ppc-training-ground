@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/auth';
-import { validateRedirectUrl } from '@/lib/validation';
+import { validateRedirectUrl } from '@/lib/redirect-url';
 import { ToastProvider } from '@/components/ui/Toast';
 import { SignInForm } from './SignInForm';
 import styles from './auth.module.css';

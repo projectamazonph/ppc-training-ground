@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button, Input } from '@/components/ui';
 import { Toast } from '@/components/ui/Toast';
 import { signUpAction } from '@/app/actions/auth';
-import { validateRedirectUrl } from '@/lib/validation';
+import { validateRedirectUrl } from '@/lib/redirect-url';
 import styles from '../signin/auth.module.css';
 
 interface SignUpFormProps {

@@ -16,7 +16,7 @@ import { Card, CardHeader, CardTitle, CardDescription, Button, Badge } from '@/c
 import { Icon } from '@/components/ui/Icon';
 import { db } from '@/lib/db';
 import { getSession } from '@/lib/auth';
-import { validateRedirectUrl } from '@/lib/validation';
+import { validateRedirectUrl } from '@/lib/redirect-url';
 import { CheckoutStatus } from '@/lib/enums';
 import { BRAND_NAME } from '@/lib/brand';
 import styles from './complete.module.css';
