@@ -50,15 +50,17 @@ The priority is not adding more theory. It is helping a learner move through thi
 
 **Fix:** Move all authored content into `content/curriculum/` inside v2. Keep one MDX or structured-content file per lesson, version quiz data beside the lesson, and import from a repository-relative path. Treat curriculum changes like product changes: review, test, publish, and record the version.
 
-**Status:** The 31 legacy MDX lessons and the quiz fixture are now versioned at `content/curriculum/modules/` and `content/curriculum/quiz-questions.json`, and the importer reads from that repo-relative path. The content itself is still the unrevised legacy text — the P0 findings below (AdCraft/AI Mentor references, factual corrections, course-to-tier structure) are unchanged and still block the next release.
+**Status:** The 31 legacy MDX lessons and the quiz fixture are now versioned at `content/curriculum/modules/` and `content/curriculum/quiz-questions.json`, and the importer reads from that repo-relative path.
 
-### P0. The current lesson renderer cannot faithfully display the existing curriculum
+### P0. The current lesson renderer cannot faithfully display the existing curriculum — resolved
 
 The imported lessons contain Markdown tables, numbered workflows, and references to visual diagrams. `src/lib/mdx.ts` only renders headings, paragraphs, bold and italic text, inline and code blocks, bullet lists, blockquotes, and horizontal rules. It does not render Markdown tables, numbered lists, links, images, video, or interactive components. A learner will see table pipes as text and cannot use embedded visual content even when an author adds it.
 
 **Fix:** Replace the lightweight parser with a safe, tested Markdown or MDX renderer that supports tables, ordered lists, links, images, callouts, and video embeds. Keep raw HTML disabled. Do not start the video programme until a lesson can render and track a video correctly.
 
-### P0. Imported copy describes a different product
+**Status:** `src/lib/mdx.ts` now renders via `marked` (CommonMark + GFM), covering tables, ordered lists, links, and images. The 8-video explainer programme has since been produced (`docs/VIDEO-EXPLAINER-SCRIPTS.md`, `videos/*-explainer/`).
+
+### P0. Imported copy describes a different product — resolved
 
 The legacy lessons repeatedly refer to **AdCraft**, an **AI Mentor**, a **Formula Calculator**, and only **three simulations**. v2 explicitly forbids AI features and offers five tools. This will break learner trust the first time a learner follows the lesson and cannot find the feature.
 
@@ -71,7 +73,9 @@ Examples:
 
 **Fix:** Replace all platform-tour, navigation, next-step, and tool naming copy before importing the next content release. Never ask a learner to find a feature that does not exist.
 
-### P0. The course-to-tier promise is not represented in the curriculum
+**Status:** All legacy AdCraft / AI Mentor / Formula Calculator / "three simulations" references have been removed from `content/curriculum/modules/` and replaced with the real platform (4-tab nav, five named tools). Verified by re-running this section's own evidence-gathering greps against the current content; zero hits remain outside internal frontmatter fields. Full lesson rewrites to the 10-block production standard (Release 2, see `docs/CURRICULUM-REDESIGN.md`) are still open — this fix only corrected factual/naming accuracy, not lesson structure.
+
+### P0. The course-to-tier promise is not represented in the curriculum — resolved
 
 Pricing says PPC Foundations includes five core modules, Accelerated Mastery includes all eight, and Ultimate adds support and portfolio review. The importer creates one 25-hour course with nine modules, then binds it to the PPC Foundations tier. The current gate can allow or deny a whole course only. It cannot hold individual advanced modules behind higher tiers.
 
@@ -82,7 +86,9 @@ Pricing says PPC Foundations includes five core modules, Accelerated Mastery inc
 
 Do not sell an advanced path until the content, route gates, and learner catalog all agree.
 
-### P0. Several lessons teach product behaviour as permanent rules
+**Status:** `scripts/import-amph-content.ts` now creates two `Course` rows: `ppc-foundations` (modules 0-4) bound to the `ppc-foundations` tier, and `accelerated-mastery` (modules 5-8) bound to the `accelerated-mastery` tier — option 1 (three real courses), partially: the third course (`ultimate-transformation`) deliberately has no `Course` row yet since modules 10-13 don't exist (Release 3). Nobody can currently enroll into the Ultimate tier; that gap is pre-existing and tracked, not newly introduced.
+
+### P0. Several lessons teach product behaviour as permanent rules — resolved
 
 Amazon Ads changes. Learners need principles and a habit of checking the console, not brittle rules that can cause bad client work.
 
@@ -95,6 +101,8 @@ Amazon Ads changes. Learners need principles and a habit of checking the console
 | Manual dayparting is a universal Amazon Ads workflow. | Availability and controls vary. | Teach scheduled bidding or budget rules where eligible, with a console-validation step and a non-automation fallback. |
 
 Use an "Amazon Ads Fact Card" in every release: product, retailer or marketplace scope, access requirement, source URL, owner, last verified date, and next review date.
+
+**Status:** All five factual corrections above were made, each with an Amazon Ads Fact Card added. The `Last verified` / `Next review due` / `Owner` fields on those cards are placeholders for the content owner to fill in, not fabricated.
 
 Useful official references:
 
@@ -161,18 +169,18 @@ See `CURRICULUM-REDESIGN.md` for the module map, assessments, and production ord
 
 ## Release plan
 
-### Release 1. Trust and safety
+### Release 1. Trust and safety — substantially complete, two follow-ups remain
 
-- Move curriculum source into v2.
-- Remove legacy names and nonexistent feature references.
-- Correct the portfolio, attribution, auction, budget, quality-signal, and dayparting lessons.
-- Align three pricing tiers with access rules and actual content.
-- Add factual-review metadata to time-sensitive lessons.
+- Move curriculum source into v2. ✅
+- Remove legacy names and nonexistent feature references. ✅
+- Correct the portfolio, attribution, auction, budget, quality-signal, and dayparting lessons. ✅
+- Align the available course/tier access rules with actual content. ✅ for Foundations and Accelerated Mastery; **Ultimate remains blocked** until Release 3 content exists (no `Course` row, nobody can enroll).
+- Add factual-review cards. ✅ cards added; **not done** until `Last verified`/`Next review due`/`Owner` are populated by the content owner.
 
 ### Release 2. Foundations that lead to action
 
-- Rewrite the 15 foundation and campaign-building lessons with the standard learning pattern.
-- Launch five short video explainers and five matching practice sheets.
+- Rewrite the 15 foundation and campaign-building lessons with the standard learning pattern. Two reference-pattern lessons exist (`docs/0-1-welcome-to-amph.md`, `docs/1-1-read-ppc-data-before-you-change-it.md`); the rest are still open.
+- Launch five short video explainers and five matching practice sheets. 8 video explainers have shipped (`videos/*-explainer/`, see `docs/VIDEO-EXPLAINER-SCRIPTS.md`); matching practice sheets are still open.
 - Add calculation, keyword-map, and campaign-rationale artifacts.
 
 ### Release 3. Operator and client readiness
@@ -194,8 +202,10 @@ Track learning quality, not only logins and XP.
 
 ## Immediate next actions
 
-1. Approve the three-course structure and tier model.
-2. Move source content into v2 before any further authoring.
-3. Replace all legacy product references in the onboarding sequence.
-4. Ship the revised Big Six lesson and its video as the reference pattern.
-5. Build the career and client-delivery modules before expanding theory further.
+Release 1 (items 1-3 below) is done; see the status notes on each P0 above.
+
+1. ~~Approve the three-course structure and tier model.~~ Done (two real courses; Ultimate deferred to Release 3 content).
+2. ~~Move source content into v2 before any further authoring.~~ Done.
+3. ~~Replace all legacy product references in the onboarding sequence.~~ Done, repo-wide.
+4. Rewrite the 15 foundation and campaign-building lessons to the 10-block standard (Release 2) — the Big Six lesson (`docs/1-1-read-ppc-data-before-you-change-it.md`) is the shipped reference pattern; the rest are still open.
+5. Build the career and client-delivery modules before expanding theory further (Release 3).
