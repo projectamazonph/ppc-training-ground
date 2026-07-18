@@ -82,7 +82,7 @@ export default async function ToolsIndexPage() {
               <Icon name={heroTool.icon} size="xl" />
               <Badge variant="default">{heroTool.scenarioCount} scenarios</Badge>
             </div>
-            <CardTitle>{heroTool.name}</CardTitle>
+            <CardTitle className={styles.heroTitle}>{heroTool.name}</CardTitle>
             <CardDescription>{heroTool.description}</CardDescription>
           </CardHeader>
         </Link>

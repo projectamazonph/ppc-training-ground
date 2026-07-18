@@ -2,7 +2,7 @@
   margin-bottom: var(--space-6);
 }
 
-.heroCard :global(h3) {
+.heroTitle {
   font-size: var(--text-2xl);
 }
 

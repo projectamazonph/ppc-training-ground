@@ -50,13 +50,18 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Legacy /dashboard/<feature> bookmarks (real URLs for those features live
-  // at /courses, /payments, /tools, /live-classes, /certificates — the
+  // at /courses, /payments, /tools, /live-classes, /certificates: the
   // (dashboard) route group does not contribute to the URL). Strip the
   // prefix and continue. Bare /dashboard is its own real page (the student
   // home) and falls through to the auth check below instead of redirecting.
   if (pathname.startsWith('/dashboard/')) {
     const remainder = pathname.slice('/dashboard'.length);
-    return NextResponse.redirect(new URL(remainder, request.url));
+    // Clone nextUrl (not `new URL(remainder, request.url)`) so a path like
+    // /dashboard//evil.com can't be parsed as a protocol-relative URL and
+    // redirect off-origin, and so the query string survives the redirect.
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = remainder;
+    return NextResponse.redirect(redirectUrl);
   }
 
   // Only protect admin and dashboard routes
