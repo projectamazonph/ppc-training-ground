@@ -69,3 +69,8 @@ prisma/prisma/
 
 # Local env (contains JWT_SECRET)
 .env
+
+# Agent skill tooling (installed via `npx skills add`, not project source)
+.agents/
+.claude/skills/
+skills-lock.json

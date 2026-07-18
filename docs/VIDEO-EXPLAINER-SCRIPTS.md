@@ -65,7 +65,7 @@ These are short, screen-led explainers for Filipino aspiring VAs. Record at a ca
 
 **Runtime:** 4 minutes.
 
-**Course placement:** Module 2, listing and retail readiness.
+**Course placement:** Module 3, Listing Optimization, alongside 3.1 Listing and Ad Relevance Signals.
 
 **Learner outcome:** Separate click problems from conversion problems.
 
@@ -81,7 +81,7 @@ These are short, screen-led explainers for Filipino aspiring VAs. Record at a ca
 
 **Runtime:** 4 minutes.
 
-**Course placement:** Module 3, before Campaign Builder.
+**Course placement:** Module 2, Keyword Research, at 2.4 Keyword Grouping, just before Module 4 Campaign Architecture opens.
 
 **Learner outcome:** Organize targets by purpose, not by a random keyword dump.
 
@@ -97,7 +97,7 @@ These are short, screen-led explainers for Filipino aspiring VAs. Record at a ca
 
 **Runtime:** 5 minutes.
 
-**Course placement:** Module 4, directly before Campaign Builder.
+**Course placement:** Module 4, Campaign Architecture, directly before 4.4 Campaign Architecture Practice (Campaign Builder).
 
 **Learner outcome:** Build for control, learning, and clean reporting.
 
@@ -114,7 +114,7 @@ These are short, screen-led explainers for Filipino aspiring VAs. Record at a ca
 
 **Runtime:** 5 minutes.
 
-**Course placement:** Module 5, before Search Term Triage.
+**Course placement:** Module 7, Search Term Triage, before 7.3 STR Triage Prep.
 
 **Learner outcome:** Make careful decisions without wasting useful search terms.
 
@@ -131,7 +131,7 @@ These are short, screen-led explainers for Filipino aspiring VAs. Record at a ca
 
 **Runtime:** 4 minutes.
 
-**Course placement:** Module 9 and Course 3.
+**Course placement:** Planned for the future Reporting and Diagnostic Framework module (not yet built; see the Course 2 notes in docs/CURRICULUM-REDESIGN.md). Hold this script until that module is scheduled.
 
 **Learner outcome:** Give a client a clear update they can act on.
 

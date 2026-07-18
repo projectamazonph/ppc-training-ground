@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Turn PPC Data Into a Weekly Client Update</title>
+    <script src="node_modules/gsap/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --bg: #fdfae7;
+        --primary: #1e2bfa;
+        --text: #111111;
+        --text-muted: #4a4a4a;
+        --text-light: #6b6b6b;
+        --accent-light: rgba(30, 43, 250, 0.08);
+        --accent-medium: rgba(30, 43, 250, 0.15);
+        --border: rgba(30, 43, 250, 0.2);
+        --card-bg: rgba(30, 43, 250, 0.04);
+        --positive: #059669;
+        --negative: #dc2626;
+        --font-display: "Space Grotesk", sans-serif;
+        --font-body: "Inter", sans-serif;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--bg);
+      }
+      body {
+        font-family: var(--font-body);
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        background: var(--bg);
+        overflow: hidden;
+      }
+      .frame {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 96px 120px 180px;
+      }
+      .eyebrow {
+        font-family: var(--font-display);
+        font-size: 26px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--primary);
+        margin-bottom: 24px;
+      }
+      .headline {
+        font-family: var(--font-display);
+        font-size: 60px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        color: var(--text);
+        max-width: 1500px;
+        margin-bottom: 16px;
+      }
+      .headline .accent {
+        color: var(--primary);
+      }
+      .accent-line {
+        width: 60px;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--primary);
+        margin-bottom: 28px;
+      }
+
+      /* ---- Frame 1: dashboard vs five lines ---- */
+      .transform-wrap {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 56px;
+      }
+      .dashboard-card {
+        flex: 1;
+        max-width: 620px;
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 36px;
+      }
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .dash-tile {
+        background: var(--accent-light);
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        height: 56px;
+      }
+      .dashboard-card .dc-label {
+        font-family: var(--font-display);
+        font-size: 22px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        text-align: center;
+      }
+      .transform-arrow {
+        font-family: var(--font-display);
+        font-size: 56px;
+        font-weight: 700;
+        color: var(--text-light);
+      }
+      .story-card {
+        flex: 1;
+        max-width: 620px;
+        background: var(--accent-light);
+        border: 1.5px solid var(--primary);
+        border-radius: 14px;
+        padding: 44px 40px;
+        text-align: center;
+      }
+      .story-card .sc-value {
+        font-family: var(--font-display);
+        font-size: 56px;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 12px;
+      }
+      .story-card .sc-label {
+        font-family: var(--font-display);
+        font-size: 22px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+      }
+
+      /* ---- Frame 2: five headings ---- */
+      .heading-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin-top: 12px;
+        flex: 1;
+        justify-content: center;
+        max-width: 1400px;
+      }
+      .heading-row {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        padding: 22px 32px;
+      }
+      .heading-row .h-num {
+        font-family: var(--font-display);
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--primary);
+        width: 56px;
+        flex-shrink: 0;
+      }
+      .heading-row .h-name {
+        font-family: var(--font-display);
+        font-size: 30px;
+        font-weight: 700;
+        color: var(--text);
+        width: 240px;
+        flex-shrink: 0;
+      }
+      .heading-row .h-desc {
+        font-family: var(--font-body);
+        font-size: 24px;
+        color: var(--text-muted);
+      }
+
+      /* ---- Frame 3: worked example document ---- */
+      .report-doc {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-top: 8px;
+        overflow: hidden;
+      }
+      .report-line {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-left: 4px solid var(--primary);
+        border-radius: 10px;
+        padding: 20px 30px;
+      }
+      .report-line .rl-tag {
+        font-family: var(--font-display);
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--primary);
+        margin-bottom: 6px;
+      }
+      .report-line .rl-text {
+        font-family: var(--font-body);
+        font-size: 23px;
+        color: var(--text);
+        line-height: 1.45;
+      }
+
+      /* ---- Frame 4: why it works ---- */
+      .why-wrap {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 24px;
+      }
+      .why-card {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        padding: 26px 32px;
+      }
+      .why-card .wc-mark {
+        font-family: var(--font-display);
+        font-size: 30px;
+        font-weight: 700;
+        color: var(--primary);
+        flex-shrink: 0;
+      }
+      .why-card p {
+        font-family: var(--font-body);
+        font-size: 26px;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+      .why-warn {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        background: rgba(220, 38, 38, 0.06);
+        border: 1.5px solid rgba(220, 38, 38, 0.3);
+        border-radius: 12px;
+        padding: 26px 32px;
+      }
+      .why-warn .wc-mark {
+        font-family: var(--font-display);
+        font-size: 30px;
+        font-weight: 700;
+        color: var(--negative);
+        flex-shrink: 0;
+      }
+      .why-warn p {
+        font-family: var(--font-body);
+        font-size: 26px;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+      .why-warn strong {
+        color: var(--text);
+      }
+
+      /* ---- Frame 5: closing ---- */
+      .closing-frame {
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+      .closing-frame .headline {
+        max-width: 1500px;
+        text-align: center;
+      }
+      .closing-frame .accent-line {
+        align-self: center;
+      }
+      .task-card {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 36px 48px;
+        max-width: 1200px;
+        margin-bottom: 36px;
+        text-align: left;
+      }
+      .task-card .t-line {
+        font-family: var(--font-body);
+        font-size: 28px;
+        color: var(--text-muted);
+        line-height: 1.6;
+      }
+      .cta-button {
+        background: var(--primary);
+        color: var(--bg);
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 30px;
+        padding: 24px 56px;
+        border-radius: 100px;
+      }
+      .rings {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 900px;
+        height: 900px;
+        border-radius: 50%;
+        border: 1.5px solid var(--border);
+        z-index: -1;
+      }
+      .rings::before,
+      .rings::after {
+        content: "";
+        position: absolute;
+        inset: 120px;
+        border-radius: 50%;
+        border: 1.5px solid var(--border);
+      }
+      .rings::after {
+        inset: 260px;
+      }
+
+      /* ---- captions ---- */
+      .caption-band {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 64px;
+        display: flex;
+        justify-content: center;
+        z-index: 50;
+      }
+      .caption-card {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 22px 44px;
+        max-width: 1500px;
+      }
+      .caption-card p {
+        font-family: var(--font-display);
+        font-weight: 500;
+        font-size: 30px;
+        color: var(--text);
+        text-align: center;
+        line-height: 1.4;
+      }
+
+      /* ---- progress bar ---- */
+      .progress-track {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 3px;
+        background: var(--accent-light);
+        z-index: 60;
+      }
+      #progress-fill {
+        display: block;
+        height: 100%;
+        width: 0%;
+        background: var(--primary);
+      }
+      .counter {
+        position: absolute;
+        right: 40px;
+        bottom: 16px;
+        font-family: var(--font-display);
+        font-size: 20px;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        color: #444444;
+        z-index: 60;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="240"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- Frame 1: 0-30s — dense dashboard becomes five lines -->
+      <div id="frame-1" class="frame clip" data-start="0" data-duration="30" data-track-index="1">
+        <div class="eyebrow">The Client Update</div>
+        <div class="headline">They need the story, <span class="accent">not the dashboard.</span></div>
+        <div class="accent-line"></div>
+        <div class="transform-wrap">
+          <div class="dashboard-card" id="dash-card">
+            <div class="dashboard-grid">
+              <div class="dash-tile"></div><div class="dash-tile"></div><div class="dash-tile"></div><div class="dash-tile"></div>
+              <div class="dash-tile"></div><div class="dash-tile"></div><div class="dash-tile"></div><div class="dash-tile"></div>
+              <div class="dash-tile"></div><div class="dash-tile"></div><div class="dash-tile"></div><div class="dash-tile"></div>
+            </div>
+            <div class="dc-label">47 metrics, no story</div>
+          </div>
+          <div class="transform-arrow">&rarr;</div>
+          <div class="story-card" id="story-card">
+            <div class="sc-value">5 lines</div>
+            <div class="sc-label">Result, cause, action, watch, request</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 2: 30-75s — five headings -->
+      <div id="frame-2" class="frame clip" data-start="30" data-duration="45" data-track-index="1">
+        <div class="eyebrow">The Five-Line Format</div>
+        <div class="headline">Use these five <span class="accent">headings, in order.</span></div>
+        <div class="accent-line"></div>
+        <div class="heading-list">
+          <div class="heading-row" id="h-1">
+            <span class="h-num">1</span><span class="h-name">Result</span><span class="h-desc">State what happened.</span>
+          </div>
+          <div class="heading-row" id="h-2">
+            <span class="h-num">2</span><span class="h-name">Cause</span><span class="h-desc">Explain the likely reason.</span>
+          </div>
+          <div class="heading-row" id="h-3">
+            <span class="h-num">3</span><span class="h-name">Action</span><span class="h-desc">State the change you made.</span>
+          </div>
+          <div class="heading-row" id="h-4">
+            <span class="h-num">4</span><span class="h-name">Watch</span><span class="h-desc">Say what you'll check next.</span>
+          </div>
+          <div class="heading-row" id="h-5">
+            <span class="h-num">5</span><span class="h-name">Request</span><span class="h-desc">Ask for anything you need.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 3: 75-145s — worked example -->
+      <div id="frame-3" class="frame clip" data-start="75" data-duration="70" data-track-index="1">
+        <div class="eyebrow">A Worked Example</div>
+        <div class="headline">One report, <span class="accent">five honest lines.</span></div>
+        <div class="accent-line"></div>
+        <div class="report-doc">
+          <div class="report-line" id="rl-1">
+            <div class="rl-tag">Result</div>
+            <div class="rl-text">Ad sales rose 18% week over week, driven by our exact-match campaign.</div>
+          </div>
+          <div class="report-line" id="rl-2">
+            <div class="rl-tag">Cause</div>
+            <div class="rl-text">ACoS also rose from 24% to 31% because CPC increased on two top-of-search terms.</div>
+          </div>
+          <div class="report-line" id="rl-3">
+            <div class="rl-tag">Action</div>
+            <div class="rl-text">We reduced those bids to stay closer to the target and moved budget toward the better-converting targets.</div>
+          </div>
+          <div class="report-line" id="rl-4">
+            <div class="rl-tag">Watch</div>
+            <div class="rl-text">We will review conversion rate and CPC next Tuesday.</div>
+          </div>
+          <div class="report-line" id="rl-5">
+            <div class="rl-tag">Request</div>
+            <div class="rl-text">Please confirm whether the planned coupon will run next week.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 4: 145-195s — why it works -->
+      <div id="frame-4" class="frame clip" data-start="145" data-duration="50" data-track-index="1">
+        <div class="eyebrow">Why This Works</div>
+        <div class="headline">It does not <span class="accent">hide the bad news.</span></div>
+        <div class="accent-line"></div>
+        <div class="why-wrap">
+          <div class="why-card" id="why-1">
+            <span class="wc-mark">&check;</span>
+            <p>Explains the trade-off and shows that you have a plan.</p>
+          </div>
+          <div class="why-card" id="why-2">
+            <span class="wc-mark">&check;</span>
+            <p>Names the metric, the action, and the next review.</p>
+          </div>
+          <div class="why-warn" id="why-3">
+            <span class="wc-mark">&times;</span>
+            <p>Avoid saying <strong>"optimized campaigns"</strong> with no evidence.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 5: 195-240s — weekly report template -->
+      <div id="frame-5" class="frame closing-frame clip" data-start="195" data-duration="45" data-track-index="1">
+        <div class="rings"></div>
+        <div class="eyebrow">Your Task</div>
+        <div class="headline">Write <span class="accent">one page.</span></div>
+        <div class="accent-line"></div>
+        <div class="task-card">
+          <div class="t-line">Complete the weekly report template from the scenario data. Keep it to one page &mdash; a client who understands your update quickly can trust your work more easily.</div>
+        </div>
+        <div class="cta-button">Open the Weekly Report Template</div>
+      </div>
+
+      <!-- Captions -->
+      <div id="caption-1" class="caption-band clip" data-start="0" data-duration="3" data-track-index="2">
+        <div class="caption-card"><p>Your client does not need every metric.</p></div>
+      </div>
+      <div id="caption-2" class="caption-band clip" data-start="3.5" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>They need the story, the decision, and the next check.</p></div>
+      </div>
+
+      <div id="caption-3" class="caption-band clip" data-start="30" data-duration="2.5" data-track-index="2">
+        <div class="caption-card"><p>Use five lines.</p></div>
+      </div>
+      <div id="caption-4" class="caption-band clip" data-start="33" data-duration="2.5" data-track-index="2">
+        <div class="caption-card"><p>First, state the result.</p></div>
+      </div>
+      <div id="caption-5" class="caption-band clip" data-start="36" data-duration="3" data-track-index="2">
+        <div class="caption-card"><p>Second, explain the likely cause.</p></div>
+      </div>
+      <div id="caption-6" class="caption-band clip" data-start="39.5" data-duration="3" data-track-index="2">
+        <div class="caption-card"><p>Third, state the action you took.</p></div>
+      </div>
+      <div id="caption-7" class="caption-band clip" data-start="43" data-duration="3" data-track-index="2">
+        <div class="caption-card"><p>Fourth, say what you will watch next.</p></div>
+      </div>
+      <div id="caption-8" class="caption-band clip" data-start="46.5" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>Fifth, ask for anything you need from the client.</p></div>
+      </div>
+
+      <div id="caption-9" class="caption-band clip" data-start="75" data-duration="2.5" data-track-index="2">
+        <div class="caption-card"><p>Here is an example.</p></div>
+      </div>
+      <div id="caption-10" class="caption-band clip" data-start="78" data-duration="5" data-track-index="2">
+        <div class="caption-card"><p>"Ad sales rose eighteen percent week over week, driven by our exact-match campaign."</p></div>
+      </div>
+      <div id="caption-11" class="caption-band clip" data-start="83.5" data-duration="5.5" data-track-index="2">
+        <div class="caption-card"><p>"ACoS also rose from twenty-four percent to thirty-one percent because CPC increased on two top-of-search terms."</p></div>
+      </div>
+      <div id="caption-12" class="caption-band clip" data-start="89.5" data-duration="5.5" data-track-index="2">
+        <div class="caption-card"><p>"We reduced those bids to stay closer to the target and moved budget toward the better-converting targets."</p></div>
+      </div>
+      <div id="caption-13" class="caption-band clip" data-start="95.5" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>"We will review conversion rate and CPC next Tuesday."</p></div>
+      </div>
+      <div id="caption-14" class="caption-band clip" data-start="100" data-duration="4.5" data-track-index="2">
+        <div class="caption-card"><p>"Please confirm whether the planned coupon will run next week."</p></div>
+      </div>
+
+      <div id="caption-15" class="caption-band clip" data-start="145" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>This works because it does not hide the bad news.</p></div>
+      </div>
+      <div id="caption-16" class="caption-band clip" data-start="149.5" data-duration="3.5" data-track-index="2">
+        <div class="caption-card"><p>It explains the trade-off and shows that you have a plan.</p></div>
+      </div>
+      <div id="caption-17" class="caption-band clip" data-start="153.5" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>Avoid saying "optimized campaigns" with no evidence.</p></div>
+      </div>
+      <div id="caption-18" class="caption-band clip" data-start="158" data-duration="4" data-track-index="2">
+        <div class="caption-card"><p>Name the metric, the action, and the next review.</p></div>
+      </div>
+
+      <div id="caption-19" class="caption-band clip" data-start="195" data-duration="4.5" data-track-index="2">
+        <div class="caption-card"><p>Complete the weekly report template from the scenario data.</p></div>
+      </div>
+      <div id="caption-20" class="caption-band clip" data-start="200" data-duration="2.5" data-track-index="2">
+        <div class="caption-card"><p>Keep it to one page.</p></div>
+      </div>
+      <div id="caption-21" class="caption-band clip" data-start="203" data-duration="5.5" data-track-index="2">
+        <div class="caption-card"><p>If a client can understand your update quickly, they can trust your work more easily.</p></div>
+      </div>
+
+      <!-- Persistent chrome -->
+      <div class="progress-track">
+        <span id="progress-fill" class="clip" data-start="0" data-duration="240" data-track-index="90"></span>
+      </div>
+      <div class="counter clip" data-start="0" data-duration="240" data-track-index="91" id="counter">00:00 / 04:00</div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Frame 1
+      tl.from("#frame-1 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 0);
+      tl.from("#dash-card", { opacity: 0, x: -30, duration: 0.5, ease: "power2.out" }, 0.4);
+      tl.from("#story-card", { opacity: 0, x: 30, duration: 0.5, ease: "power2.out" }, 0.7);
+
+      // Frame 2
+      tl.from("#frame-2 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 30);
+      tl.from("#frame-2 .heading-row", { opacity: 0, x: -20, duration: 0.4, ease: "power2.out", stagger: 0.12 }, 30.4);
+
+      // Frame 3
+      tl.from("#frame-3 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 75);
+      tl.from("#frame-3 .report-line", { opacity: 0, y: 16, duration: 0.4, ease: "power2.out", stagger: 0.15 }, 75.4);
+
+      // Frame 4
+      tl.from("#frame-4 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 145);
+      tl.from("#frame-4 .why-card, #frame-4 .why-warn", { opacity: 0, y: 16, duration: 0.4, ease: "power2.out", stagger: 0.15 }, 145.4);
+
+      // Frame 5
+      tl.from("#frame-5 .rings", { opacity: 0, scale: 0.85, duration: 1, ease: "power2.out" }, 195);
+      tl.from("#frame-5 .headline", { opacity: 0, y: 24, duration: 0.6, ease: "power2.out" }, 195.3);
+      tl.from("#frame-5 .task-card", { opacity: 0, y: 20, duration: 0.5, ease: "power2.out" }, 195.9);
+      tl.from("#frame-5 .cta-button", { opacity: 0, y: 16, duration: 0.5, ease: "power2.out" }, 196.5);
+
+      // Persistent progress bar
+      tl.to("#progress-fill", { width: "100%", duration: 240, ease: "none" }, 0);
+
+      window.__timelines["main"] = tl;
+
+      function formatTime(s) {
+        var m = Math.floor(s / 60);
+        var sec = Math.floor(s % 60);
+        return (m < 10 ? "0" + m : m) + ":" + (sec < 10 ? "0" + sec : sec);
+      }
+
+      var counterEl = document.getElementById("counter");
+      tl.eventCallback("onUpdate", function () {
+        counterEl.textContent = formatTime(tl.time()) + " / 04:00";
+      });
+      counterEl.textContent = formatTime(tl.time()) + " / 04:00";
+    </script>
+  </body>
+</html>
