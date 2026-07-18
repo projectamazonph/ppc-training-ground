@@ -43,7 +43,9 @@ const SOFT_DELETE_MODELS = new Set([
   'Payment',
   'DiscountCode',
   'RefundRequest',
-  'ProcessedWebhook',
+  // H4 (AUDIT-2026-07-17): ProcessedWebhook has no deletedAt column — listing
+  // it here made every read on that model inject a filter on a nonexistent
+  // field, which Prisma would reject at runtime.
   'Invoice',
   'TeamMember',
 ]);

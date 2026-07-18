@@ -34,8 +34,27 @@ function hashPassword(password: string): string {
 }
 
 async function upsertAdminUser(): Promise<void> {
-  const email = process.env.ADMIN_EMAIL ?? '[email protected]';
-  const password = process.env.ADMIN_PASSWORD ?? 'ChangeMe123!';
+  // C5: fail loudly when ADMIN_EMAIL or ADMIN_PASSWORD is missing instead of
+  // silently seeding a well-known ([email protected] / ChangeMe123!) admin
+  // account — that fallback shipping to production would be a standing
+  // account-takeover hole.
+  const isProduction = process.env.NODE_ENV === 'production';
+  const rawEmail = (process.env.ADMIN_EMAIL ?? '').trim();
+  const rawPassword = process.env.ADMIN_PASSWORD ?? '';
+  if (isProduction && (!rawEmail || !rawPassword.trim())) {
+    throw new Error(
+      'ADMIN_EMAIL and ADMIN_PASSWORD environment variables are required in production. ' +
+      'Set them in .env.local or your deployment environment.',
+    );
+  }
+  if (!rawEmail) {
+    throw new Error('ADMIN_EMAIL must not be empty.');
+  }
+  if (!rawPassword.trim()) {
+    throw new Error('ADMIN_PASSWORD must not be empty or whitespace-only.');
+  }
+  const email = rawEmail;
+  const password = rawPassword;
 
   await prisma.user.upsert({
     where: { email },

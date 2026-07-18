@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/auth';
+import { validateRedirectUrl } from '@/lib/redirect-url';
 import { ToastProvider } from '@/components/ui/Toast';
 import { SignInForm } from './SignInForm';
 import styles from './auth.module.css';
@@ -23,6 +24,8 @@ export default async function SignInPage({ searchParams }: PageProps) {
 
   const params = await searchParams;
   const error = params.error ? decodeURIComponent(params.error) : null;
+  // C3: validate the redirect target before it can ever reach router.push().
+  const safeRedirect = validateRedirectUrl(params.redirect);
 
   return (
     <main id="main-content" className={styles.authContainer}>
@@ -31,7 +34,7 @@ export default async function SignInPage({ searchParams }: PageProps) {
           <h1 className={styles.title}>Sign in</h1>
           <p className={styles.subtitle}>Welcome back. Sign in to continue learning.</p>
 
-          <SignInForm error={error} redirectTo={params.redirect} />
+          <SignInForm error={error} redirectTo={safeRedirect} />
 
           <p className={styles.footer}>
             New here? <Link href="/auth/signup">Create an account</Link>

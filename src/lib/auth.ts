@@ -198,8 +198,21 @@ export async function requireAuth(): Promise<SessionUser> {
 
 export async function requireAdmin(): Promise<SessionUser> {
   const user = await requireAuth();
-  if (user.role !== 'ADMIN') {
-    log.warn({ component: 'auth', userId: user.id, role: user.role }, 'non-admin → redirect /');
+
+  // H3: Load the authoritative role from the database — the JWT claim can be
+  // stale (e.g. an admin was demoted after the token was issued, but the
+  // cookie is still valid for the rest of its lifetime).
+  const dbUser = await db.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  });
+
+  const effectiveRole = dbUser?.role ?? user.role;
+  if (effectiveRole !== 'ADMIN') {
+    log.warn(
+      { component: 'auth', userId: user.id, role: effectiveRole },
+      'non-admin → redirect /',
+    );
     redirect('/');
   }
   log.debug({ component: 'auth', userId: user.id }, 'requireAdmin ok');
