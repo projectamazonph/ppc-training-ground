@@ -1,6 +1,6 @@
 # SESSION-HANDOVER.md
 
-**Updated:** 2026-07-14 (stale-doc cleanup pass #2 — corrected STORY-052 + sprint-11 PLAN; `main` HEAD `d23de02405adc79101fac411c9537473576cbf45`)
+**Updated:** 2026-07-18 (design-drift remediation + admin audit + branch cleanup; `main` HEAD `daa16e8` after PR #41)
 
 ---
 
@@ -483,3 +483,70 @@ Re-ran the audit's own evidence-gathering greps (`adcraft`, `ai mentor`, `formul
 2. Fill in the fact cards' `Last verified` / `Next review due` / `Owner` placeholders — deliberately left blank rather than guessed.
 3. Decide whether to open a dedicated issue for the Ultimate Transformation checkout gap now, or defer it to when Release 3 content is scoped.
 4. Move on to Release 2 (full lesson rewrites to the 10-block standard) per `docs/CURRICULUM-REDESIGN.md`'s production order — issue #24's Release 1 checklist should be fully closed after this section's work merges.
+
+---
+
+## 2026-07-18 — Landing page repositioning, design-drift remediation (PRs #38-#39), edge auth + BTV scenario fix (PR #40), branch cleanup + video assets (PR #41)
+
+**Owner of this section:** one continuous session, four PRs, on branch `claude/session-vg077i`. **Context for the next agent:** the code side of v2 is still fully shipped (see Project Status above); this session did landing-page copy/positioning, a full design-system audit against `docs/stitch-prompts.md`, a real product bug fix, and repo housekeeping. Read `docs/stitch-prompts.md` (the "Field Manual" design spec) before touching any page layout — it's the source of truth this session audited against.
+
+### What was asked
+
+A chain of user-directed turns: reposition the landing page around hands-on practice access rather than classroom theory → several headline iterations (final: "Learn Amazon PPC the right way" / "We turn the theoretical into the practical") → add real tool screenshots → Facebook promo copy with a ₱499 pre-enrollment offer against the Accelerated Mastery tier → "screenshot each section then compare to stitch designed pages... the design and feel look off" → "Everything to follow spec please" → "I reckon all pages have design drift, open pr and push" → "Merge after ci then run the audit on other pages" (repeated as the working pattern) → after PR #39 merged, "What's next" → user picked two flagged items (middleware auth coverage gap; admin sub-pages audit) → mid-task, "Use tdd and solid principles" (a standing instruction for the rest of the session) → "Clean up branches" → "Both" (open a PR for the one branch with real unmerged content, and merge it) → "Update documentation and prepare handoff" (this entry).
+
+### What was done
+
+**1. Landing page repositioning + design-drift audit (PR #38, `04329ee`).** Rewrote `src/app/page.tsx` hero/pain-points/simulator-showcase/CTA copy, added real cropped screenshots of all 5 tools (`public/images/tools/*.jpg`), added a `RevealSection` scroll-reveal component and a shared button/CSS system in `home.module.css`. Fixed a JSX whitespace-stripping bug (`{BRAND_NAME}{' '}fixes that:`) and a CSS Modules `:global(.is-visible)` gap.
+
+**2. Multi-page design-drift audit (PR #39, `e743652`).** Screenshotted every section via Playwright against a local seeded Postgres, compared to the Field Manual spec. Found two tiers of drift:
+- **Structural:** every authenticated page used the public marketing header (no logged-in state), and `/admin` was rendering that header *above* its own sidebar+TopBar (double header). No sidebar existed for the student area at all — only `/admin` had one. `/dashboard` was dead code (middleware unconditionally redirected the bare path).
+- **Cosmetic:** pricing tiers rendered as equal columns instead of a featured center tier; tools index had no hero card; sign-in/up text was left-aligned instead of centered.
+
+Fixed via a new `(dashboard)/layout.tsx` (sidebar + top bar, generalizing the existing admin `NavSidebar`/`TopBar` to accept `items`/`homeHref`/`brandSuffix` props), a new `SiteHeader` client component that hides the public header on shell routes, and CSS/layout fixes to pricing and tools pages. Also narrowed the middleware's legacy `/dashboard` redirect to only match `/dashboard/*` sub-paths (it was swallowing the bare `/dashboard` route too).
+
+**3. Edge auth coverage extended to the full student area (PR #40, `6e9b224`, TDD).** PR #39's own scope notes flagged that middleware's matcher only covered `/admin` and `/dashboard`, leaving `/courses`, `/tools`, `/payments`, `/certificates`, `/live-classes` with page-level `requireAuth()` as their only gate (no edge-level defense-in-depth). Per the user's "use TDD and SOLID principles" instruction: extracted pure, framework-free route classification into `src/lib/route-guards.ts` (`isAdminRoute`, `isStudentRoute`, `isProtectedRoute`, `legacyDashboardRedirectTarget`), wrote `route-guards.test.ts` first (28 tests, including an open-redirect regression test), then made `src/middleware.ts` a thin wrapper around it and expanded its `matcher` to all six student route prefixes. A CodeRabbit review on this PR also caught a real open-redirect: `new URL(remainder, request.url)` could resolve a `//evil.example` remainder as protocol-relative; fixed via `request.nextUrl.clone(); redirectUrl.pathname = value` (the `.pathname` setter can't escape origin).
+
+**4. Campaign Builder BTV scenario bug (same PR #40, found during the admin Tool Scenarios page audit).** `src/engine/registry.ts` imported `BTV_SCENARIOS` from `campaign-builder/scenarios.ts` — a one-item `SCENARIOS.filter(...)` stand-in — instead of the real, separate 5-scenario pool in `campaign-builder/btv-scenarios.ts` (which was otherwise fully-built dead code; the runner's `resolveScenario` already tried `getBtv()` as a fallback). Caused a duplicate scenario id/slug (visible as a duplicate "Smart Air Fryer" entry and a React key-collision dev warning on `/admin/tool-scenarios`) and real BTV slugs like `kitchen-cutting-board-btv-launch` 404ing. TDD'd: wrote `registry.test.ts` first, confirmed red (wrong count, duplicate slug, 404 on a real BTV slug), then fixed the import. Also refactored `(dashboard)/tools/page.tsx` to derive `scenarioCount` from `TOOL_REGISTRY` instead of independently re-importing and re-summing raw per-engine scenario arrays — the same DRY violation that let this exact bug exist in two places was removed, not just patched once.
+
+**5. CodeRabbit findings on PR #40, triaged and mostly fixed:** `SiteHeader`'s own hardcoded `SHELL_PREFIXES` list duplicated `route-guards.ts` — replaced with `isProtectedRoute()` (real DRY finding, fixed). Em-dashes in comments (repo rule, fixed). An unneeded `as never` cast on two `Link href`s in `tools/page.tsx` (no `typedRoutes` config exists, so the cast wasn't needed — removed, `tsc` confirmed clean). Skipped two suggestions with reasoning posted on the PR: moving `route-guards.test.ts` out of `__tests__/` (14 of 15 existing `src/lib` tests already use that convention — the suggestion went against the grain, not with it), and adding new component test files for `NavSidebar`/`layout.tsx`/`SiteHeader` (no existing React component test infrastructure in the repo; UI is verified live via Playwright instead — that's new test-infra scope, not a fix).
+
+**6. A stale-branch merge conflict, root-caused and fixed.** After the first push to `claude/session-vg077i`, the remote branch's tip turned out to be PR #39's *pre-squash-merge* commit history (content-identical to the squash-merge commit `e743652` already on `main`, confirmed via empty `git diff`, but a different, non-descendant commit lineage — the documented "GitHub squash-merge creates a new commit" gotcha). Rebasing my new commits onto that stale tip (to avoid a force-push) produced a spurious merge conflict against `main` when GitHub tried to compute mergeability, because both sides independently carried the same net diff through different commit granularity. Fixed by rebasing directly onto `main`'s actual squash-merge commit (`git rebase --onto e743652 <stale-tip> HEAD`), which replayed cleanly with an empty diff against `main`; required one `--force-with-lease` push since the commit SHAs changed (safe: the old SHAs were never merged, session-owned branch).
+
+**7. Branch cleanup (per user request; "Clean up branches").** Audited all 14 non-`main` remote branches: checked each candidate's PR `merged` status (the `list_pull_requests` tool's `merged` field was unreliable — returned `false` for PRs later confirmed `merged: true` via `pull_request_read` `get`), then diffed each branch tip against the actual squash-merge commit on `main` (not just ancestor-checked, for the same reason as item 6) to find real drift.
+- **7 branches confirmed zero-drift (fully merged, safe to delete), could not delete them:** `git push --delete` is blocked by this session's git proxy (403), and the GitHub MCP server here has no branch-delete tool. Listed for manual deletion below.
+- **1 branch (`claude/dependency-drift-triage-cont-cwp1ro`) had zero *real* diff** — its workflow-version-bump changes were already on `main` byte-for-byte (landed via later PRs); the only remaining diff was a stale `SESSION-HANDOVER.md` retrospective addendum. Also flagged for manual deletion.
+- **1 branch (`claude/stitch-ui-pages-02hskb`) is an alternate, older landing-page redesign** that predates and directly conflicts with the already-shipped, user-approved PR #38 landing page. Flagged as do-not-merge (would revert approved work), recommend deleting.
+- **1 branch (`claude/amazon-ph-academy-alignment-3pvxz9`) had real, substantial unmerged work:** 127 files / ~11.7k lines of finished HyperFrames video-explainer builds (8 videos: HTML compositions + rendered frame snapshots + briefs) fulfilling the video program already planned in `docs/VIDEO-EXPLAINER-SCRIPTS.md`. Purely additive, clean merge-tree against `main`, verified with the user before opening a PR (a content/scope decision, not a mechanical fix). Opened as **PR #41**, CI green, no CodeRabbit findings, merged (`daa16e8`) after user confirmed to merge without a manual content-accuracy pass (that pass is now a follow-up, see below).
+- **4 branches kept as-is:** `claude/session-vg077i` (this one), plus three with genuinely open, unrelated PRs (`claude/amph-v2-audit-findings-jff31l` #34, `fix/audit-2026-07-17-full-remediation` #33, `refactor/bolt-optimize-listing-audit-367519118260146446` #37) — not investigated further, out of scope for this session.
+
+**8. Documentation pass (this entry).** Updated `CLAUDE.md` (fixed the stale "legacy content still describes a different product" claim — it's been rewritten since a prior session; added an Architecture Notes section covering `route-guards.ts` and the tool registry pattern; filled in the previously-empty `## Commands` section). Updated `docs/CONTENT-AUDIT-2026-07-16.md` — all four P0 findings are now actually resolved (renderer, legacy copy, course/tier split, factual corrections) but the doc only had a status note on P0 #1; added accurate status notes to the other three and corrected the Release 1 / Immediate Next Actions sections to reflect reality.
+
+### Explicitly NOT done
+
+- **Manual deletion of 9 stale/superseded remote branches.** Listed exactly below — this session has no tool access to delete a remote branch (git push delete returns 403 through the session proxy; no `mcp__github__*` branch-delete tool exists). Delete via GitHub's UI (repo → branches → delete icon on each):
+  ```
+  feat/branding-rename
+  claude/content-updates-planning-0ed4ti
+  claude/whats-next-4hf0yp
+  claude/whats-next-dk7dvf
+  claude/claude-md-docs-8hgde3
+  fix/async-password-hashing-5610909855535561442
+  fix/performance-engine-maps-5778776182061102239
+  claude/dependency-drift-triage-cont-cwp1ro
+  claude/stitch-ui-pages-02hskb
+  ```
+- **Content-accuracy review of the 8 merged video-explainer builds.** PR #41 was merged on CI-green + user go-ahead, but nobody has actually watched the 8 rendered videos (`videos/*-explainer/index.html`, `snapshots/*.png`) against `docs/VIDEO-EXPLAINER-SCRIPTS.md` for correctness. Flagged as the PR's own unchecked test-plan item; still open.
+- **Screens 6-8 and 13-17 of the Field Manual spec** (lesson pages, quiz pages, payments, certificates, live-classes detail views) — PR #39's own scope notes said these weren't audited in detail, only confirmed to sit correctly inside the new sidebar shell. Still a possible follow-up.
+- **Content track Release 2** (full lesson rewrites to the 10-block production standard) — untouched this session, still fully open per `docs/CURRICULUM-REDESIGN.md`.
+- **Fact card metadata** (`Last verified`/`Next review due`/`Owner` placeholders from the July 16 content pass) — still blank, still needs the content owner.
+
+### Verified
+
+`npx tsc --noEmit` clean on every PR. Full Vitest suite green (247/247 at time of PR #40; includes the new `route-guards.test.ts` and `registry.test.ts`, both written TDD-first and confirmed red before their respective fixes). `pnpm lint` clean (only pre-existing unrelated warnings). Live-verified via Playwright against a local seeded Postgres: no double header on any shell route, sidebar renders with correct active states, `TopBar` shows the real user role, admin Tool Scenarios page shows Campaign Builder at the correct 11-scenario count with no console warnings, and a real BTV scenario (`kitchen-cutting-board-btv-launch`) resolves and renders in the runner. All 4 PRs (#38, #39, #40, #41) merged with green CI (Quality Gates, E2E Tests, Lighthouse CI) and `mergeable_state: clean` at merge time.
+
+### Next steps for whoever picks this up
+
+1. Delete the 9 branches listed above via GitHub's UI.
+2. Spot-check the 8 merged video-explainer builds against their source scripts for content accuracy (PR #41's own unchecked test-plan item).
+3. Decide whether to audit the remaining Field Manual screens (lesson/quiz/payments/certificates/live-classes detail views) for design drift, following the same audit → fix → PR → CI → merge pattern used this session.
+4. Continue the content track: Release 2 lesson rewrites, or pick up one of the three genuinely-open unrelated PRs (#33, #34, #37) if they're still relevant.
