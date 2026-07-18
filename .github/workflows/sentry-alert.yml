@@ -62,6 +62,6 @@ jobs:
             echo "::warning::SLACK_WEBHOOK_URL is not configured — skipping failure notification."
             exit 0
           fi
-          curl -sf -X POST -H 'Content-type: application/json' \
+          curl -sf --show-error --connect-timeout 5 --max-time 15 -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\":rotating_light: AMPH Sentry→Slack alert job FAILED at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
             "$SLACK_WEBHOOK_URL"
