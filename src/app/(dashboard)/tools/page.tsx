@@ -14,7 +14,7 @@ interface ToolCopy {
 
 // Presentation copy only. Scenario counts come from TOOL_REGISTRY (the
 // single source of truth also used by the tool detail/runner pages) instead
-// of being recomputed here from the raw per-engine scenario arrays — that
+// of being recomputed here from the raw per-engine scenario arrays. That
 // duplication is exactly how campaign-builder's count went stale before.
 const TOOL_COPY: ToolCopy[] = [
   {

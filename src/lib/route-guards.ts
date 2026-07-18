@@ -1,7 +1,7 @@
 /**
  * Pure route-classification logic for the edge middleware. Kept free of
  * NextRequest/NextResponse so it's unit-testable without mocking the Edge
- * runtime — middleware.ts is the thin orchestration layer around this.
+ * runtime, so middleware.ts is the thin orchestration layer around this.
  */
 
 // The (dashboard) route group contributes no URL segment, so its pages live

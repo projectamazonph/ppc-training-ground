@@ -3,14 +3,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BRAND_NAME } from '@/lib/brand';
-
-// Routes that render their own app shell (sidebar + top bar) and must not
-// also get the public marketing header stacked above it.
-const SHELL_PREFIXES = ['/admin', '/dashboard', '/courses', '/tools', '/payments', '/certificates', '/live-classes'];
+import { isProtectedRoute } from '@/lib/route-guards';
 
 export function SiteHeader() {
   const pathname = usePathname();
-  if (SHELL_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) {
+  // Protected routes render their own app shell (sidebar + top bar) and must
+  // not also get the public marketing header stacked above it.
+  if (isProtectedRoute(pathname)) {
     return null;
   }
 

@@ -1,13 +1,13 @@
 /**
- * Edge middleware — verifies JWT and protects /admin/* and the authenticated
+ * Edge middleware. Verifies JWT and protects /admin/* and the authenticated
  * student area (the (dashboard) route group: /dashboard, /courses, /tools,
  * /payments, /certificates, /live-classes).
  *
  * Pattern (per consensus plan B6):
- *   - Middleware runs on Edge runtime — no Prisma, no Node crypto, just `jose`
+ *   - Middleware runs on Edge runtime, so no Prisma, no Node crypto, just `jose`
  *   - Server Components re-verify via getSession() in src/lib/auth.ts (cheap,
  *     avoids trusting headers blindly)
- *   - This middleware only does coarse-grained gating (auth + role) — server
+ *   - This middleware only does coarse-grained gating (auth + role). Server
  *     actions and Server Components do the authoritative checks
  *   - Route classification lives in src/lib/route-guards.ts as plain
  *     functions (no NextRequest/NextResponse) so it's unit-tested directly,
@@ -85,7 +85,7 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  // Admin routes require ADMIN role. Do NOT clear the cookie here — a
+  // Admin routes require ADMIN role. Do NOT clear the cookie here, since a
   // student following a stray /admin link should be turned away, not
   // logged out of their whole session.
   if (isAdminRoute(pathname) && payload.role !== 'ADMIN') {
