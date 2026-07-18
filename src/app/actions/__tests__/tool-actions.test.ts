@@ -25,7 +25,7 @@ vi.mock('@/engine/keyword-research/scenarios', () => ({
 vi.mock('@/lib/db', () => ({
   db: {
     user: { findUnique: vi.fn(), update: vi.fn() },
-    toolSession: { create: vi.fn(), findUnique: vi.fn(), update: vi.fn() },
+    toolSession: { create: vi.fn(), findUnique: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
   },
 }))
 
@@ -70,6 +70,30 @@ describe('tool session actions', () => {
     const result = await saveToolSession({ sessionId: 's1', state: {} });
     expect(result.success).toBe(false);
     if (!result.success) expect(result.error).toBe('Forbidden.');
+  });
+
+  it('saveToolSession freezes edits once the session leaves IN_PROGRESS (atomic guard)', async () => {
+    (db.toolSession.findUnique as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: 's1', userId: 'u1', status: 'IN_PROGRESS', scenarioId: 's1', toolType: 'CAMPAIGN_BUILDER', state: '{}', timeSpentSeconds: 0, createdAt: new Date(), updatedAt: new Date(),
+    });
+    // A concurrent submit transitioned the session between the read and the
+    // guarded update, so the status-guarded updateMany matches zero rows.
+    (db.toolSession.updateMany as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({ count: 0 });
+    const result = await saveToolSession({ sessionId: 's1', state: { a: 1 } });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toBe('This session has been submitted and can no longer be edited.');
+  });
+
+  it('saveToolSession writes through the IN_PROGRESS-guarded update', async () => {
+    (db.toolSession.findUnique as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: 's1', userId: 'u1', status: 'IN_PROGRESS', scenarioId: 's1', toolType: 'CAMPAIGN_BUILDER', state: '{}', timeSpentSeconds: 0, createdAt: new Date(), updatedAt: new Date(),
+    });
+    (db.toolSession.updateMany as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({ count: 1 });
+    const result = await saveToolSession({ sessionId: 's1', state: { a: 1 } });
+    expect(result.success).toBe(true);
+    expect(db.toolSession.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ status: 'IN_PROGRESS' }) }),
+    );
   });
 
   it('loadToolSession returns null for missing session', async () => {

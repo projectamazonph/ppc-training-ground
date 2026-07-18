@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { signUpSchema, signInSchema, createSafeAction } from '@/lib/validation';
+import { validateRedirectUrl } from '@/lib/redirect-url';
 
 describe('validation.ts', () => {
   it('signUpSchema accepts valid input', () => {
@@ -67,5 +68,53 @@ describe('validation.ts', () => {
       expect(result.error).toBe('Something went wrong. Please try again.');
       expect(result.error).not.toContain('prisma');
     }
+  });
+
+  // ── validateRedirectUrl (C3 / XSS defence) ──────────────────────────────
+
+  it('validateRedirectUrl allows valid internal path', () => {
+    expect(validateRedirectUrl('/dashboard')).toBe('/dashboard');
+    expect(validateRedirectUrl('/auth/signin')).toBe('/auth/signin');
+    expect(validateRedirectUrl('/checkout/complete?status=success')).toBe('/checkout/complete?status=success');
+  });
+
+  it('validateRedirectUrl rejects external URLs with scheme', () => {
+    expect(validateRedirectUrl('https://evil.com')).toBe('/');
+    expect(validateRedirectUrl('javascript:alert(1)')).toBe('/');
+    expect(validateRedirectUrl('data:text/html,<script>alert(1)</script>')).toBe('/');
+    expect(validateRedirectUrl('file:///etc/passwd')).toBe('/');
+  });
+
+  it('validateRedirectUrl rejects double-slash paths', () => {
+    expect(validateRedirectUrl('//evil.com')).toBe('/');
+    expect(validateRedirectUrl('//google.com')).toBe('/');
+  });
+
+  it('validateRedirectUrl rejects paths with control characters', () => {
+    // Use actual control characters via String.fromCharCode
+    expect(validateRedirectUrl('/path' + String.fromCharCode(10))).toBe('/');
+    expect(validateRedirectUrl('/path' + String.fromCharCode(13))).toBe('/');
+    expect(validateRedirectUrl('/path' + String.fromCharCode(0))).toBe('/');
+  });
+
+  it('validateRedirectUrl returns fallback for null/undefined/empty', () => {
+    expect(validateRedirectUrl(null)).toBe('/');
+    expect(validateRedirectUrl(undefined)).toBe('/');
+    expect(validateRedirectUrl('')).toBe('/');
+    expect(validateRedirectUrl('  ')).toBe('/');
+  });
+
+  it('validateRedirectUrl uses custom fallback', () => {
+    expect(validateRedirectUrl('https://evil.com', '/fallback')).toBe('/fallback');
+    expect(validateRedirectUrl(null, '/custom')).toBe('/custom');
+  });
+
+  it('validateRedirectUrl rejects encoded scheme attacks', () => {
+    expect(validateRedirectUrl('/%6A%61%76%61%73%63%72%69%70%74:alert(1)')).toBe('/');
+  });
+
+  it('validateRedirectUrl rejects paths starting with scheme prefix', () => {
+    expect(validateRedirectUrl('/https://evil.com')).toBe('/');
+    expect(validateRedirectUrl('/http://phishing.com')).toBe('/');
   });
 });
