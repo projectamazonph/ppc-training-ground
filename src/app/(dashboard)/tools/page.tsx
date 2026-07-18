@@ -75,7 +75,7 @@ export default async function ToolsIndexPage() {
       </header>
 
       <Card key={heroTool.id} variant="interactive" padding="lg" className={styles.heroCard}>
-        <Link href={`/tools/${heroTool.id}` as never} className={styles.toolLink}>
+        <Link href={`/tools/${heroTool.id}`} className={styles.toolLink}>
           <CardHeader>
             <div className={styles.toolHeader}>
               <Icon name={heroTool.icon} size="xl" />
@@ -90,7 +90,7 @@ export default async function ToolsIndexPage() {
       <section className={styles.toolGrid}>
         {restTools.map((tool) => (
           <Card key={tool.id} variant="interactive" padding="lg">
-            <Link href={`/tools/${tool.id}` as never} className={styles.toolLink}>
+            <Link href={`/tools/${tool.id}`} className={styles.toolLink}>
               <CardHeader>
                 <div className={styles.toolHeader}>
                   <Icon name={tool.icon} size="lg" />
