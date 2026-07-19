@@ -63,8 +63,16 @@ CREATE UNIQUE INDEX "Certificate_active_per_user_course_key"
 -- ----------------------------------------------------------------------------
 -- H6: backfill existing emails to canonical (trimmed, lowercase) form.
 -- Rows whose canonical form would collide with another account are left
--- untouched — those need manual reconciliation before a case-insensitive
+-- untouched, and need manual reconciliation before a case-insensitive
 -- uniqueness constraint (citext / normalized column) can be enforced.
+--
+-- The collision guard compares canonical-to-CANONICAL, not canonical-to-exact.
+-- Two rows that are both non-canonical but share a canonical form (e.g.
+-- 'Foo@Bar.com' and 'FOO@bar.com') would otherwise BOTH satisfy an exact-match
+-- guard and both UPDATE to the same value in one statement (WHERE is evaluated
+-- against the MVCC snapshot), violating the case-sensitive unique email index
+-- and failing the migration. Canonical-to-canonical skips every member of a
+-- colliding group instead.
 -- ----------------------------------------------------------------------------
 UPDATE "User" u
 SET email = lower(btrim(u.email))
@@ -72,11 +80,11 @@ WHERE u.email <> lower(btrim(u.email))
   AND NOT EXISTS (
     SELECT 1 FROM "User" o
     WHERE o.id <> u.id
-      AND o.email = lower(btrim(u.email))
+      AND lower(btrim(o.email)) = lower(btrim(u.email))
   );
 
 -- Surface the rows we deliberately skipped (their canonical form collides with
--- another account) so they don't vanish silently - canonicalized lookups
+-- another account) so they don't vanish silently: canonicalized lookups
 -- (findOrCreateUserByEmail, signUpAction) query by lowercase and can't find a
 -- still-mixed-case row. These need manual reconciliation. Emitted as a WARNING
 -- so it shows in migration/deploy logs; run scripts/report-email-collisions.ts
@@ -91,7 +99,7 @@ BEGIN
     AND EXISTS (
       SELECT 1 FROM "User" o
       WHERE o.id <> u.id
-        AND o.email = lower(btrim(u.email))
+        AND lower(btrim(o.email)) = lower(btrim(u.email))
     );
   IF skipped_count > 0 THEN
     RAISE WARNING 'H6 email canonicalization: % account(s) left un-normalized due to a case-insensitive collision. Run scripts/report-email-collisions.ts and reconcile manually.', skipped_count;

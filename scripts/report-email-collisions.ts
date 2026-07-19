@@ -23,31 +23,36 @@ if (!process.env.DATABASE_URL) {
 const prisma = new PrismaClient({ adapter: new PrismaPg(process.env.DATABASE_URL) });
 
 async function main() {
+  // Group by canonical (lowercased) email and report every member of any group
+  // with more than one row. This catches collisions where BOTH rows are
+  // non-canonical (e.g. 'Foo@Bar.com' + 'FOO@bar.com') and share a canonical
+  // form, which an exact-value EXISTS lookup would miss - exactly the rows the
+  // H6 migration leaves un-normalized.
   const rows = await prisma.$queryRaw<
     Array<{ id: string; email: string; canonical: string }>
   >`
     SELECT u.id, u.email, lower(btrim(u.email)) AS canonical
     FROM "User" u
-    WHERE u.email <> lower(btrim(u.email))
-      AND EXISTS (
-        SELECT 1 FROM "User" o
-        WHERE o.id <> u.id
-          AND o.email = lower(btrim(u.email))
-      )
+    WHERE lower(btrim(u.email)) IN (
+      SELECT lower(btrim(email))
+      FROM "User"
+      GROUP BY lower(btrim(email))
+      HAVING COUNT(*) > 1
+    )
     ORDER BY canonical, u.email
   `;
 
   if (rows.length === 0) {
-    console.log('No email-canonicalization collisions - every account is canonical.');
+    console.log('No email-canonicalization collisions - every canonical email is unique.');
     return;
   }
 
-  console.log(`Found ${rows.length} account(s) needing manual reconciliation:\n`);
+  console.log(`Found ${rows.length} account(s) in ${new Set(rows.map((r) => r.canonical)).size} colliding group(s), needing manual reconciliation:\n`);
   for (const r of rows) {
-    console.log(`  ${r.id}  ${r.email}  →  collides with existing "${r.canonical}"`);
+    console.log(`  ${r.id}  ${r.email}  ->  canonical "${r.canonical}"`);
   }
   console.log(
-    '\nResolve each by merging or renaming the duplicate account, then re-run the H6 UPDATE for that row.',
+    '\nResolve each group by merging or renaming the duplicate accounts, then re-run the H6 UPDATE.',
   );
 }
 

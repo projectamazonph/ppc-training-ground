@@ -39,7 +39,9 @@ async function upsertAdminUser(): Promise<void> {
   // account — that fallback shipping to production would be a standing
   // account-takeover hole.
   const isProduction = process.env.NODE_ENV === 'production';
-  const rawEmail = (process.env.ADMIN_EMAIL ?? '').trim();
+  // Canonicalize to match the app's trim().toLowerCase() contract, so a
+  // mixed-case ADMIN_EMAIL still matches canonicalized sign-in lookups.
+  const rawEmail = (process.env.ADMIN_EMAIL ?? '').trim().toLowerCase();
   const rawPassword = process.env.ADMIN_PASSWORD ?? '';
   if (isProduction && (!rawEmail || !rawPassword.trim())) {
     throw new Error(
