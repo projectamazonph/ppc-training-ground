@@ -55,11 +55,13 @@ jobs:
 
       - name: Notify Slack on failure
         if: failure()
-        uses: slackapi/slack-github-action@v4.0.0
-        with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
-          payload: |
-            {
-              "text": ":rotating_light: AMPH Sentry→Slack alert job FAILED at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "::warning::SLACK_WEBHOOK_URL is not configured — skipping failure notification."
+            exit 0
+          fi
+          curl -sf --show-error --connect-timeout 5 --max-time 15 -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\":rotating_light: AMPH Sentry→Slack alert job FAILED at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            "$SLACK_WEBHOOK_URL"
