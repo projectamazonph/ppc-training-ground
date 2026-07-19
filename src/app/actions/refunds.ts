@@ -36,6 +36,25 @@ import {
 import { sendRefundStatusEmail } from '@/lib/email';
 import { logger } from '@/lib/logger';
 import { isUniqueConstraintError } from '@/lib/prisma-errors';
+import { auditLog } from '@/lib/admin-audit';
+
+/**
+ * Best-effort AuditLog for a refund admin action. The state transition has
+ * already been committed by the time we log it, so a logging failure must not
+ * break the action or misreport a refund that actually moved money — we log
+ * the failure and move on (AGENTS.md: every admin action logs to AuditLog).
+ */
+async function auditRefundAction(
+  action: string,
+  requestId: string,
+  metadata: Record<string, unknown>,
+): Promise<void> {
+  try {
+    await auditLog({ action, entityType: 'RefundRequest', entityId: requestId, metadata });
+  } catch (err) {
+    logger.error({ err, action, requestId }, 'Failed to write refund AuditLog entry');
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Student: create refund request
@@ -256,6 +275,11 @@ export async function approveRefundAction(
           failureReason: message.slice(0, 500),
         },
       });
+      await auditRefundAction('APPROVE_REFUND_FAILED', request.id, {
+        amountPhp: request.amountPhp,
+        statusCode,
+        reason: message.slice(0, 200),
+      });
       revalidatePath('/admin/refunds');
       revalidatePath(`/admin/refunds/${request.id}`);
       return { success: false, error: `Refund API call failed: ${message}` };
@@ -268,6 +292,10 @@ export async function approveRefundAction(
       { err, requestId: request.id, statusCode },
       'Refund outcome unknown; left APPROVED for reconciliation',
     );
+    await auditRefundAction('APPROVE_REFUND_AMBIGUOUS', request.id, {
+      amountPhp: request.amountPhp,
+      statusCode,
+    });
     revalidatePath('/admin/refunds');
     revalidatePath(`/admin/refunds/${request.id}`);
     return {
@@ -317,6 +345,10 @@ export async function approveRefundAction(
       { err, requestId: request.id, paymongoRefundId },
       'Refund succeeded at PayMongo but local reconciliation failed; webhook will reconcile',
     );
+    await auditRefundAction('APPROVE_REFUND_RECONCILING', request.id, {
+      amountPhp: request.amountPhp,
+      paymongoRefundId,
+    });
     revalidatePath('/admin/refunds');
     revalidatePath(`/admin/refunds/${request.id}`);
     // State 2 is NOT a failure — the money left PayMongo. Report it honestly.
@@ -325,6 +357,12 @@ export async function approveRefundAction(
       data: { requestId: request.id, status: 'PROCESSING', paymongoRefundId },
     };
   }
+
+  await auditRefundAction('APPROVE_REFUND', request.id, {
+    amountPhp: request.amountPhp,
+    paymongoRefundId,
+    status: 'PROCESSED',
+  });
 
   revalidatePath('/admin/refunds');
   revalidatePath(`/admin/refunds/${request.id}`);
@@ -383,6 +421,10 @@ export async function rejectRefundAction(
   if (result.count === 0) {
     return { success: false, error: 'Request is no longer pending.' };
   }
+
+  await auditRefundAction('REJECT_REFUND', requestId, {
+    reviewerNotes: reviewerNotes.trim().slice(0, 200),
+  });
 
   const refundRequest = await db.refundRequest.findUnique({
     where: { id: requestId },

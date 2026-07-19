@@ -29,18 +29,13 @@ export const metadata = {
   robots: { index: false },
 };
 
-async function resolveCheckout(
-  checkoutSessionId: string | undefined,
-  paymongoReference: string | undefined,
-) {
-  if (!checkoutSessionId && !paymongoReference) return null;
+async function resolveCheckout(checkoutSessionId: string | undefined) {
+  // Look up strictly by the CheckoutSession id carried on the redirect URL
+  // (`checkout_id`/`id`). PayMongo doesn't hand this page a source reference,
+  // so there is no source-id fallback to attempt.
+  if (!checkoutSessionId) return null;
   return db.checkoutSession.findFirst({
-    where: {
-      OR: [
-        checkoutSessionId ? { id: checkoutSessionId } : { id: '__never__' },
-        paymongoReference ? { paymongoSourceId: paymongoReference } : { paymongoSourceId: '__never__' },
-      ],
-    },
+    where: { id: checkoutSessionId },
     include: {
       pricingTier: { select: { name: true, slug: true } },
     },
@@ -58,7 +53,7 @@ export default async function CheckoutCompletePage({ searchParams }: PageProps) 
   // '//evil.example', 'javascript:', encoded schemes, etc., not just a bare
   // '//' prefix.
   const returnUrl = validateRedirectUrl(rawReturnUrl, undefined) || undefined;
-  const checkout = await resolveCheckout(checkoutSessionId, returnUrl);
+  const checkout = await resolveCheckout(checkoutSessionId);
 
   if (status === 'failed') {
     return <FailedCard returnUrl={returnUrl} />;

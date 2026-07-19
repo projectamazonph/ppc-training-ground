@@ -207,10 +207,12 @@ export async function requireAdmin(): Promise<SessionUser> {
     select: { role: true },
   });
 
-  const effectiveRole = dbUser?.role ?? user.role;
-  if (effectiveRole !== 'ADMIN') {
+  // Fail closed: if the row is missing (soft-deleted between requireAuth's
+  // lookup and this one — a narrow TOCTOU window), deny rather than fall back
+  // to the JWT's possibly-stale role claim, which would defeat this check.
+  if (!dbUser || dbUser.role !== 'ADMIN') {
     log.warn(
-      { component: 'auth', userId: user.id, role: effectiveRole },
+      { component: 'auth', userId: user.id, role: dbUser?.role ?? 'missing' },
       'non-admin → redirect /',
     );
     redirect('/');

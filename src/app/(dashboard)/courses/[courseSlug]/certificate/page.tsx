@@ -70,10 +70,17 @@ export default async function CertificatePage({ params }: PageProps) {
 
   // Auto-issue on page visit if eligible. This way the user sees their existing
   // cert immediately on the final lesson completion without a manual click.
+  // Issuance is best-effort here: a transient failure (or a lost issuance race)
+  // must not crash the whole page to the error boundary — fall back to showing
+  // progress, and the manual "Issue" button remains as a retry.
   let verificationHash: string | null = activeCert?.verificationHash ?? null;
   if (!verificationHash && completion.isComplete) {
-    const issued = await issueCertificate(user.id, course.id);
-    verificationHash = issued?.verificationHash ?? null;
+    try {
+      const issued = await issueCertificate(user.id, course.id);
+      verificationHash = issued?.verificationHash ?? null;
+    } catch {
+      verificationHash = null;
+    }
   }
 
   const issuedDateFmt = new Intl.DateTimeFormat('en-PH', {

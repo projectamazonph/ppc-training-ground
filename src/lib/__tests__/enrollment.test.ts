@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const mockDb = vi.hoisted(() => {
   const fn = () => vi.fn();
   return {
-    processedWebhook: { create: fn() },
+    processedWebhook: { create: fn(), deleteMany: fn() },
     user: { findUnique: fn(), create: fn() },
     checkoutSession: { findUnique: fn(), findFirst: fn(), update: fn(), updateMany: fn() },
     payment: { create: fn(), findUnique: fn(), findFirst: fn(), update: fn() },
@@ -675,6 +675,10 @@ describe('enrollment.ts', () => {
           data: expect.objectContaining({ userId: 'u-guest', courseId: 'c-1', status: 'ACTIVE' }),
         }),
       );
+      // Post-purchase emails fire AFTER the transaction commits (best-effort,
+      // not awaited inside it) — let the pending microtasks drain before
+      // asserting on them.
+      await new Promise((resolve) => setImmediate(resolve));
       // The dead-code bug this task fixes: a NEW guest user must get the
       // account-claim email with the raw token, not just a log line.
       expect(sendAccountClaimEmail).toHaveBeenCalledWith(
@@ -724,6 +728,16 @@ describe('enrollment.ts', () => {
       await expect(
         handleSourceChargeable(makeSourceChargeableEvent({ currency: 'USD' })),
       ).rejects.toThrow('Unexpected currency: USD');
+      expect(mockCreatePaymentFromSource).not.toHaveBeenCalled();
+    });
+
+    it('rejects (throws) an underpayment instead of granting full access (H2)', async () => {
+      mockDb.processedWebhook.create.mockResolvedValue({ id: 'pw-1' });
+      mockDb.checkoutSession.findFirst.mockResolvedValue(sourceCheckoutRow); // finalAmountPhp 299900
+
+      await expect(
+        handleSourceChargeable(makeSourceChargeableEvent({ amount: 100000 })),
+      ).rejects.toThrow('less than the expected checkout amount');
       expect(mockCreatePaymentFromSource).not.toHaveBeenCalled();
     });
   });

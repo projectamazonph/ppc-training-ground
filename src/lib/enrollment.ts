@@ -578,14 +578,62 @@ type SourceFlowCheckout = {
 };
 
 /**
+ * Reject a webhook-reported payment whose currency is not PHP or whose amount
+ * is less than the checkout's expected amount (H2). Underpayment must never
+ * grant full tier access; a non-PHP currency (including an empty string) is
+ * likewise refused. Overpayment only warns — it isn't a security issue.
+ *
+ * A `currency` of `undefined` skips the currency assertion (some events, e.g.
+ * `payment.paid`, don't carry it); the amount assertion always runs.
+ */
+function assertPaymentMatchesCheckout(
+  expectedAmountCentavos: number,
+  actualAmountCentavos: number,
+  currency: string | undefined,
+  context: Record<string, unknown>,
+): void {
+  if (currency !== undefined && currency !== 'PHP') {
+    logger.error({ ...context, currency }, 'payment currency is not PHP — rejecting');
+    throw new Error(`Unexpected currency: ${currency || '(empty)'}. Expected PHP.`);
+  }
+  if (actualAmountCentavos < expectedAmountCentavos) {
+    logger.error(
+      { ...context, expectedAmountCentavos, actualAmountCentavos },
+      'payment amount is less than the expected checkout amount — rejecting',
+    );
+    throw new Error('Payment amount is less than the expected checkout amount.');
+  }
+  if (actualAmountCentavos > expectedAmountCentavos) {
+    logger.warn(
+      { ...context, expectedAmountCentavos, actualAmountCentavos },
+      'payment amount exceeds expected — proceeding (overpayment)',
+    );
+  }
+}
+
+/**
  * Handle `source.chargeable` webhook.
  *
  * This fires when a Source (GCash, Maya, GrabPay) becomes chargeable after
- * the user authorizes the payment on PayMongo's hosted page. We must call
+ * the user authorizes the payment on PayMongo's hosted page. We call
  * `createPaymentFromSource` to convert the source into an actual Payment.
  *
- * If the Payment is returned with status=paid, we also create the local
- * Payment + Enrollment immediately.
+ * Ordering (why it's shaped this way):
+ *   - Idempotency FIRST: `markWebhookProcessed` commits the event id before any
+ *     external call. Its unique index makes concurrent redeliveries race-safe —
+ *     exactly one caller proceeds to charge; duplicates return null. A source is
+ *     charged at most once per event.
+ *   - State 1 — the external PayMongo charge runs OUTSIDE any DB transaction, so
+ *     we never hold row locks or a pooled connection across an HTTP round-trip.
+ *     If the charge itself fails, we RELEASE the idempotency claim so PayMongo's
+ *     retry can re-attempt (a transient failure must not silently lose the sale).
+ *   - State 2 — durable local fulfillment runs in its own short transaction
+ *     (DB writes only). If it fails, the idempotency claim stays (the money was
+ *     charged) and the `payment.paid` webhook — a separate event id — is the
+ *     backstop that creates the enrollment.
+ *   - Post-purchase emails are best-effort, fired AFTER the transaction commits
+ *     (never awaited inside it — they read via the top-level `db` client, which
+ *     cannot see a transaction's uncommitted rows).
  */
 export async function handleSourceChargeable(
   event: SourceChargeableEvent,
@@ -594,90 +642,103 @@ export async function handleSourceChargeable(
   const sourceId = event.data.attributes.data.id;
   const amountCentavos = event.data.attributes.data.attributes.amount;
   const metadata = event.data.attributes.data.attributes.metadata ?? {};
+  const currency = event.data.attributes.data.attributes.currency;
 
-  return db.$transaction(async (tx) => {
-    const firstTime = await markWebhookProcessed(
-      eventId,
-      'source.chargeable',
-      'source',
+  // Idempotency claim FIRST — never charge a source twice for the same event.
+  // Concurrent redeliveries race on the unique index; only the winner proceeds.
+  const firstTime = await markWebhookProcessed(
+    eventId,
+    'source.chargeable',
+    'source',
+    sourceId,
+    `amount=${amountCentavos}`,
+    200,
+  );
+  if (!firstTime) return null;
+
+  // Read-only lookup + validation before charging.
+  const checkout = (await db.checkoutSession.findFirst({
+    where: { paymongoSourceId: sourceId, deletedAt: null },
+    select: {
+      id: true,
+      email: true,
+      finalAmountPhp: true,
+      pricingTierId: true,
+      discountCodeId: true,
+      pricingTier: { select: { name: true, tier: true, slug: true } },
+      discountCode: { select: { maxUses: true } },
+    },
+  })) as SourceFlowCheckout | null;
+  if (!checkout) {
+    // Unknown source — leave the event marked (retrying won't conjure a
+    // session) and don't charge.
+    logger.warn({ sourceId }, 'source.chargeable: no checkout session found for source');
+    return null;
+  }
+
+  // H2: reject underpayment / non-PHP currency BEFORE charging the source.
+  // Throwing returns 500 for this delivery, but the event is already marked
+  // processed above, so PayMongo's retry short-circuits (never charges, no
+  // retry storm) rather than looping on the same mismatch.
+  assertPaymentMatchesCheckout(checkout.finalAmountPhp, amountCentavos, currency, { sourceId });
+
+  // State 1 — external provider call, OUTSIDE any DB transaction.
+  let payment: PayMongoPayment;
+  try {
+    payment = await createPaymentFromSource({
+      amountCentavos,
       sourceId,
-      `amount=${amountCentavos}`,
-      200,
-      tx,
-    );
-    if (!firstTime) return null;
-
-    // Find the CheckoutSession by source ID with all fields needed
-    // for processPaymentPaidInTransaction (pricingTierId, discountCodeId, tier info)
-    const checkout = (await tx.checkoutSession.findFirst({
-      where: { paymongoSourceId: sourceId, deletedAt: null },
-      select: {
-        id: true,
-        email: true,
-        finalAmountPhp: true,
-        pricingTierId: true,
-        discountCodeId: true,
-        pricingTier: { select: { name: true, tier: true, slug: true } },
-        discountCode: { select: { maxUses: true } },
-      },
-    })) as SourceFlowCheckout | null;
-    if (!checkout) {
-      logger.warn({ sourceId }, 'source.chargeable: no checkout session found for source');
-      return null;
-    }
-
-    // H2: Verify amount consistency with webhook amount and validate currency.
-    // The finalAmountPhp is in centavos — verify consistency with webhook amount.
-    const currency = event.data.attributes.data.attributes.currency;
-    if (currency && currency !== 'PHP') {
-      logger.error(
-        { sourceId, currency, expectedCurrency: 'PHP' },
-        'source.chargeable: unexpected currency — rejecting',
+      description: `Checkout ${checkout.id} — Amazon PH Academy`,
+      metadata: { checkoutId: checkout.id, ...metadata },
+    });
+  } catch (err) {
+    // Release the idempotency claim so PayMongo's retry can re-attempt the
+    // charge — a transient failure must not silently lose the sale.
+    await db.processedWebhook
+      .deleteMany({ where: { paymongoEventId: eventId } })
+      .catch((cleanupErr) =>
+        logger.error({ cleanupErr, eventId }, 'Failed to release webhook idempotency claim'),
       );
-      throw new Error(`Unexpected currency: ${currency}. Expected PHP.`);
-    }
+    logger.error({ err, sourceId }, 'source.chargeable: charge failed; released claim for retry');
+    throw err; // surfaced to the webhook route → 500 → PayMongo retries
+  }
 
-    const expectedAmount = checkout.finalAmountPhp;
-    if (expectedAmount !== amountCentavos) {
-      logger.warn(
-        { sourceId, expectedAmount, actualAmount: amountCentavos },
-        'source.chargeable: amount mismatch — creating payment with webhook amount',
-      );
-    }
+  logger.info(
+    { sourceId, paymentId: payment.id, status: payment.status },
+    'source.chargeable: payment created from source',
+  );
 
+  // Only fulfil when the payment already settled; otherwise the payment.paid
+  // webhook completes it.
+  if (payment.status === 'paid') {
+    // State 2 — durable local fulfillment (DB writes only). A failure here does
+    // NOT undo the PayMongo charge and must not re-run State 1; payment.paid
+    // reconciles.
+    let result: PostPurchaseResult | null = null;
     try {
-      const payment = await createPaymentFromSource({
-        amountCentavos,
-        sourceId,
-        description: `Checkout ${checkout.id} — Amazon PH Academy`,
-        metadata: { checkoutId: checkout.id, ...metadata },
-      });
-
-      logger.info(
-        { sourceId, paymentId: payment.id, status: payment.status },
-        'source.chargeable: payment created from source',
-      );
-
-      // If already paid, process immediately
-      if (payment.status === 'paid') {
-        const result = await processPaymentPaidInTransaction(
+      result = await db.$transaction((tx) =>
+        processPaymentPaidInTransaction(
           tx,
           payment,
           checkout,
           event.data.attributes.data.attributes.type,
-        );
-        if (result) {
-          // Send enrollment confirmation + claim token email
-          await sendPostPurchaseEmails(result);
-        }
-      }
-
-      return payment;
+        ),
+      );
     } catch (err) {
-      logger.error({ err, sourceId }, 'source.chargeable: failed to create payment from source');
-      throw err; // Will be caught by webhook handler
+      logger.error(
+        { err, sourceId, paymentId: payment.id },
+        'source.chargeable: local fulfillment failed; payment.paid webhook will reconcile',
+      );
     }
-  });
+    if (result) {
+      // Best-effort emails, AFTER commit — never awaited inside the transaction.
+      sendPostPurchaseEmails(result).catch((err: Error) =>
+        logger.error({ err }, 'Failed to send post-purchase emails'),
+      );
+    }
+  }
+
+  return payment;
 }
 
 /**
@@ -693,7 +754,10 @@ export async function handlePaymentPaid(
   const eventId = event.data.id;
   const paymentIdPm = event.data.attributes.data.attributes.id;
   const amountCentavos = event.data.attributes.data.attributes.amount;
+  const currency = event.data.attributes.data.attributes.currency;
   const sourceId = event.data.attributes.data.attributes.source?.id;
+  // Forward the real payment method so non-GCash payments aren't mis-recorded.
+  const sourceType = event.data.attributes.data.attributes.source?.type;
 
   const checkoutSelect = {
     id: true,
@@ -735,10 +799,10 @@ export async function handlePaymentPaid(
         logger.warn({ paymentId: paymentIdPm }, 'payment.paid: no checkout session found');
         return null;
       }
-      return processPaymentInCheckout(tx, paymentIdPm, amountCentavos, checkoutByPayment);
+      return processPaymentInCheckout(tx, paymentIdPm, amountCentavos, checkoutByPayment, sourceType, currency);
     }
 
-    return processPaymentInCheckout(tx, paymentIdPm, amountCentavos, checkout);
+    return processPaymentInCheckout(tx, paymentIdPm, amountCentavos, checkout, sourceType, currency);
   });
 }
 
@@ -750,24 +814,28 @@ async function processPaymentInCheckout(
   paymentIdPm: string,
   amountCentavos: number,
   checkout: SourceFlowCheckout,
+  paymentMethod?: string,
+  currency?: string,
 ): Promise<{ enrollmentId: string; paymentId: string } | null> {
-  // H2: Reconcile amount and currency. Validate before proceeding.
-  // Note: payment.paid events from PayMongo carry amount in the top-level
-  // event which we already checked. Currency should be PHP.
-  if (checkout.finalAmountPhp !== amountCentavos) {
-    logger.warn(
-      { checkoutId: checkout.id, expected: checkout.finalAmountPhp, actual: amountCentavos },
-      'payment.paid: amount mismatch — creating enrollment with webhook amount',
-    );
+  // H2: reject underpayment / non-PHP currency rather than granting access on
+  // a webhook amount below the listed price. This event has already been marked
+  // processed by the caller, so returning null consumes it without granting an
+  // enrollment (no retry storm), matching the "refuse, don't retry" posture.
+  try {
+    assertPaymentMatchesCheckout(checkout.finalAmountPhp, amountCentavos, currency, {
+      checkoutId: checkout.id,
+      paymentId: paymentIdPm,
+    });
+  } catch (err) {
+    logger.error({ err, checkoutId: checkout.id }, 'payment.paid: amount/currency check failed — not granting access');
+    return null;
   }
 
-  // For a Payment-based flow, the paymongoPaymentId on the CheckoutSession
-  // was already set when we created the Payment (or it's set now).
-  // Source type not available from payment.paid webhook — default to GCASH
   const result = await processPaymentPaidInTransaction(
     tx,
     { id: paymentIdPm, status: 'paid', amount: amountCentavos, paidAt: new Date().toISOString() },
     checkout,
+    paymentMethod,
   );
 
   // Send post-purchase emails (outside transaction — best-effort)
@@ -820,7 +888,9 @@ async function processPaymentPaidInTransaction(
       netAmountPhp: checkout.finalAmountPhp,
       currency: 'PHP',
       paymongoPaymentId: paymentIdPm,
-      method: paymentMethod ? mapPaymentMethod(paymentMethod) : PaymentMethod.GCASH,
+      // Record the real method from the source type; only fall back to OTHER
+      // when it's genuinely unavailable — never silently assume GCash.
+      method: paymentMethod ? mapPaymentMethod(paymentMethod) : PaymentMethod.OTHER,
       status: PaymentStatus.COMPLETED,
       paidAt: payment.paidAt ? new Date(payment.paidAt) : new Date(),
     },

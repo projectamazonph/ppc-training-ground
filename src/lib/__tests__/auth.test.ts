@@ -262,6 +262,21 @@ describe('auth.ts', () => {
     await expect(requireAdmin()).rejects.toThrow('NEXT_REDIRECT');
   });
 
+  it('requireAdmin fails closed when the authoritative role lookup returns null', async () => {
+    // The row is gone from requireAdmin's own lookup (e.g. soft-deleted between
+    // requireAuth's read and this one — a narrow TOCTOU window). We must deny,
+    // not fall back to trusting the JWT's possibly-stale ADMIN claim.
+    const token = await signToken({
+      sub: 'u1', email: 'ghost@b.com', role: 'ADMIN', name: 'Ghost',
+    });
+    mockCookieStore.get.mockReturnValue({ name: 'amph_auth', value: token });
+    mockDb.user.findUnique
+      .mockResolvedValueOnce({ xp: 0, level: 1, streakDays: 0, status: 'ACTIVE', deletedAt: null })
+      .mockResolvedValueOnce(null);
+
+    await expect(requireAdmin()).rejects.toThrow('NEXT_REDIRECT');
+  });
+
   // ── verifyToken: invalid payload shape (lines 80-81) ────────────────────
 
   it('verifyToken returns null when payload fields have wrong types', async () => {

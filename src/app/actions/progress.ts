@@ -101,9 +101,21 @@ export const markLessonCompleteAction = createSafeAction(slugsSchema, async (dat
     throw new Error('Complete this lesson by passing its quiz.');
   }
 
-  // Mark complete (idempotent) then award XP exactly once (C10). The two are
-  // deliberately separate: re-completing a lesson must never re-grant XP, but
-  // the progress row staying COMPLETED is harmless.
+  // Award XP exactly once (C10), THEN mark the lesson complete. These can't
+  // share one transaction: awardXpOnce relies on its ledger's unique-index
+  // insert failing (P2002) to enforce exactly-once, and a P2002 inside an outer
+  // transaction would abort the whole thing — including the progress write —
+  // breaking idempotent re-completion. Awarding first means any XP failure
+  // leaves the lesson un-completed and cleanly retryable, rather than
+  // "completed but no XP." A crash in the gap self-heals: the lesson still
+  // shows incomplete, and re-completing no-ops the (already-granted) XP.
+  await awardXpOnce(
+    user.id,
+    `lesson-complete:${lesson.id}`,
+    lesson.xpReward,
+    'Lesson completed',
+  );
+
   await db.lessonProgress.upsert({
     where: {
       userId_lessonId: { userId: user.id, lessonId: lesson.id },
@@ -121,13 +133,6 @@ export const markLessonCompleteAction = createSafeAction(slugsSchema, async (dat
       xpEarned: lesson.xpReward,
     },
   });
-
-  await awardXpOnce(
-    user.id,
-    `lesson-complete:${lesson.id}`,
-    lesson.xpReward,
-    'Lesson completed',
-  );
 
   revalidatePath(`/dashboard/courses/${data.courseSlug}`);
   revalidatePath(`/dashboard/courses/${data.courseSlug}/lessons/${data.lessonSlug}`);
@@ -201,10 +206,26 @@ export const submitQuizAction = createSafeAction(submitQuizSchema, async (data) 
     timeSpentSeconds: data.timeSpentSeconds ?? 0,
   });
 
-  // If passed, mark lesson complete (idempotent) and award XP exactly once.
-  // Completion XP and the pass bonus are separate ledger events so neither can
-  // be double-granted by a re-submit or a concurrent pass (C10).
+  // If passed, award XP exactly once THEN mark the lesson complete. Completion
+  // XP and the pass bonus are separate ledger events so neither can be
+  // double-granted by a re-submit or a concurrent pass (C10). XP is awarded
+  // before the progress write for the same reason as markLessonCompleteAction:
+  // a shared transaction is incompatible with the ledger's P2002-based
+  // exactly-once gate, and awarding first keeps any failure cleanly retryable.
   if (passed) {
+    await awardXpOnce(
+      user.id,
+      `lesson-complete:${lesson.id}`,
+      lesson.xpReward,
+      'Lesson completed',
+    );
+    await awardXpOnce(
+      user.id,
+      `quiz-pass:${lesson.quiz.id}`,
+      QUIZ_PASS_BONUS_XP,
+      'Quiz passed',
+    );
+
     await db.lessonProgress.upsert({
       where: {
         userId_lessonId: { userId: user.id, lessonId: lesson.id },
@@ -222,19 +243,6 @@ export const submitQuizAction = createSafeAction(submitQuizSchema, async (data) 
         xpEarned: lesson.xpReward + QUIZ_PASS_BONUS_XP,
       },
     });
-
-    await awardXpOnce(
-      user.id,
-      `lesson-complete:${lesson.id}`,
-      lesson.xpReward,
-      'Lesson completed',
-    );
-    await awardXpOnce(
-      user.id,
-      `quiz-pass:${lesson.quiz.id}`,
-      QUIZ_PASS_BONUS_XP,
-      'Quiz passed',
-    );
   }
 
   revalidatePath(`/dashboard/courses/${data.courseSlug}/lessons/${data.lessonSlug}`);

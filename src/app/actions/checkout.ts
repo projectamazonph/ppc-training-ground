@@ -43,6 +43,8 @@ import {
 import { getSession } from '@/lib/auth';
 import { rateLimit } from '@/lib/rate-limit';
 import { createSafeAction, type ActionResult } from '@/lib/validation';
+import { CheckoutStatus } from '@/lib/enums';
+import { logger } from '@/lib/logger';
 import { z } from 'zod';
 
 // ---------------------------------------------------------------------------
@@ -205,6 +207,17 @@ export async function createCheckoutSessionAction(
   try {
     source = await createSource(sourceInput);
   } catch (err) {
+    // The CheckoutSession row was created first (H1) but its PayMongo Source
+    // never came into being — mark it ERROR so it isn't left dangling as a
+    // PENDING row forever (there is no cron/TTL sweep to reclaim it).
+    await db.checkoutSession
+      .update({
+        where: { id: checkoutSessionId },
+        data: { status: CheckoutStatus.ERROR, failedAt: new Date(), failureReason: 'source-creation-failed' },
+      })
+      .catch((cleanupErr) =>
+        logger.error({ cleanupErr, checkoutSessionId }, 'Failed to mark checkout session ERROR after source failure'),
+      );
     if (err instanceof PayMongoError) {
       return { success: false as const, error: `Payment error: ${err.message}` };
     }

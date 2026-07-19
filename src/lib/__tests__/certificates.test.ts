@@ -156,6 +156,30 @@ describe('certificates.ts', () => {
         }),
       );
     });
+
+    it('returns the winner cert (not a crash) when the create loses the unique-index race (H7 P2002)', async () => {
+      mockCount.mockResolvedValue(10);
+      const { db } = await import('@/lib/db');
+      (db.lessonProgress.count as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(10);
+      // First findFirst: no active cert (pre-check). Second findFirst (after
+      // P2002): the row the racing writer committed.
+      mockFindFirst
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({
+          id: 'cert-winner',
+          verificationHash: 'winner-hash',
+          courseId: 'c-1',
+          userId: 'u-1',
+          issuedAt: new Date('2026-07-15'),
+        });
+      const p2002 = Object.assign(new Error('Unique constraint failed'), { code: 'P2002' });
+      mockCreate.mockRejectedValue(p2002);
+
+      const result = await issueCertificate('u-1', 'c-1');
+      expect(result).not.toBeNull();
+      expect(result!.id).toBe('cert-winner');
+      expect(result!.alreadyExisted).toBe(true);
+    });
   });
 
   describe('getCertificateByVerificationHash', () => {

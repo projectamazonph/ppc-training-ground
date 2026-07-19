@@ -74,3 +74,26 @@ WHERE u.email <> lower(btrim(u.email))
     WHERE o.id <> u.id
       AND o.email = lower(btrim(u.email))
   );
+
+-- Surface the rows we deliberately skipped (their canonical form collides with
+-- another account) so they don't vanish silently — canonicalized lookups
+-- (findOrCreateUserByEmail, signUpAction) query by lowercase and can't find a
+-- still-mixed-case row. These need manual reconciliation. Emitted as a WARNING
+-- so it shows in migration/deploy logs; run scripts/report-email-collisions.ts
+-- afterwards to list them again on demand.
+DO $$
+DECLARE
+  skipped_count INTEGER;
+BEGIN
+  SELECT count(*) INTO skipped_count
+  FROM "User" u
+  WHERE u.email <> lower(btrim(u.email))
+    AND EXISTS (
+      SELECT 1 FROM "User" o
+      WHERE o.id <> u.id
+        AND o.email = lower(btrim(u.email))
+    );
+  IF skipped_count > 0 THEN
+    RAISE WARNING 'H6 email canonicalization: % account(s) left un-normalized due to a case-insensitive collision. Run scripts/report-email-collisions.ts and reconcile manually.', skipped_count;
+  END IF;
+END $$;
