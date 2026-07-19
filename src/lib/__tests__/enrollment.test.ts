@@ -676,7 +676,7 @@ describe('enrollment.ts', () => {
         }),
       );
       // Post-purchase emails fire AFTER the transaction commits (best-effort,
-      // not awaited inside it) — let the pending microtasks drain before
+      // not awaited inside it) - let the pending microtasks drain before
       // asserting on them.
       await new Promise((resolve) => setImmediate(resolve));
       // The dead-code bug this task fixes: a NEW guest user must get the

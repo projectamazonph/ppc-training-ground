@@ -264,7 +264,7 @@ describe('auth.ts', () => {
 
   it('requireAdmin fails closed when the authoritative role lookup returns null', async () => {
     // The row is gone from requireAdmin's own lookup (e.g. soft-deleted between
-    // requireAuth's read and this one — a narrow TOCTOU window). We must deny,
+    // requireAuth's read and this one - a narrow TOCTOU window). We must deny,
     // not fall back to trusting the JWT's possibly-stale ADMIN claim.
     const token = await signToken({
       sub: 'u1', email: 'ghost@b.com', role: 'ADMIN', name: 'Ghost',

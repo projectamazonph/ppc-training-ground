@@ -41,7 +41,7 @@ import { auditLog } from '@/lib/admin-audit';
 /**
  * Best-effort AuditLog for a refund admin action. The state transition has
  * already been committed by the time we log it, so a logging failure must not
- * break the action or misreport a refund that actually moved money — we log
+ * break the action or misreport a refund that actually moved money - we log
  * the failure and move on (AGENTS.md: every admin action logs to AuditLog).
  */
 async function auditRefundAction(
@@ -301,7 +301,7 @@ export async function approveRefundAction(
     return {
       success: false,
       error:
-        'Refund status is unknown (network error). It has been left pending and will reconcile automatically. Do not retry.',
+        'Refund status is unknown (network error). It has been left for automatic reconciliation. Do not retry.',
     };
   }
 

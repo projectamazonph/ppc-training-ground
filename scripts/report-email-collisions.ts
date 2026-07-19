@@ -4,7 +4,7 @@
  * because canonicalizing it would collide with another account's email.
  *
  * The H6 backfill migration (20260718000000_audit_integrity_fixes) skips these
- * rows on purpose — normalizing them would violate the case-sensitive unique
+ * rows on purpose - normalizing them would violate the case-sensitive unique
  * email constraint. Canonicalized lookups (findOrCreateUserByEmail,
  * signUpAction) query by lowercase, so a still-mixed-case row is effectively
  * unreachable until an operator reconciles the duplicate accounts by hand.
@@ -38,7 +38,7 @@ async function main() {
   `;
 
   if (rows.length === 0) {
-    console.log('No email-canonicalization collisions — every account is canonical.');
+    console.log('No email-canonicalization collisions - every account is canonical.');
     return;
   }
 

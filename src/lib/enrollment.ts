@@ -581,7 +581,7 @@ type SourceFlowCheckout = {
  * Reject a webhook-reported payment whose currency is not PHP or whose amount
  * is less than the checkout's expected amount (H2). Underpayment must never
  * grant full tier access; a non-PHP currency (including an empty string) is
- * likewise refused. Overpayment only warns — it isn't a security issue.
+ * likewise refused. Overpayment only warns - it isn't a security issue.
  *
  * A `currency` of `undefined` skips the currency assertion (some events, e.g.
  * `payment.paid`, don't carry it); the amount assertion always runs.
@@ -593,20 +593,20 @@ function assertPaymentMatchesCheckout(
   context: Record<string, unknown>,
 ): void {
   if (currency !== undefined && currency !== 'PHP') {
-    logger.error({ ...context, currency }, 'payment currency is not PHP — rejecting');
+    logger.error({ ...context, currency }, 'payment currency is not PHP - rejecting');
     throw new Error(`Unexpected currency: ${currency || '(empty)'}. Expected PHP.`);
   }
   if (actualAmountCentavos < expectedAmountCentavos) {
     logger.error(
       { ...context, expectedAmountCentavos, actualAmountCentavos },
-      'payment amount is less than the expected checkout amount — rejecting',
+      'payment amount is less than the expected checkout amount - rejecting',
     );
     throw new Error('Payment amount is less than the expected checkout amount.');
   }
   if (actualAmountCentavos > expectedAmountCentavos) {
     logger.warn(
       { ...context, expectedAmountCentavos, actualAmountCentavos },
-      'payment amount exceeds expected — proceeding (overpayment)',
+      'payment amount exceeds expected - proceeding (overpayment)',
     );
   }
 }
@@ -620,19 +620,19 @@ function assertPaymentMatchesCheckout(
  *
  * Ordering (why it's shaped this way):
  *   - Idempotency FIRST: `markWebhookProcessed` commits the event id before any
- *     external call. Its unique index makes concurrent redeliveries race-safe —
+ *     external call. Its unique index makes concurrent redeliveries race-safe -
  *     exactly one caller proceeds to charge; duplicates return null. A source is
  *     charged at most once per event.
- *   - State 1 — the external PayMongo charge runs OUTSIDE any DB transaction, so
+ *   - State 1 - the external PayMongo charge runs OUTSIDE any DB transaction, so
  *     we never hold row locks or a pooled connection across an HTTP round-trip.
  *     If the charge itself fails, we RELEASE the idempotency claim so PayMongo's
  *     retry can re-attempt (a transient failure must not silently lose the sale).
- *   - State 2 — durable local fulfillment runs in its own short transaction
+ *   - State 2 - durable local fulfillment runs in its own short transaction
  *     (DB writes only). If it fails, the idempotency claim stays (the money was
- *     charged) and the `payment.paid` webhook — a separate event id — is the
+ *     charged) and the `payment.paid` webhook - a separate event id - is the
  *     backstop that creates the enrollment.
  *   - Post-purchase emails are best-effort, fired AFTER the transaction commits
- *     (never awaited inside it — they read via the top-level `db` client, which
+ *     (never awaited inside it - they read via the top-level `db` client, which
  *     cannot see a transaction's uncommitted rows).
  */
 export async function handleSourceChargeable(
@@ -644,7 +644,7 @@ export async function handleSourceChargeable(
   const metadata = event.data.attributes.data.attributes.metadata ?? {};
   const currency = event.data.attributes.data.attributes.currency;
 
-  // Idempotency claim FIRST — never charge a source twice for the same event.
+  // Idempotency claim FIRST - never charge a source twice for the same event.
   // Concurrent redeliveries race on the unique index; only the winner proceeds.
   const firstTime = await markWebhookProcessed(
     eventId,
@@ -670,7 +670,7 @@ export async function handleSourceChargeable(
     },
   })) as SourceFlowCheckout | null;
   if (!checkout) {
-    // Unknown source — leave the event marked (retrying won't conjure a
+    // Unknown source - leave the event marked (retrying won't conjure a
     // session) and don't charge.
     logger.warn({ sourceId }, 'source.chargeable: no checkout session found for source');
     return null;
@@ -682,18 +682,18 @@ export async function handleSourceChargeable(
   // retry storm) rather than looping on the same mismatch.
   assertPaymentMatchesCheckout(checkout.finalAmountPhp, amountCentavos, currency, { sourceId });
 
-  // State 1 — external provider call, OUTSIDE any DB transaction.
+  // State 1 - external provider call, OUTSIDE any DB transaction.
   let payment: PayMongoPayment;
   try {
     payment = await createPaymentFromSource({
       amountCentavos,
       sourceId,
-      description: `Checkout ${checkout.id} — Amazon PH Academy`,
+      description: `Checkout ${checkout.id} - Amazon PH Academy`,
       metadata: { checkoutId: checkout.id, ...metadata },
     });
   } catch (err) {
     // Release the idempotency claim so PayMongo's retry can re-attempt the
-    // charge — a transient failure must not silently lose the sale.
+    // charge - a transient failure must not silently lose the sale.
     await db.processedWebhook
       .deleteMany({ where: { paymongoEventId: eventId } })
       .catch((cleanupErr) =>
@@ -711,7 +711,7 @@ export async function handleSourceChargeable(
   // Only fulfil when the payment already settled; otherwise the payment.paid
   // webhook completes it.
   if (payment.status === 'paid') {
-    // State 2 — durable local fulfillment (DB writes only). A failure here does
+    // State 2 - durable local fulfillment (DB writes only). A failure here does
     // NOT undo the PayMongo charge and must not re-run State 1; payment.paid
     // reconciles.
     let result: PostPurchaseResult | null = null;
@@ -731,7 +731,7 @@ export async function handleSourceChargeable(
       );
     }
     if (result) {
-      // Best-effort emails, AFTER commit — never awaited inside the transaction.
+      // Best-effort emails, AFTER commit - never awaited inside the transaction.
       sendPostPurchaseEmails(result).catch((err: Error) =>
         logger.error({ err }, 'Failed to send post-purchase emails'),
       );
@@ -827,7 +827,7 @@ async function processPaymentInCheckout(
       paymentId: paymentIdPm,
     });
   } catch (err) {
-    logger.error({ err, checkoutId: checkout.id }, 'payment.paid: amount/currency check failed — not granting access');
+    logger.error({ err, checkoutId: checkout.id }, 'payment.paid: amount/currency check failed - not granting access');
     return null;
   }
 
@@ -889,7 +889,7 @@ async function processPaymentPaidInTransaction(
       currency: 'PHP',
       paymongoPaymentId: paymentIdPm,
       // Record the real method from the source type; only fall back to OTHER
-      // when it's genuinely unavailable — never silently assume GCash.
+      // when it's genuinely unavailable - never silently assume GCash.
       method: paymentMethod ? mapPaymentMethod(paymentMethod) : PaymentMethod.OTHER,
       status: PaymentStatus.COMPLETED,
       paidAt: payment.paidAt ? new Date(payment.paidAt) : new Date(),

@@ -104,7 +104,7 @@ export const markLessonCompleteAction = createSafeAction(slugsSchema, async (dat
   // Award XP exactly once (C10), THEN mark the lesson complete. These can't
   // share one transaction: awardXpOnce relies on its ledger's unique-index
   // insert failing (P2002) to enforce exactly-once, and a P2002 inside an outer
-  // transaction would abort the whole thing — including the progress write —
+  // transaction would abort the whole thing - including the progress write -
   // breaking idempotent re-completion. Awarding first means any XP failure
   // leaves the lesson un-completed and cleanly retryable, rather than
   // "completed but no XP." A crash in the gap self-heals: the lesson still

@@ -76,7 +76,7 @@ WHERE u.email <> lower(btrim(u.email))
   );
 
 -- Surface the rows we deliberately skipped (their canonical form collides with
--- another account) so they don't vanish silently — canonicalized lookups
+-- another account) so they don't vanish silently - canonicalized lookups
 -- (findOrCreateUserByEmail, signUpAction) query by lowercase and can't find a
 -- still-mixed-case row. These need manual reconciliation. Emitted as a WARNING
 -- so it shows in migration/deploy logs; run scripts/report-email-collisions.ts

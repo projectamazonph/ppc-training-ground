@@ -49,10 +49,11 @@ export default async function CheckoutCompletePage({ searchParams }: PageProps) 
   // the legacy `id` param, so this page reliably finds the session instead of
   // depending solely on webhook timing.
   const checkoutSessionId = checkout_id || id || undefined;
-  // C3: validateRedirectUrl replaces the ad hoc same-origin check — rejects
+  // C3: validateRedirectUrl replaces the ad hoc same-origin check. It rejects
   // '//evil.example', 'javascript:', encoded schemes, etc., not just a bare
-  // '//' prefix.
-  const returnUrl = validateRedirectUrl(rawReturnUrl, undefined) || undefined;
+  // '//' prefix. Use an empty-string fallback so missing/invalid input becomes
+  // undefined (not the default '/'), letting FailedCard fall back to /pricing.
+  const returnUrl = validateRedirectUrl(rawReturnUrl, '') || undefined;
   const checkout = await resolveCheckout(checkoutSessionId);
 
   if (status === 'failed') {

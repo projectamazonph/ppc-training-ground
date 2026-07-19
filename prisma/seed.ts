@@ -401,9 +401,8 @@ async function main(): Promise<void> {
   await grandfatherFreeEnrollment();
 
   console.log('\nSeed complete.');
-  console.log(`\nSign in with: ${process.env.ADMIN_EMAIL ?? '[email protected]'}`);
-  console.log(`Default password: ${process.env.ADMIN_PASSWORD ?? 'ChangeMe123!'}`);
-  console.log('(Change the password after first sign-in.)');
+  console.log(`\nSign in with the admin email you configured (ADMIN_EMAIL): ${process.env.ADMIN_EMAIL ?? '(unset)'}`);
+  console.log('Use the ADMIN_PASSWORD you set. Change it after first sign-in.');
 }
 
 main()

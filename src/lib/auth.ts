@@ -199,7 +199,7 @@ export async function requireAuth(): Promise<SessionUser> {
 export async function requireAdmin(): Promise<SessionUser> {
   const user = await requireAuth();
 
-  // H3: Load the authoritative role from the database — the JWT claim can be
+  // H3: Load the authoritative role from the database. The JWT claim can be
   // stale (e.g. an admin was demoted after the token was issued, but the
   // cookie is still valid for the rest of its lifetime).
   const dbUser = await db.user.findUnique({
@@ -208,7 +208,7 @@ export async function requireAdmin(): Promise<SessionUser> {
   });
 
   // Fail closed: if the row is missing (soft-deleted between requireAuth's
-  // lookup and this one — a narrow TOCTOU window), deny rather than fall back
+  // lookup and this one, a narrow TOCTOU window), deny rather than fall back
   // to the JWT's possibly-stale role claim, which would defeat this check.
   if (!dbUser || dbUser.role !== 'ADMIN') {
     log.warn(

@@ -208,7 +208,7 @@ export async function createCheckoutSessionAction(
     source = await createSource(sourceInput);
   } catch (err) {
     // The CheckoutSession row was created first (H1) but its PayMongo Source
-    // never came into being — mark it ERROR so it isn't left dangling as a
+    // never came into being - mark it ERROR so it isn't left dangling as a
     // PENDING row forever (there is no cron/TTL sweep to reclaim it).
     await db.checkoutSession
       .update({

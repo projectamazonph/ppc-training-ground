@@ -114,7 +114,7 @@ export async function issueCertificate(
   // manual "issue" action and the auto-issue page render) can both pass the
   // findFirst and both create. The partial unique index
   // `Certificate_active_per_user_course_key` (one ACTIVE cert per user+course)
-  // makes the loser fail with P2002 — we treat that as "already issued" and
+  // makes the loser fail with P2002 - we treat that as "already issued" and
   // return the winner's row, exactly like every other create-under-race in the
   // audit remediation (refunds, XP ledger, quiz attempts).
   try {
