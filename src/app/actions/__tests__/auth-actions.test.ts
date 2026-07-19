@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { signInAction, signUpAction, signOutAction } from '@/app/actions/auth';
+import { PLACEHOLDER_PASSWORD_PREFIX } from '@/lib/claim-token';
 
 const mockSignToken = vi.fn();
 const mockSetAuthCookie = vi.fn();
@@ -18,7 +19,7 @@ vi.mock('@/lib/auth', () => ({
 
 vi.mock('@/lib/db', () => ({
   db: {
-    user: { findUnique: vi.fn(), create: vi.fn(), update: vi.fn() },
+    user: { findUnique: vi.fn(), create: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
   },
 }));
 
@@ -75,6 +76,62 @@ describe('auth actions', () => {
     const result = await signUpAction({ email: 'new@b.com', password: 'pass1234', confirmPassword: 'pass1234', name: 'New' });
     expect(result.success).toBe(true);
     expect((result as any).data.userId).toBe('u2');
+  });
+
+  // C6: guest-checkout placeholder accounts can only be claimed with the
+  // single-use token emailed to the buyer.
+  const placeholderUser = {
+    id: 'u-guest',
+    email: 'guest@b.com',
+    name: 'Guest',
+    role: 'STUDENT',
+    status: 'ACTIVE',
+    passwordHash: 'placeholder_abc123',
+    emailVerified: null,
+    lastActiveAt: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+  };
+
+  it('signUpAction refuses to claim a placeholder without a token', async () => {
+    (db.user.findUnique as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(placeholderUser);
+    const result = await signUpAction({ email: 'guest@b.com', password: 'pass1234', confirmPassword: 'pass1234' });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toMatch(/claim link/i);
+    expect(db.user.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('signUpAction rejects an invalid or expired claim token', async () => {
+    (db.user.findUnique as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(placeholderUser);
+    // Guarded update matches zero rows → token invalid/expired/already used.
+    (db.user.updateMany as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({ count: 0 });
+    const result = await signUpAction({ email: 'guest@b.com', password: 'pass1234', confirmPassword: 'pass1234', claimToken: 'wrong-token' });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toMatch(/invalid or has expired/i);
+  });
+
+  it('signUpAction claims a placeholder with a valid token (atomic consume)', async () => {
+    (db.user.findUnique as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(placeholderUser);
+    (db.user.updateMany as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({ count: 1 });
+    const result = await signUpAction({ email: 'guest@b.com', password: 'pass1234', confirmPassword: 'pass1234', claimToken: 'right-token' });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.userId).toBe('u-guest');
+    // The consume is a guarded updateMany, not a blind update. Every predicate
+    // that protects against takeover/replay must be asserted so removing any of
+    // them fails this test: id, placeholder marker, token hash, and expiry.
+    expect(db.user.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          id: 'u-guest',
+          passwordHash: { startsWith: PLACEHOLDER_PASSWORD_PREFIX },
+          claimTokenHash: expect.any(String),
+          claimTokenExpiresAt: expect.objectContaining({ gt: expect.any(Date) }),
+        }),
+        data: expect.objectContaining({ claimTokenHash: null, claimTokenExpiresAt: null }),
+      }),
+    );
+    expect(db.user.update).not.toHaveBeenCalled();
   });
 
   it('signOutAction clears cookie and returns ok', async () => {

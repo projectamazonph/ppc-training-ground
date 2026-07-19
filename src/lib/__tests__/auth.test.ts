@@ -226,7 +226,11 @@ describe('auth.ts', () => {
       sub: 'u1', email: 'admin@b.com', role: 'ADMIN', name: 'Admin',
     });
     mockCookieStore.get.mockReturnValue({ name: 'amph_auth', value: token });
-    mockDb.user.findUnique.mockResolvedValue({ xp: 0, level: 1, streakDays: 0, status: 'ACTIVE', deletedAt: null });
+    // H3: requireAdmin queries the DB twice — once inside getSession(), once
+    // to load the authoritative role (the JWT claim can be stale).
+    mockDb.user.findUnique
+      .mockResolvedValueOnce({ xp: 0, level: 1, streakDays: 0, status: 'ACTIVE', deletedAt: null })
+      .mockResolvedValueOnce({ role: 'ADMIN' });
 
     const user = await requireAdmin();
     expect(user.role).toBe('ADMIN');
@@ -237,7 +241,38 @@ describe('auth.ts', () => {
       sub: 'u1', email: 'a@b.com', role: 'STUDENT', name: 'A',
     });
     mockCookieStore.get.mockReturnValue({ name: 'amph_auth', value: token });
-    mockDb.user.findUnique.mockResolvedValue({ xp: 0, level: 1, streakDays: 0, status: 'ACTIVE', deletedAt: null });
+    mockDb.user.findUnique
+      .mockResolvedValueOnce({ xp: 0, level: 1, streakDays: 0, status: 'ACTIVE', deletedAt: null })
+      .mockResolvedValueOnce({ role: 'STUDENT' });
+
+    await expect(requireAdmin()).rejects.toThrow('NEXT_REDIRECT');
+  });
+
+  it('requireAdmin redirects a STUDENT even when the stale JWT claims ADMIN (H3)', async () => {
+    // The JWT was issued while the user was an admin; they've since been
+    // demoted in the DB. requireAdmin must not trust the stale claim.
+    const token = await signToken({
+      sub: 'u1', email: 'demoted@b.com', role: 'ADMIN', name: 'Demoted',
+    });
+    mockCookieStore.get.mockReturnValue({ name: 'amph_auth', value: token });
+    mockDb.user.findUnique
+      .mockResolvedValueOnce({ xp: 0, level: 1, streakDays: 0, status: 'ACTIVE', deletedAt: null })
+      .mockResolvedValueOnce({ role: 'STUDENT' });
+
+    await expect(requireAdmin()).rejects.toThrow('NEXT_REDIRECT');
+  });
+
+  it('requireAdmin fails closed when the authoritative role lookup returns null', async () => {
+    // The row is gone from requireAdmin's own lookup (e.g. soft-deleted between
+    // requireAuth's read and this one - a narrow TOCTOU window). We must deny,
+    // not fall back to trusting the JWT's possibly-stale ADMIN claim.
+    const token = await signToken({
+      sub: 'u1', email: 'ghost@b.com', role: 'ADMIN', name: 'Ghost',
+    });
+    mockCookieStore.get.mockReturnValue({ name: 'amph_auth', value: token });
+    mockDb.user.findUnique
+      .mockResolvedValueOnce({ xp: 0, level: 1, streakDays: 0, status: 'ACTIVE', deletedAt: null })
+      .mockResolvedValueOnce(null);
 
     await expect(requireAdmin()).rejects.toThrow('NEXT_REDIRECT');
   });

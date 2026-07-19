@@ -67,12 +67,24 @@ export async function hasBlockingRefundRequest(paymentId: string): Promise<boole
 }
 
 /**
- * The amount already refunded for this payment (in PHP). Used to compute
- * how much of a payment can still be refunded when admins approve a
- * partial request.
+ * A Prisma client or a transaction-scoped client. Lets refund helpers run
+ * inside the same transaction as the writes that depend on them.
  */
-export async function alreadyRefundedAmountPhp(paymentId: string): Promise<number> {
-  const completed = await db.refundRequest.findMany({
+type RefundDbClient = typeof db | Parameters<Parameters<typeof db.$transaction>[0]>[0];
+
+/**
+ * The amount already refunded for this payment (in PHP): the sum of every
+ * PROCESSED refund request. This is the single source of truth for cumulative
+ * refunded amount (audit C8) — both the admin approval path and the
+ * `payment.refunded` webhook write `Payment.refundAmountPhp` from this value
+ * instead of each adding its own amount, so a refund can never be counted
+ * twice regardless of which path runs first.
+ */
+export async function alreadyRefundedAmountPhp(
+  paymentId: string,
+  client: RefundDbClient = db,
+): Promise<number> {
+  const completed = await client.refundRequest.findMany({
     where: {
       paymentId,
       deletedAt: null,

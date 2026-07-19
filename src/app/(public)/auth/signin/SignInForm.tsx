@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button, Input } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
 import { signInAction, signUpAction } from '@/app/actions/auth';
+import { validateRedirectUrl } from '@/lib/redirect-url';
 import { Toast } from '@/components/ui/Toast';
 import styles from './auth.module.css';
 
@@ -27,7 +28,7 @@ export function SignInForm({
       password: formData.get('password'),
     });
     if (result.success) {
-      const target = result.data.role === 'ADMIN' ? '/admin' : (redirectTo || '/');
+      const target = result.data.role === 'ADMIN' ? '/admin' : validateRedirectUrl(redirectTo);
       router.push(target);
       router.refresh();
       toast('Signed in', 'success');

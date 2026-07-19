@@ -163,6 +163,116 @@ function EnrollmentConfirmationEmail({
 }
 
 // ---------------------------------------------------------------------------
+// Account-claim email (guest checkout)
+// ---------------------------------------------------------------------------
+
+interface AccountClaimEmailProps {
+  to: string;
+  rawClaimToken: string;
+  tierName: string;
+}
+
+/**
+ * Deliver the single-use link a guest buyer uses to set a password and claim
+ * their account. This is the ONLY place the raw claim token is sent — it is
+ * never logged. The link expires (see CLAIM_TOKEN_TTL_MS).
+ */
+export async function sendAccountClaimEmail({
+  to,
+  rawClaimToken,
+  tierName,
+}: AccountClaimEmailProps): Promise<void> {
+  const claimUrl = new URL('/auth/signup', APP_URL);
+  claimUrl.searchParams.set('claim', rawClaimToken);
+  claimUrl.searchParams.set('email', to);
+  claimUrl.searchParams.set('next', '/dashboard');
+
+  await sendEmail({
+    to,
+    subject: `Claim your ${BRAND_NAME} account`,
+    react: (
+      <AccountClaimEmail claimUrl={claimUrl.toString()} tierName={tierName} />
+    ),
+  });
+}
+
+function AccountClaimEmail({ claimUrl, tierName }: { claimUrl: string; tierName: string }) {
+  return (
+    <div
+      style={{
+        fontFamily: 'Inter, system-ui, sans-serif',
+        backgroundColor: '#F5F5F0',
+        padding: '40px 20px',
+        maxWidth: '560px',
+        margin: '0 auto',
+      }}
+    >
+      <div style={{ backgroundColor: '#1A1A2E', borderRadius: '12px', padding: '32px' }}>
+        <p
+          style={{
+            color: '#FF6B35',
+            fontFamily: 'Space Grotesk, system-ui, sans-serif',
+            fontSize: '13px',
+            fontWeight: 600,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            margin: '0 0 8px',
+          }}
+        >
+          {BRAND_NAME}
+        </p>
+        <h1
+          style={{
+            color: '#FFFFFF',
+            fontFamily: 'Space Grotesk, system-ui, sans-serif',
+            fontSize: '24px',
+            fontWeight: 700,
+            margin: '0 0 20px',
+          }}
+        >
+          Set your password to finish
+        </h1>
+        <p style={{ color: '#D4D4C8', fontSize: '15px', lineHeight: 1.6, margin: '0 0 24px' }}>
+          Your payment for {tierName} went through and your enrollment is active.
+          To access your account, set a password using the secure link below.
+          It expires in 7 days.
+        </p>
+        <a
+          href={claimUrl}
+          style={{
+            display: 'inline-block',
+            backgroundColor: '#FF6B35',
+            color: '#FFFFFF',
+            textDecoration: 'none',
+            fontFamily: 'Space Grotesk, system-ui, sans-serif',
+            fontWeight: 600,
+            fontSize: '14px',
+            padding: '12px 24px',
+            borderRadius: '8px',
+          }}
+        >
+          Claim your account →
+        </a>
+        <p style={{ color: '#6B6B6B', fontSize: '12px', lineHeight: 1.6, margin: '20px 0 0' }}>
+          If you didn&apos;t make this purchase, you can ignore this email — no
+          account can be accessed without this link.
+        </p>
+      </div>
+      <p
+        style={{
+          color: '#6B6B6B',
+          fontSize: '12px',
+          textAlign: 'center',
+          margin: '20px 0 0',
+        }}
+      >
+        {`${BRAND_NAME} · projectamazonph.com`}
+      </p>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Refund status email
 // ---------------------------------------------------------------------------
 

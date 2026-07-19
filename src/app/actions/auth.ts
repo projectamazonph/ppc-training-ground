@@ -17,6 +17,10 @@ import {
 import { logger } from '@/lib/logger';
 import { rateLimit } from '@/lib/rate-limit';
 import {
+  hashClaimToken,
+  PLACEHOLDER_PASSWORD_PREFIX,
+} from '@/lib/claim-token';
+import {
   createSafeAction,
   signUpSchema,
   signInSchema,
@@ -37,32 +41,59 @@ export const signUpAction = createSafeAction(signUpSchema, async (data) => {
 
   // Two sign-up cases:
   //   1. New email — create a fresh STUDENT user.
-  //   2. Existing email with `placeholder_<uuid>` passwordHash — guest checkout
-  //      created this account; the user is now claiming it by setting a real
-  //      password. Upgrade in place: replace hash, set name, mark verified.
+  //   2. Existing email with a `placeholder_` passwordHash — guest checkout
+  //      created this account. The buyer may claim it ONLY by presenting the
+  //      single-use claim token that was emailed to that address (C5/C6).
+  //      Merely knowing the email is not enough — that was an account-takeover
+  //      hole. The token is consumed atomically.
   //   3. Existing email with a real passwordHash — email is taken.
   if (existing) {
     const isPlaceholder =
-      existing.passwordHash && existing.passwordHash.startsWith('placeholder_');
+      existing.passwordHash?.startsWith(PLACEHOLDER_PASSWORD_PREFIX) ?? false;
     if (!isPlaceholder) {
       throw new Error('An account with that email already exists.');
     }
-    const upgraded = await db.user.update({
-      where: { id: existing.id },
+    if (!data.claimToken) {
+      throw new Error(
+        'To finish your account, use the claim link we emailed you after checkout.',
+      );
+    }
+
+    const newHash = await hashPassword(data.password);
+    // Atomic consume: the update only matches while the account is still an
+    // unclaimed placeholder AND the token hash + expiry are valid. Two
+    // concurrent claims both compute the same guard, but only one UPDATE
+    // matches a still-placeholder row — the other affects zero rows. This
+    // closes the "both requests set a different password" race (C6).
+    const consumed = await db.user.updateMany({
+      where: {
+        id: existing.id,
+        passwordHash: { startsWith: PLACEHOLDER_PASSWORD_PREFIX },
+        claimTokenHash: hashClaimToken(data.claimToken),
+        claimTokenExpiresAt: { gt: new Date() },
+      },
       data: {
         name: data.name ?? existing.name,
-        passwordHash: await hashPassword(data.password),
+        passwordHash: newHash,
         emailVerified: new Date(),
+        claimTokenHash: null,
+        claimTokenExpiresAt: null,
       },
     });
+    if (consumed.count !== 1) {
+      throw new Error(
+        'This claim link is invalid or has expired. Request a new one from support.',
+      );
+    }
+
     const token = await signToken({
-      sub: upgraded.id,
-      email: upgraded.email,
-      role: upgraded.role,
-      name: upgraded.name,
+      sub: existing.id,
+      email: existing.email,
+      role: existing.role,
+      name: data.name ?? existing.name,
     });
     await setAuthCookie(token);
-    return { userId: upgraded.id };
+    return { userId: existing.id };
   }
 
   const user = await db.user.create({
@@ -156,7 +187,9 @@ export async function signUpFormAction(formData: FormData): Promise<void> {
   const result = await signUpAction({
     email: formData.get('email'),
     password: formData.get('password'),
+    confirmPassword: formData.get('confirmPassword') || formData.get('password'),
     name: formData.get('name') || undefined,
+    claimToken: formData.get('claimToken') || undefined,
   });
 
   if (result.success) {

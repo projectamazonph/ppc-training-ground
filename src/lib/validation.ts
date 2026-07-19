@@ -23,15 +23,23 @@ export type ActionResult<T = unknown> =
 // Auth schemas
 // ---------------------------------------------------------------------------
 
+// H6: emails are canonicalized (trimmed + lowercased) BEFORE validation so a
+// single spelling is stored and matched everywhere. `.trim()` runs before
+// `.email()` so surrounding whitespace never fails a legitimate address.
+const canonicalEmail = (invalidMessage: string) =>
+  z.string().trim().toLowerCase().email(invalidMessage);
+
 export const signUpSchema = z
   .object({
-    email: z.string().email('Enter a valid email. Example: [email protected]'),
+    email: canonicalEmail('Enter a valid email. Example: [email protected]'),
     password: z
       .string()
       .min(8, 'Password must be at least 8 characters.')
       .max(128, 'Password is too long.'),
     confirmPassword: z.string(),
     name: z.string().min(1, 'Enter your name.').max(100).optional(),
+    // Present only when claiming a guest-checkout placeholder account (C5/C6).
+    claimToken: z.string().min(1).max(256).optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords do not match.',
@@ -39,7 +47,7 @@ export const signUpSchema = z
   });
 
 export const signInSchema = z.object({
-  email: z.string().email('Enter a valid email.'),
+  email: canonicalEmail('Enter a valid email.'),
   password: z.string().min(1, 'Enter your password.'),
 });
 

@@ -125,6 +125,10 @@ jobs:
     env:
       DATABASE_URL: postgresql://test:test@localhost:5432/amph_v2_e2e
       JWT_SECRET: test-secret-min-32-characters-long-aaaaaaaa
+      # The seed fails loudly if these are unset (C5 hardening). CI-only test
+      # credentials, never used outside this ephemeral Postgres.
+      ADMIN_EMAIL: admin@ci.local
+      ADMIN_PASSWORD: ci-test-password-not-secret
 
     steps:
       - uses: actions/checkout@v7
@@ -183,6 +187,10 @@ jobs:
     env:
       DATABASE_URL: postgresql://test:test@localhost:5432/amph_v2_lhci
       JWT_SECRET: test-secret-min-32-characters-long-aaaaaaaa
+      # The seed fails loudly if these are unset (C5 hardening). CI-only test
+      # credentials, never used outside this ephemeral Postgres.
+      ADMIN_EMAIL: admin@ci.local
+      ADMIN_PASSWORD: ci-test-password-not-secret
 
     steps:
       - uses: actions/checkout@v7

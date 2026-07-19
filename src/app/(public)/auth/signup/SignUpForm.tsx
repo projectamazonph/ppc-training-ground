@@ -11,9 +11,15 @@ interface SignUpFormProps {
   error: string | null;
   prefilledEmail?: string;
   nextUrl?: string;
+  claimToken?: string;
 }
 
-export function SignUpForm({ error: initialError, prefilledEmail = '', nextUrl = '/' }: SignUpFormProps) {
+export function SignUpForm({
+  error: initialError,
+  prefilledEmail = '',
+  nextUrl = '/',
+  claimToken,
+}: SignUpFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(initialError);
@@ -32,6 +38,7 @@ export function SignUpForm({ error: initialError, prefilledEmail = '', nextUrl =
       password,
       confirmPassword,
       name: (formData.get('name') as string) || undefined,
+      claimToken: (formData.get('claimToken') as string) || undefined,
     });
     if (result.success) {
       // STORY-027: respect the `next` param so guest checkout returns to
@@ -47,6 +54,7 @@ export function SignUpForm({ error: initialError, prefilledEmail = '', nextUrl =
   return (
     <form action={(formData) => startTransition(() => handleSubmit(formData))} className={styles.form}>
       {error && <div className={styles.errorBanner} role="alert">{error}</div>}
+      {claimToken && <input type="hidden" name="claimToken" value={claimToken} />}
       <Input label="Name" type="text" name="name" autoComplete="name" placeholder="Maria Cruz" />
       <Input
         label="Email"
@@ -55,7 +63,14 @@ export function SignUpForm({ error: initialError, prefilledEmail = '', nextUrl =
         autoComplete="email"
         required
         defaultValue={prefilledEmail}
-        hint={prefilledEmail ? 'From your checkout. Change if needed.' : undefined}
+        readOnly={Boolean(claimToken)}
+        hint={
+          claimToken
+            ? 'This claim link is tied to this email.'
+            : prefilledEmail
+              ? 'From your checkout. Change if needed.'
+              : undefined
+        }
         placeholder="[email protected]"
       />
       <Input label="Password" type="password" name="password" autoComplete="new-password" required hint="At least 8 characters." />

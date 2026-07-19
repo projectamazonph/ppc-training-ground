@@ -10,6 +10,7 @@ import 'server-only';
 
 import { randomUUID } from 'node:crypto';
 import { db } from './db';
+import { isUniqueConstraintError } from './prisma-errors';
 
 /**
  * Total lesson count for a course, filtered to published modules and
@@ -106,47 +107,66 @@ export async function issueCertificate(
   const completion = await evaluateCourseCompletion(userId, courseId);
   if (!completion.isComplete) return null;
 
+  const existing = await findActiveCertificate(userId, courseId);
+  if (existing) return existing;
+
+  // The read-then-create above is a TOCTOU race: two concurrent requests (the
+  // manual "issue" action and the auto-issue page render) can both pass the
+  // findFirst and both create. The partial unique index
+  // `Certificate_active_per_user_course_key` (one ACTIVE cert per user+course)
+  // makes the loser fail with P2002 - we treat that as "already issued" and
+  // return the winner's row, exactly like every other create-under-race in the
+  // audit remediation (refunds, XP ledger, quiz attempts).
+  try {
+    const created = await db.certificate.create({
+      data: {
+        userId,
+        courseId,
+        status: 'ACTIVE',
+        verificationHash: randomUUID(),
+        metadata: JSON.stringify({
+          completedLessons: completion.completedLessons,
+          totalLessons: completion.totalLessons,
+        }),
+      },
+    });
+
+    return {
+      id: created.id,
+      verificationHash: created.verificationHash,
+      courseId: created.courseId,
+      userId: created.userId,
+      issuedAt: created.issuedAt,
+      alreadyExisted: false,
+    };
+  } catch (e) {
+    if (isUniqueConstraintError(e)) {
+      const winner = await findActiveCertificate(userId, courseId);
+      if (winner) return winner;
+    }
+    throw e;
+  }
+}
+
+/**
+ * Return the user's active certificate for a course, or null.
+ */
+async function findActiveCertificate(
+  userId: string,
+  courseId: string,
+): Promise<IssuedCertificate | null> {
   const existing = await db.certificate.findFirst({
-    where: {
-      userId,
-      courseId,
-      status: 'ACTIVE',
-      deletedAt: null,
-    },
+    where: { userId, courseId, status: 'ACTIVE', deletedAt: null },
     orderBy: { issuedAt: 'desc' },
   });
-
-  if (existing) {
-    return {
-      id: existing.id,
-      verificationHash: existing.verificationHash,
-      courseId: existing.courseId,
-      userId: existing.userId,
-      issuedAt: existing.issuedAt,
-      alreadyExisted: true,
-    };
-  }
-
-  const created = await db.certificate.create({
-    data: {
-      userId,
-      courseId,
-      status: 'ACTIVE',
-      verificationHash: randomUUID(),
-      metadata: JSON.stringify({
-        completedLessons: completion.completedLessons,
-        totalLessons: completion.totalLessons,
-      }),
-    },
-  });
-
+  if (!existing) return null;
   return {
-    id: created.id,
-    verificationHash: created.verificationHash,
-    courseId: created.courseId,
-    userId: created.userId,
-    issuedAt: created.issuedAt,
-    alreadyExisted: false,
+    id: existing.id,
+    verificationHash: existing.verificationHash,
+    courseId: existing.courseId,
+    userId: existing.userId,
+    issuedAt: existing.issuedAt,
+    alreadyExisted: true,
   };
 }
 

@@ -26,6 +26,12 @@ model User {
   image         String?
   passwordHash  String? // null for OAuth-only
 
+  // Guest-checkout account claiming. A guest purchase creates a placeholder
+  // user; the buyer claims it by presenting the raw claim token (only its
+  // hash is stored). Consumed atomically at signup, then both fields null.
+  claimTokenHash      String?
+  claimTokenExpiresAt DateTime?
+
   // Gamification
   role         String   @default("STUDENT")
   xp           Int      @default(0)
@@ -59,6 +65,7 @@ model User {
   reviewedRefunds      RefundRequest[]         @relation("RefundReviewer")
   payments             Payment[]
   checkoutSessions     CheckoutSession[]
+  xpLedger             XpLedger[]
   authoredCourses      Course[]                @relation("CourseAuthor")
   authoredLessons      Lesson[]                @relation("LessonAuthor")
   authoredBadges       Badge[]                 @relation("BadgeAuthor")
@@ -71,6 +78,7 @@ model User {
   @@index([status])
   @@index([role])
   @@index([lastActiveAt])
+  @@index([claimTokenHash])
 }
 
 model Account {
@@ -736,7 +744,7 @@ model RefundRequest {
   reviewedById     String?
   reviewedAt       DateTime?
   reviewerNotes    String?
-  paymongoRefundId String?
+  paymongoRefundId String?   @unique
   processedAt      DateTime?
   failedAt         DateTime?
   failureReason    String?
@@ -775,6 +783,33 @@ model ProcessedWebhook {
   @@index([eventType, processedAt])
   @@index([resourceType, resourceId])
   @@index([processedAt])
+}
+
+// ============================================================================
+// XP LEDGER (idempotent gamification awards)
+// ============================================================================
+
+// Every XP award is recorded here with a unique (userId, eventKey). The
+// User.xp increment and the ledger insert happen in ONE transaction: the
+// insert's unique constraint is what makes an award exactly-once under
+// concurrency. A duplicate completion (two racing requests, a webhook replay)
+// hits P2002 on insert, the transaction rolls back, and no XP is granted twice.
+//
+// eventKey convention: "<event>:<scope-id>" — e.g.
+//   lesson-complete:<lessonId>, quiz-pass:<quizId>, tool-pass:<sessionId>.
+model XpLedger {
+  id        String   @id @default(cuid())
+  userId    String
+  eventKey  String
+  amount    Int
+  reason    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventKey])
+  @@index([userId])
+  @@index([createdAt])
 }
 
 // ============================================================================

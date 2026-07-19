@@ -198,8 +198,23 @@ export async function requireAuth(): Promise<SessionUser> {
 
 export async function requireAdmin(): Promise<SessionUser> {
   const user = await requireAuth();
-  if (user.role !== 'ADMIN') {
-    log.warn({ component: 'auth', userId: user.id, role: user.role }, 'non-admin → redirect /');
+
+  // H3: Load the authoritative role from the database. The JWT claim can be
+  // stale (e.g. an admin was demoted after the token was issued, but the
+  // cookie is still valid for the rest of its lifetime).
+  const dbUser = await db.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  });
+
+  // Fail closed: if the row is missing (soft-deleted between requireAuth's
+  // lookup and this one, a narrow TOCTOU window), deny rather than fall back
+  // to the JWT's possibly-stale role claim, which would defeat this check.
+  if (!dbUser || dbUser.role !== 'ADMIN') {
+    log.warn(
+      { component: 'auth', userId: user.id, role: dbUser?.role ?? 'missing' },
+      'non-admin → redirect /',
+    );
     redirect('/');
   }
   log.debug({ component: 'auth', userId: user.id }, 'requireAdmin ok');

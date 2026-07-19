@@ -9,6 +9,7 @@ import {
   evaluateCourseCompletion,
   issueCertificate,
 } from '@/lib/certificates';
+import { logger } from '@/lib/logger';
 import { IssueButton } from './IssueButton';
 import styles from './certificate.module.css';
 
@@ -70,10 +71,21 @@ export default async function CertificatePage({ params }: PageProps) {
 
   // Auto-issue on page visit if eligible. This way the user sees their existing
   // cert immediately on the final lesson completion without a manual click.
+  // Issuance is best-effort here: a transient failure (or a lost issuance race)
+  // must not crash the whole page to the error boundary. We fall back to showing
+  // progress, and the manual "Issue" button remains as a retry.
   let verificationHash: string | null = activeCert?.verificationHash ?? null;
   if (!verificationHash && completion.isComplete) {
-    const issued = await issueCertificate(user.id, course.id);
-    verificationHash = issued?.verificationHash ?? null;
+    try {
+      const issued = await issueCertificate(user.id, course.id);
+      verificationHash = issued?.verificationHash ?? null;
+    } catch (err) {
+      logger.error(
+        { err, userId: user.id, courseId: course.id },
+        'Certificate auto-issue failed; showing progress fallback',
+      );
+      verificationHash = null;
+    }
   }
 
   const issuedDateFmt = new Intl.DateTimeFormat('en-PH', {

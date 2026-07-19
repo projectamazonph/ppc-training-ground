@@ -18,6 +18,18 @@ import { requireAuth } from '@/lib/auth';
 import { createSafeAction } from '@/lib/validation';
 import { type ToolType } from '@/lib/enums';
 import { evaluateBadges } from '@/lib/badges';
+import { awardXpOnce } from '@/lib/xp';
+import { isUniqueConstraintError } from '@/lib/prisma-errors';
+
+/** XP granted for a passing tool submission. */
+const TOOL_PASS_XP = 30;
+
+interface ToolGrade {
+  totalScore: number;
+  passed: boolean;
+  criteriaResults: unknown[];
+  overallFeedback: string;
+}
 
 import { gradeCampaignDraft } from '@/engine/campaign-builder/engine';
 import { getScenarioById as getCbScenario } from '@/engine/campaign-builder/scenarios';
@@ -81,13 +93,21 @@ export const saveToolSession = createSafeAction(saveSessionSchema, async (data) 
   if (!session) throw new Error('Session not found.');
   if (session.userId !== user.id) throw new Error('Forbidden.');
 
-  await db.toolSession.update({
-    where: { id: data.sessionId },
+  // H3: once a session is submitted/graded its stored state is frozen, so it
+  // stays consistent with the recorded grade. The status guard lives in the
+  // updateMany where-clause so the check and the write are one atomic
+  // operation: a submit that lands between a plain read and update can no
+  // longer let a late save overwrite the graded state.
+  const saved = await db.toolSession.updateMany({
+    where: { id: data.sessionId, userId: user.id, status: 'IN_PROGRESS' },
     data: {
       state: JSON.stringify(data.state),
       timeSpentSeconds: data.timeSpentSeconds ?? session.timeSpentSeconds,
     },
   });
+  if (saved.count !== 1) {
+    throw new Error('This session has been submitted and can no longer be edited.');
+  }
 
   return { savedAt: new Date().toISOString() };
 });
@@ -107,69 +127,78 @@ export const submitToolSession = createSafeAction(submitSessionSchema, async (da
   const session = await db.toolSession.findUnique({ where: { id: data.sessionId } });
   if (!session) throw new Error('Session not found.');
   if (session.userId !== user.id) throw new Error('Forbidden.');
-  if (session.status !== 'IN_PROGRESS') throw new Error('Session already submitted.');
 
   const scenarioId = session.scenarioId;
   if (!scenarioId) throw new Error('No scenario associated with this session.');
 
-  let grade: { totalScore: number; passed: boolean; criteriaResults: unknown[]; overallFeedback: string };
+  // The request that transitions the session out of IN_PROGRESS is the single
+  // writer of its terminal status, state, score, and (on a pass) XP. Any other
+  // request reconciles from the recorded terminal state instead. This keeps
+  // the grade, the stored state, and the XP consistent under concurrency and
+  // makes submit safely retriable after a mid-grade crash (H3).
+  let grade: ToolGrade;
+  let xpAwarded = 0;
 
-  if (session.toolType === 'CAMPAIGN_BUILDER') {
-    const scenario = getCbScenario(scenarioId);
-    if (!scenario) throw new Error('Scenario not found.');
-    const state = data.state as CampaignBuilderSessionState;
-    grade = gradeCampaignDraft(state.draft, scenario);
-  } else if (session.toolType === 'BID_ELEVATOR') {
-    const scenario = getBeScenario(scenarioId);
-    if (!scenario) throw new Error('Scenario not found.');
-    const state = data.state as BidElevatorSessionState;
-    grade = gradeBidDecisions(scenario, state.decisions);
-  } else if (session.toolType === 'STR_TRIAGE') {
-    const scenario = getStrScenario(scenarioId);
-    if (!scenario) throw new Error('Scenario not found.');
-    const state = data.state as StrTriageSessionState;
-    grade = gradeStrDecisions(scenario, state.decisions);
-  } else if (session.toolType === 'LISTING_AUDIT') {
-    const scenario = getLaScenario(scenarioId);
-    if (!scenario) throw new Error('Scenario not found.');
-    const state = data.state as ListingAuditSessionState;
-    grade = gradeListingAudit(scenario, state.findings, state.revisedListing);
-  } else if (session.toolType === 'KEYWORD_RESEARCH') {
-    const scenario = getKrScenario(scenarioId);
-    if (!scenario) throw new Error('Scenario not found.');
-    const state = data.state as KeywordResearchSessionState;
-    grade = gradeKeywordResearch(scenario, state.decisions, state.negatives);
+  if (session.status === 'IN_PROGRESS') {
+    // Grade BEFORE any write — a bad scenario or malformed state throws here
+    // and leaves the session IN_PROGRESS and retriable.
+    grade = gradeToolSession(session.toolType, scenarioId, data.state);
+    const passed = grade.passed;
+
+    let wonTransition = false;
+    try {
+      wonTransition = await db.$transaction(async (tx) => {
+        const claim = await tx.toolSession.updateMany({
+          where: { id: data.sessionId, userId: user.id, status: 'IN_PROGRESS' },
+          data: {
+            state: JSON.stringify(data.state),
+            status: passed ? 'GRADED' : 'SUBMITTED',
+            score: grade.totalScore,
+            submittedAt: new Date(),
+            timeSpentSeconds: data.timeSpentSeconds ?? session.timeSpentSeconds,
+          },
+        });
+        // Lost the race: a concurrent submit already made the session
+        // terminal. Award nothing and reconcile from the recorded state below.
+        if (claim.count !== 1) return false;
+
+        if (passed) {
+          // Only the winner writes XP, and only for a recorded pass. The
+          // ledger's unique key keeps it exactly-once even against a replay.
+          await tx.xpLedger.create({
+            data: {
+              userId: user.id,
+              eventKey: `tool-pass:${data.sessionId}`,
+              amount: TOOL_PASS_XP,
+              reason: 'Tool practice passed',
+            },
+          });
+          await tx.user.update({
+            where: { id: user.id },
+            data: { xp: { increment: TOOL_PASS_XP }, lastActiveAt: new Date() },
+          });
+        } else {
+          await tx.user.update({
+            where: { id: user.id },
+            data: { lastActiveAt: new Date() },
+          });
+        }
+        return true;
+      });
+    } catch (e) {
+      if (!isUniqueConstraintError(e)) throw e;
+      wonTransition = false;
+    }
+
+    if (wonTransition) {
+      xpAwarded = passed ? TOOL_PASS_XP : 0;
+    } else {
+      // Reconcile from whatever the winner recorded.
+      ({ grade, xpAwarded } = await reconcileTerminalSession(data.sessionId, user.id, scenarioId));
+    }
   } else {
-    throw new Error(`Unknown tool type: ${session.toolType}`);
-  }
-
-  const updated = await db.toolSession.update({
-    where: { id: data.sessionId },
-    data: {
-      state: JSON.stringify(data.state),
-      status: grade.passed ? 'GRADED' : 'SUBMITTED',
-      score: grade.totalScore,
-      submittedAt: new Date(),
-      timeSpentSeconds: data.timeSpentSeconds ?? session.timeSpentSeconds,
-    },
-  });
-
-  // Award XP only on passed submissions — failing a tool is still practice, not
-  // progress. Bump lastActiveAt so the streak counter can move forward on the
-  // next login attempt.
-  if (grade.passed) {
-    await db.user.update({
-      where: { id: user.id },
-      data: {
-        xp: { increment: 30 },
-        lastActiveAt: new Date(),
-      },
-    });
-  } else {
-    await db.user.update({
-      where: { id: user.id },
-      data: { lastActiveAt: new Date() },
-    });
+    // Session was already terminal on read — reconcile, never re-mutate.
+    ({ grade, xpAwarded } = await reconcileTerminalSession(data.sessionId, user.id, scenarioId));
   }
 
   // Badge trigger fires only on a passing submission — the only criteria that
@@ -183,15 +212,100 @@ export const submitToolSession = createSafeAction(submitSessionSchema, async (da
     : { awarded: [], totalXpGained: 0 };
 
   return {
-    sessionId: updated.id,
+    sessionId: data.sessionId,
     totalScore: grade.totalScore,
     passed: grade.passed,
     criteriaResults: grade.criteriaResults as Array<{ criterionId: string; passed: boolean; score: number; feedback: string }>,
     overallFeedback: grade.overallFeedback,
     newlyAwardedBadges: badgeResult.awarded,
-    xpAwarded: grade.passed ? 30 : 0,
+    xpAwarded,
   };
 });
+
+/**
+ * Grade a session from its RECORDED terminal state and reconcile XP. Used when
+ * this request did not win the status transition (session already terminal, or
+ * a concurrent submit won the race). The response reflects what was stored, and
+ * XP is (idempotently) ensured only when the recorded status is GRADED.
+ */
+async function reconcileTerminalSession(
+  sessionId: string,
+  userId: string,
+  scenarioId: string,
+): Promise<{ grade: ToolGrade; xpAwarded: number }> {
+  const terminal = await db.toolSession.findUnique({ where: { id: sessionId } });
+  if (!terminal) throw new Error('Session not found.');
+  const grade = gradeToolSession(terminal.toolType, scenarioId, parseState(terminal.state));
+
+  let xpAwarded = 0;
+  if (terminal.status === 'GRADED') {
+    // awardXpOnce is idempotent: it grants only if the winner hasn't already.
+    const granted = await awardXpOnce(
+      userId,
+      `tool-pass:${sessionId}`,
+      TOOL_PASS_XP,
+      'Tool practice passed',
+    );
+    xpAwarded = granted ? TOOL_PASS_XP : 0;
+  }
+  return { grade, xpAwarded };
+}
+
+/**
+ * Parse a stored session-state JSON blob. Returns `{}` on malformed JSON so
+ * grading fails closed (zero score) rather than throwing on a corrupt row.
+ */
+function parseState(raw: string): Record<string, unknown> {
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : {};
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Pure grading dispatch. Selects the scenario + engine for the tool type and
+ * returns the grade. No database writes — callers own persistence so grading
+ * can be repeated safely.
+ */
+function gradeToolSession(
+  toolType: string,
+  scenarioId: string,
+  state: Record<string, unknown>,
+): ToolGrade {
+  if (toolType === 'CAMPAIGN_BUILDER') {
+    const scenario = getCbScenario(scenarioId);
+    if (!scenario) throw new Error('Scenario not found.');
+    const s = state as unknown as CampaignBuilderSessionState;
+    return gradeCampaignDraft(s.draft, scenario);
+  }
+  if (toolType === 'BID_ELEVATOR') {
+    const scenario = getBeScenario(scenarioId);
+    if (!scenario) throw new Error('Scenario not found.');
+    const s = state as unknown as BidElevatorSessionState;
+    return gradeBidDecisions(scenario, s.decisions);
+  }
+  if (toolType === 'STR_TRIAGE') {
+    const scenario = getStrScenario(scenarioId);
+    if (!scenario) throw new Error('Scenario not found.');
+    const s = state as unknown as StrTriageSessionState;
+    return gradeStrDecisions(scenario, s.decisions);
+  }
+  if (toolType === 'LISTING_AUDIT') {
+    const scenario = getLaScenario(scenarioId);
+    if (!scenario) throw new Error('Scenario not found.');
+    const s = state as unknown as ListingAuditSessionState;
+    return gradeListingAudit(scenario, s.findings, s.revisedListing);
+  }
+  if (toolType === 'KEYWORD_RESEARCH') {
+    const scenario = getKrScenario(scenarioId);
+    if (!scenario) throw new Error('Scenario not found.');
+    const s = state as unknown as KeywordResearchSessionState;
+    return gradeKeywordResearch(scenario, s.decisions, s.negatives);
+  }
+  throw new Error(`Unknown tool type: ${toolType}`);
+}
 
 // ---------------------------------------------------------------------------
 // Helper: load a session's state for resume
