@@ -43,12 +43,18 @@ and the payment stack can be restored later from the main repo's history.
    - `NEXT_PUBLIC_APP_URL` — your production URL (needed for correct claim
      links from /admin/enroll)
    - Optional: `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN`
-3. **Migrate + seed** (locally, pointing at the production DB):
+3. **Migrate + import + seed** (locally, pointing at the production DB) —
+   order matters: the curriculum import must run before the seed's
+   course-dependent steps (live classes) can complete:
    ```bash
-   DATABASE_URL="..." pnpm prisma:deploy
-   DATABASE_URL="..." ADMIN_EMAIL="you@..." ADMIN_PASSWORD="..." pnpm prisma db seed
+   DATABASE_URL="..." ADMIN_EMAIL="you@..." ADMIN_PASSWORD="..." ./scripts/setup-db.sh
    ```
-   The seed creates the admin account, pricing tiers, courses/modules, badges.
+   or step by step:
+   ```bash
+   DATABASE_URL="..." pnpm prisma:deploy                 # schema
+   DATABASE_URL="..." pnpm tsx scripts/import-amph-content.ts  # courses/modules/lessons/quizzes
+   DATABASE_URL="..." ADMIN_EMAIL="you@..." ADMIN_PASSWORD="..." pnpm prisma db seed  # admin, tiers, badges, live classes
+   ```
 4. **Deploy**: import the repo in Vercel, pick this branch, deploy. No other
    configuration is required.
 5. **Smoke test**: sign in at `/auth/signin` with the admin account →
