@@ -30,7 +30,11 @@ import { db } from './db';
 import { CheckoutStatus, EnrollmentStatus, PaymentMethod, PaymentStatus } from './enums';
 import { alreadyRefundedAmountPhp } from './refunds';
 import { issueInvoiceForPayment } from './receipts';
-import { sendEnrollmentConfirmationEmail, sendAccountClaimEmail } from './email';
+import {
+  sendEnrollmentConfirmationEmail,
+  sendAccountClaimEmail,
+  sendPaymentFailedEmail,
+} from './email';
 import { logger } from './logger';
 import { generateClaimToken, PLACEHOLDER_PASSWORD_PREFIX } from './claim-token';
 import { createPaymentFromSource, type PayMongoPayment } from './paymongo';
@@ -142,12 +146,38 @@ export interface PaymentPaidEvent {
   };
 }
 
+export interface PaymentFailedEvent {
+  data: {
+    id: string;
+    attributes: {
+      type: 'payment.failed';
+      data: {
+        id: string;
+        attributes: {
+          id: string;
+          amount: number;
+          currency: string;
+          status: string;
+          source?: { id: string; type: string };
+          // PayMongo surfaces the decline reason under a few shapes depending
+          // on the flow; all optional and used only for logging/copy.
+          last_payment_error?: string;
+          failed_code?: string;
+          failed_message?: string;
+          metadata?: Record<string, string>;
+        };
+      };
+    };
+  };
+}
+
 export type PayMongoWebhookEvent =
   | { type: 'checkout_session.payment.paid'; payload: CheckoutPaidEvent }
   | { type: 'checkout_session.payment.failed'; payload: CheckoutFailedEvent }
   | { type: 'payment.refunded'; payload: PaymentRefundedEvent }
   | { type: 'source.chargeable'; payload: SourceChargeableEvent }
   | { type: 'payment.paid'; payload: PaymentPaidEvent }
+  | { type: 'payment.failed'; payload: PaymentFailedEvent }
   | { type: string; payload: unknown };
 
 /**
@@ -490,6 +520,89 @@ export async function handleCheckoutFailed(
 }
 
 /**
+ * Handle `payment.failed` webhook.
+ *
+ * This is the failure counterpart to `payment.paid` for the Source-based flow
+ * this codebase uses (checkout.ts creates a Source, not a hosted Checkout
+ * Session), so PayMongo fires `payment.failed` — not
+ * `checkout_session.payment.failed` — when a charge is declined. Previously
+ * this event fell through to the webhook route's `default` case and was
+ * dropped: the CheckoutSession stayed PENDING and the buyer was never told.
+ *
+ * Marks the matching CheckoutSession FAILED and best-effort emails the buyer a
+ * retry link.
+ */
+export async function handlePaymentFailed(
+  event: PaymentFailedEvent,
+): Promise<void> {
+  const eventId = event.data.id;
+  const attrs = event.data.attributes.data.attributes;
+  const paymentIdPm = attrs.id;
+  const sourceId = attrs.source?.id;
+  const reason =
+    attrs.failed_message ?? attrs.last_payment_error ?? attrs.failed_code ?? 'unknown';
+
+  const notify = await db.$transaction(async (tx) => {
+    const firstTime = await markWebhookProcessed(
+      eventId,
+      'payment.failed',
+      'payment',
+      paymentIdPm,
+      `reason=${reason}`,
+      200,
+      tx,
+    );
+    if (!firstTime) return null;
+
+    // Find the session via source id (set at checkout creation) or, failing
+    // that, a payment id we may have recorded on a prior event.
+    const checkout =
+      (sourceId
+        ? await tx.checkoutSession.findFirst({
+            where: { paymongoSourceId: sourceId, deletedAt: null },
+            select: { id: true, email: true, status: true, pricingTier: { select: { name: true } } },
+          })
+        : null) ??
+      (await tx.checkoutSession.findFirst({
+        where: { paymongoPaymentId: paymentIdPm, deletedAt: null },
+        select: { id: true, email: true, status: true, pricingTier: { select: { name: true } } },
+      }));
+
+    if (!checkout) {
+      logger.warn({ paymentId: paymentIdPm, sourceId }, 'payment.failed: no checkout session found');
+      return null;
+    }
+
+    // Never downgrade a session that already succeeded — a late/duplicate
+    // failure event must not revoke a paid enrollment.
+    if (checkout.status === CheckoutStatus.PAID) {
+      logger.warn({ checkoutId: checkout.id }, 'payment.failed: session already PAID, ignoring');
+      return null;
+    }
+
+    await tx.checkoutSession.update({
+      where: { id: checkout.id },
+      data: {
+        status: CheckoutStatus.FAILED,
+        failedAt: new Date(),
+        failureReason: reason,
+      },
+    });
+
+    return { email: checkout.email, tierName: checkout.pricingTier.name };
+  });
+
+  if (notify) {
+    // Best-effort — a failed email must not fail the webhook.
+    sendPaymentFailedEmail({
+      to: notify.email,
+      studentName: notify.email.split('@')[0] ?? 'there',
+      tierName: notify.tierName,
+    }).catch((err: Error) => logger.error({ err }, 'payment.failed: retry email send failed'));
+  }
+}
+
+/**
  * Handle `payment.refunded` webhook.
  */
 export async function handlePaymentRefunded(
@@ -554,6 +667,37 @@ export async function handlePaymentRefunded(
       }
     }
   });
+}
+
+/**
+ * Sweep stale checkout sessions to EXPIRED.
+ *
+ * A session is created PENDING with a 24h `expiresAt` (see checkout.ts). If the
+ * buyer abandons the flow, no webhook ever arrives, so nothing transitions it
+ * out of PENDING/AWAITING_PAYMENT. This leaves "orphan" sessions that the
+ * business-layer spec explicitly forbids ("every one ends in PAID, EXPIRED,
+ * FAILED, or ERROR"). This function — driven by an hourly Vercel cron at
+ * /api/cron/expire-checkouts — closes them out.
+ *
+ * Only unresolved statuses are touched; PAID/FAILED/ERROR/EXPIRED are left
+ * alone, so a race with an in-flight webhook can't clobber a real outcome.
+ * Soft-deleted rows are ignored.
+ *
+ * @returns the number of sessions expired.
+ */
+export async function sweepExpiredCheckouts(now: Date = new Date()): Promise<number> {
+  const { count } = await db.checkoutSession.updateMany({
+    where: {
+      status: { in: [CheckoutStatus.PENDING, CheckoutStatus.AWAITING_PAYMENT] },
+      expiresAt: { lt: now },
+      deletedAt: null,
+    },
+    data: { status: CheckoutStatus.EXPIRED },
+  });
+  if (count > 0) {
+    logger.info({ count }, 'sweepExpiredCheckouts: expired stale checkout sessions');
+  }
+  return count;
 }
 
 // ---------------------------------------------------------------------------

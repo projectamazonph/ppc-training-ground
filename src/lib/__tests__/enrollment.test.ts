@@ -26,7 +26,14 @@ vi.mock('@/lib/paymongo', () => ({
 vi.mock('@prisma/client', () => ({ Prisma: {}, PrismaClient: class {} }));
 
 const mockEnums = vi.hoisted(() => ({
-  CheckoutStatus: { PAID: 'PAID', FAILED: 'FAILED' },
+  CheckoutStatus: {
+    PENDING: 'PENDING',
+    AWAITING_PAYMENT: 'AWAITING_PAYMENT',
+    PAID: 'PAID',
+    EXPIRED: 'EXPIRED',
+    FAILED: 'FAILED',
+    ERROR: 'ERROR',
+  },
   EnrollmentStatus: { ACTIVE: 'ACTIVE' },
   PaymentMethod: { GCASH: 'GCASH', MAYA: 'MAYA', GRABPAY: 'GRABPAY', CREDIT_CARD: 'CREDIT_CARD', BANK_TRANSFER: 'BANK_TRANSFER', OTHER: 'OTHER' },
   PaymentStatus: { COMPLETED: 'COMPLETED', REFUNDED: 'REFUNDED', PARTIALLY_REFUNDED: 'PARTIALLY_REFUNDED' },
@@ -38,6 +45,7 @@ vi.mock('@/lib/receipts', () => ({ issueInvoiceForPayment: vi.fn() }));
 vi.mock('@/lib/email', () => ({
   sendEnrollmentConfirmationEmail: vi.fn(() => Promise.resolve()),
   sendAccountClaimEmail: vi.fn(() => Promise.resolve()),
+  sendPaymentFailedEmail: vi.fn(() => Promise.resolve()),
 }));
 vi.mock('@/lib/logger', () => ({
   logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() },
@@ -52,7 +60,11 @@ vi.mock('node:crypto', () => ({
 }));
 
 import { issueInvoiceForPayment } from '@/lib/receipts';
-import { sendEnrollmentConfirmationEmail, sendAccountClaimEmail } from '@/lib/email';
+import {
+  sendEnrollmentConfirmationEmail,
+  sendAccountClaimEmail,
+  sendPaymentFailedEmail,
+} from '@/lib/email';
 import {
   markWebhookProcessed,
   findOrCreateUserByEmail,
@@ -61,11 +73,14 @@ import {
   handlePaymentRefunded,
   handleSourceChargeable,
   handlePaymentPaid,
+  handlePaymentFailed,
+  sweepExpiredCheckouts,
   type CheckoutPaidEvent,
   type CheckoutFailedEvent,
   type PaymentRefundedEvent,
   type SourceChargeableEvent,
   type PaymentPaidEvent,
+  type PaymentFailedEvent,
 } from '@/lib/enrollment';
 
 /** Error shaped like Prisma's unique-constraint violation. */
@@ -108,6 +123,31 @@ function makeFailedEvent(): CheckoutFailedEvent {
         data: {
           id: 'cs_test_456',
           attributes: { id: 'cs_test_456', failure_reason: 'insufficient_funds', metadata: {} },
+        },
+      },
+    },
+  };
+}
+
+function makeFailedPaymentEvent(
+  attrOverrides: Record<string, unknown> = {},
+): PaymentFailedEvent {
+  return {
+    data: {
+      id: 'evt-payfail-1',
+      attributes: {
+        type: 'payment.failed',
+        data: {
+          id: 'pm_pay_fail_1',
+          attributes: {
+            id: 'pm_pay_fail_1',
+            amount: 299900,
+            currency: 'PHP',
+            status: 'failed',
+            source: { id: 'src_abc', type: 'gcash' },
+            failed_message: 'card_declined',
+            ...attrOverrides,
+          },
         },
       },
     },
@@ -563,6 +603,95 @@ describe('enrollment.ts', () => {
       await handleCheckoutFailed(makeFailedEvent());
 
       expect(mockDb.checkoutSession.updateMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('handlePaymentFailed', () => {
+    it('marks the session FAILED and emails the buyer on first event', async () => {
+      mockDb.processedWebhook.create.mockResolvedValue({ id: 'pw-1' });
+      mockDb.checkoutSession.findFirst.mockResolvedValue({
+        id: 'cs-1',
+        email: 'juan@example.com',
+        status: 'PENDING',
+        pricingTier: { name: 'PPC Foundations' },
+      });
+      mockDb.checkoutSession.update.mockResolvedValue({ id: 'cs-1' });
+
+      await handlePaymentFailed(makeFailedPaymentEvent());
+
+      expect(mockDb.checkoutSession.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { paymongoSourceId: 'src_abc', deletedAt: null },
+        }),
+      );
+      expect(mockDb.checkoutSession.update).toHaveBeenCalledWith({
+        where: { id: 'cs-1' },
+        data: expect.objectContaining({ status: 'FAILED', failureReason: 'card_declined' }),
+      });
+      expect(sendPaymentFailedEmail).toHaveBeenCalledWith(
+        expect.objectContaining({ to: 'juan@example.com', tierName: 'PPC Foundations' }),
+      );
+    });
+
+    it('skips work on duplicate event', async () => {
+      mockDb.processedWebhook.create.mockRejectedValue(p2002());
+
+      await handlePaymentFailed(makeFailedPaymentEvent());
+
+      expect(mockDb.checkoutSession.update).not.toHaveBeenCalled();
+      expect(sendPaymentFailedEmail).not.toHaveBeenCalled();
+    });
+
+    it('never downgrades an already-PAID session and sends no email', async () => {
+      mockDb.processedWebhook.create.mockResolvedValue({ id: 'pw-1' });
+      mockDb.checkoutSession.findFirst.mockResolvedValue({
+        id: 'cs-1',
+        email: 'juan@example.com',
+        status: 'PAID',
+        pricingTier: { name: 'PPC Foundations' },
+      });
+
+      await handlePaymentFailed(makeFailedPaymentEvent());
+
+      expect(mockDb.checkoutSession.update).not.toHaveBeenCalled();
+      expect(sendPaymentFailedEmail).not.toHaveBeenCalled();
+    });
+
+    it('is a no-op with no email when no session matches', async () => {
+      mockDb.processedWebhook.create.mockResolvedValue({ id: 'pw-1' });
+      mockDb.checkoutSession.findFirst.mockResolvedValue(null);
+
+      await handlePaymentFailed(makeFailedPaymentEvent());
+
+      expect(mockDb.checkoutSession.update).not.toHaveBeenCalled();
+      expect(sendPaymentFailedEmail).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('sweepExpiredCheckouts', () => {
+    it('expires stale PENDING/AWAITING_PAYMENT sessions past expiresAt', async () => {
+      mockDb.checkoutSession.updateMany.mockResolvedValue({ count: 3 });
+      const now = new Date('2026-07-19T12:00:00Z');
+
+      const count = await sweepExpiredCheckouts(now);
+
+      expect(count).toBe(3);
+      expect(mockDb.checkoutSession.updateMany).toHaveBeenCalledWith({
+        where: {
+          status: { in: ['PENDING', 'AWAITING_PAYMENT'] },
+          expiresAt: { lt: now },
+          deletedAt: null,
+        },
+        data: { status: 'EXPIRED' },
+      });
+    });
+
+    it('returns 0 when nothing is stale', async () => {
+      mockDb.checkoutSession.updateMany.mockResolvedValue({ count: 0 });
+
+      const count = await sweepExpiredCheckouts();
+
+      expect(count).toBe(0);
     });
   });
 

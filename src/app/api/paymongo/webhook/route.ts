@@ -11,7 +11,7 @@
  *   - checkout_session.payment.failed  (unused — see C1 note below)
  *   - source.chargeable                (the ACTUAL completion event — checkout.ts creates a Source)
  *   - payment.paid                     (the ACTUAL completion event)
- *   - payment.failed
+ *   - payment.failed                   (the ACTUAL failure event — marks the session FAILED, emails the buyer)
  *   - payment.refunded
  *
  * C1 (AUDIT-2026-07-17): checkout.ts creates a PayMongo Source, not a
@@ -48,11 +48,13 @@ import {
   handlePaymentRefunded,
   handleSourceChargeable,
   handlePaymentPaid,
+  handlePaymentFailed,
   type CheckoutPaidEvent,
   type CheckoutFailedEvent,
   type PaymentRefundedEvent,
   type SourceChargeableEvent,
   type PaymentPaidEvent,
+  type PaymentFailedEvent,
 } from '@/lib/enrollment';
 import { log } from '@/lib/logger';
 
@@ -65,7 +67,8 @@ type PayMongoEvent =
   | { type: 'payment.refunded'; data: PaymentRefundedEvent }
   | { type: 'source.chargeable'; data: SourceChargeableEvent }
   | { type: 'payment.paid'; data: PaymentPaidEvent }
-  | { type: 'payment.failed' | string; data: { id?: string; attributes?: { type?: string } } };
+  | { type: 'payment.failed'; data: PaymentFailedEvent }
+  | { type: string; data: { id?: string; attributes?: { type?: string } } };
 
 function pickEvent(body: string): PayMongoEvent | null {
   try {
@@ -130,6 +133,9 @@ export async function POST(request: NextRequest): Promise<Response> {
         break;
       case 'payment.paid':
         await handlePaymentPaid(event.data as unknown as PaymentPaidEvent);
+        break;
+      case 'payment.failed':
+        await handlePaymentFailed(event.data as unknown as PaymentFailedEvent);
         break;
       default:
         log.info({ component: 'paymongo-webhook', eventType: event.type }, 'unhandled event type');

@@ -667,3 +667,119 @@ function LiveClassReminderEmail({
     </div>
   );
 }
+
+// ---------------------------------------------------------------------------
+// Payment-failed email
+// ---------------------------------------------------------------------------
+
+interface PaymentFailedEmailProps {
+  to: string;
+  studentName: string;
+  tierName: string;
+  /** Where the buyer can retry checkout. Defaults to the pricing page. */
+  retryUrl?: string;
+}
+
+/**
+ * Notify a buyer that their payment did not go through, with a link back to
+ * retry. Fired from the `payment.failed` / `checkout_session.payment.failed`
+ * webhook handlers. Best-effort like every other send here.
+ */
+export async function sendPaymentFailedEmail({
+  to,
+  studentName,
+  tierName,
+  retryUrl,
+}: PaymentFailedEmailProps): Promise<void> {
+  await sendEmail({
+    to,
+    subject: `Your payment didn't go through — ${tierName}`,
+    react: (
+      <PaymentFailedEmail
+        studentName={studentName}
+        tierName={tierName}
+        retryUrl={retryUrl ?? `${APP_URL}/pricing`}
+      />
+    ),
+  });
+}
+
+function PaymentFailedEmail({
+  studentName,
+  tierName,
+  retryUrl,
+}: {
+  studentName: string;
+  tierName: string;
+  retryUrl: string;
+}) {
+  return (
+    <div
+      style={{
+        fontFamily: 'Inter, system-ui, sans-serif',
+        backgroundColor: '#F5F5F0',
+        padding: '40px 20px',
+        maxWidth: '560px',
+        margin: '0 auto',
+      }}
+    >
+      <div style={{ backgroundColor: '#1A1A2E', borderRadius: '12px', padding: '32px' }}>
+        <p
+          style={{
+            color: '#FF6B35',
+            fontFamily: 'Space Grotesk, system-ui, sans-serif',
+            fontSize: '13px',
+            fontWeight: 600,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            margin: '0 0 8px',
+          }}
+        >
+          {BRAND_NAME}
+        </p>
+        <h1
+          style={{
+            color: '#FFFFFF',
+            fontFamily: 'Space Grotesk, system-ui, sans-serif',
+            fontSize: '24px',
+            fontWeight: 700,
+            margin: '0 0 20px',
+          }}
+        >
+          Your payment didn&apos;t go through
+        </h1>
+        <p style={{ color: '#D4D4C8', fontSize: '15px', lineHeight: 1.6, margin: '0 0 24px' }}>
+          Hi {studentName}, we couldn&apos;t complete your payment for {tierName}.
+          No charge was made. You can try again below — if a payment method was
+          declined, use a different one.
+        </p>
+        <a
+          href={retryUrl}
+          style={{
+            display: 'inline-block',
+            backgroundColor: '#FF6B35',
+            color: '#FFFFFF',
+            textDecoration: 'none',
+            fontFamily: 'Space Grotesk, system-ui, sans-serif',
+            fontWeight: 600,
+            fontSize: '14px',
+            padding: '12px 24px',
+            borderRadius: '8px',
+          }}
+        >
+          Try again →
+        </a>
+      </div>
+      <p
+        style={{
+          color: '#6B6B6B',
+          fontSize: '12px',
+          textAlign: 'center',
+          margin: '20px 0 0',
+        }}
+      >
+        {`${BRAND_NAME} · projectamazonph.com`}
+      </p>
+    </div>
+  );
+}
