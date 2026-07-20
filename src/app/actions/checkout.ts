@@ -52,10 +52,15 @@ import { z } from 'zod';
 // ---------------------------------------------------------------------------
 
 const checkoutSchema = z.object({
-  pricingTierId: z.string().min(1),
+  pricingTierId: z.string().min(1).max(100),
   // H6: canonicalize the buyer's email so the placeholder user, checkout row,
   // and later sign-in all key off the same lowercase value.
-  email: z.string().trim().toLowerCase().email(),
+  email: z
+    .string()
+    .max(254, 'Email is too long.')
+    .trim()
+    .toLowerCase()
+    .email(),
   name: z.string().max(100).optional(),
   discountCode: z.string().max(50).optional(),
   // Relative in-app paths only — an absolute URL here is an open-redirect
