@@ -52,6 +52,16 @@ export interface BadgeEvaluationResult {
 }
 
 /**
+ * Isolated evaluation cache context to avoid N+1 database operations and
+ * repetitive identical database queries inside loop iterations.
+ */
+interface BadgeEvaluationCache {
+  user?: { streakDays: number; xp: number } | null;
+  completedCount?: number;
+  toolSessionCounts: Map<string, number>;
+}
+
+/**
  * Evaluate all badges for a user against the current database state. Award any
  * newly-earned ones. Idempotent — re-running with no new events returns
  * `awarded: []`.
@@ -95,6 +105,11 @@ export async function evaluateBadges(
     xpReward: number;
   }> = [];
 
+  // Bolt optimization: Cache DB query results to eliminate N+1 queries during loop evaluations
+  const cache: BadgeEvaluationCache = {
+    toolSessionCounts: new Map(),
+  };
+
   for (const badge of published) {
     if (alreadyAwardedSet.has(badge.id)) continue;
 
@@ -106,7 +121,7 @@ export async function evaluateBadges(
       continue;
     }
 
-    const qualifies = await checkCriteria(userId, criteria, event);
+    const qualifies = await checkCriteria(userId, criteria, event, cache);
     if (qualifies) earnedNow.push(badge);
   }
 
@@ -140,21 +155,24 @@ export async function evaluateBadges(
 
 /**
  * Returns true if the user has met the given badge criteria at this moment.
- * Each branch is a narrow DB read — no writes.
+ * Cache context ensures we only hit the database once for each unique query type.
  */
 async function checkCriteria(
   userId: string,
   criteria: BadgeCriteria,
   event: BadgeTrigger,
+  cache: BadgeEvaluationCache,
 ): Promise<boolean> {
   switch (criteria.type) {
     case 'module_complete': {
-      const completedCount = await db.lessonProgress.count({
-        where: { userId, status: 'COMPLETED' },
-      });
+      if (cache.completedCount === undefined) {
+        cache.completedCount = await db.lessonProgress.count({
+          where: { userId, status: 'COMPLETED' },
+        });
+      }
       // Treat each completed lesson as progress toward module_complete; the
       // seed threshold is 1 so this triggers after the first lesson.
-      return completedCount >= criteria.threshold;
+      return cache.completedCount >= criteria.threshold;
     }
 
     case 'quiz_score': {
@@ -165,32 +183,43 @@ async function checkCriteria(
 
     case 'tool_sessions': {
       const scopeToolType = criteria.scope?.toolType;
-      const count = await db.toolSession.count({
-        where: {
-          userId,
-          status: 'GRADED',
-          ...(scopeToolType ? { toolType: scopeToolType } : {}),
-        },
-      });
+      const cacheKey = scopeToolType || '__ALL__';
+      let count = cache.toolSessionCounts.get(cacheKey);
+      if (count === undefined) {
+        count = await db.toolSession.count({
+          where: {
+            userId,
+            status: 'GRADED',
+            ...(scopeToolType ? { toolType: scopeToolType } : {}),
+          },
+        });
+        cache.toolSessionCounts.set(cacheKey, count);
+      }
       return count >= criteria.threshold;
     }
 
     case 'streak_days': {
-      const user = await db.user.findUnique({
-        where: { id: userId },
-        select: { streakDays: true },
-      });
-      if (!user) return false;
-      return user.streakDays >= criteria.threshold;
+      if (cache.user === undefined) {
+        const user = await db.user.findUnique({
+          where: { id: userId },
+          select: { streakDays: true, xp: true },
+        });
+        cache.user = user ? { streakDays: user.streakDays, xp: user.xp } : null;
+      }
+      if (!cache.user) return false;
+      return cache.user.streakDays >= criteria.threshold;
     }
 
     case 'xp_threshold': {
-      const user = await db.user.findUnique({
-        where: { id: userId },
-        select: { xp: true },
-      });
-      if (!user) return false;
-      return user.xp >= criteria.threshold;
+      if (cache.user === undefined) {
+        const user = await db.user.findUnique({
+          where: { id: userId },
+          select: { streakDays: true, xp: true },
+        });
+        cache.user = user ? { streakDays: user.streakDays, xp: user.xp } : null;
+      }
+      if (!cache.user) return false;
+      return cache.user.xp >= criteria.threshold;
     }
 
     default:
