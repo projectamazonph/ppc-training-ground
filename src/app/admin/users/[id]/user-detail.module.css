@@ -51,7 +51,7 @@
 .primaryBtn {
   padding: var(--space-2) var(--space-4);
   background: var(--color-accent);
-  color: #fff;
+  color: var(--ink-inverse);
   border: none;
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
@@ -63,7 +63,7 @@
 .dangerBtn {
   padding: var(--space-2) var(--space-4);
   background: var(--color-danger);
-  color: #fff;
+  color: var(--ink-inverse);
   border: none;
   border-radius: var(--radius-md);
   font-size: var(--text-sm);

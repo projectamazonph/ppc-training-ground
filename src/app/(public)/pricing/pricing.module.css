@@ -1,12 +1,12 @@
 .page {
   max-width: 1120px;
   margin: 0 auto;
-  padding: var(--space-12) var(--side-pad);
+  padding: var(--space-16) var(--side-pad);
 }
 
 .header {
   text-align: center;
-  margin-bottom: var(--space-12);
+  margin-bottom: var(--space-16);
 }
 
 .eyebrow {
@@ -160,6 +160,10 @@
 
 .faqBlock {
   margin-top: var(--space-16);
+  padding: var(--space-8);
+  background: var(--surface-tint);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
   max-width: 720px;
   margin-left: auto;
   margin-right: auto;

@@ -221,25 +221,25 @@
 
 .actionkeep {
   background: var(--success, #16a34a);
-  color: #fff;
+  color: var(--ink-inverse);
   border-color: var(--success, #16a34a);
 }
 
 .actionoptimize {
   background: var(--info, #2563eb);
-  color: #fff;
+  color: var(--ink-inverse);
   border-color: var(--info, #2563eb);
 }
 
 .actionpause {
   background: var(--ink-500, #64748b);
-  color: #fff;
+  color: var(--ink-inverse);
   border-color: var(--ink-500, #64748b);
 }
 
 .actionnegate {
   background: var(--warning, #d97706);
-  color: #fff;
+  color: var(--ink-inverse);
   border-color: var(--warning, #d97706);
 }
 

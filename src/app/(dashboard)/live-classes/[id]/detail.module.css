@@ -7,8 +7,8 @@
 }
 
 .cancelled {
-  border-color: #ef4444;
-  background: #fef2f2;
+  border-color: var(--danger);
+  background: var(--danger-soft);
 }
 
 .grid {
@@ -40,14 +40,14 @@
   font-size: 11px;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: #5a5a6e;
+  color: var(--ink-500);
   font-weight: 600;
   padding-top: 2px;
 }
 
 .detailList dd {
   font-size: 14px;
-  color: #1a1a2e;
+  color: var(--ink-900);
   margin: 0;
   line-height: 1.5;
 }
@@ -55,7 +55,7 @@
 .recording {
   margin-top: 24px;
   padding-top: 24px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border);
 }
 
 .recordingTitle {
@@ -63,12 +63,12 @@
   font-size: 16px;
   font-weight: 600;
   margin: 0 0 8px;
-  color: #1a1a2e;
+  color: var(--ink-900);
 }
 
 .recordingLink {
   display: inline-block;
-  color: #ff6b35;
+  color: var(--accent);
   font-size: 14px;
   text-decoration: none;
   font-weight: 500;
@@ -81,11 +81,11 @@
 .recordingPending {
   margin-top: 24px;
   padding: 12px 16px;
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--warning-soft);
+  color: var(--warning);
   border-radius: 8px;
   font-size: 13px;
-  border-left: 3px solid #f59e0b;
+  border-left: 3px solid var(--warning);
 }
 
 .actionBlock {
@@ -100,7 +100,7 @@
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  background: #10b981;
+  background: var(--success);
   color: white;
   text-decoration: none;
   font-weight: 600;
@@ -111,12 +111,12 @@
 }
 
 .joinLink:hover {
-  background: #059669;
+  background: var(--success);
 }
 
 .upgradeLink {
   font-size: 13px;
-  color: #ff6b35;
+  color: var(--accent);
   text-decoration: none;
   text-align: center;
   font-weight: 500;
@@ -129,27 +129,27 @@
 .seatProgress {
   margin-top: 20px;
   padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border);
 }
 
 .seatMeta {
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #5a5a6e;
+  color: var(--ink-500);
   margin-bottom: 6px;
 }
 
 .seatBar {
   height: 6px;
-  background: #f3f4f6;
+  background: var(--surface-2);
   border-radius: 999px;
   overflow: hidden;
 }
 
 .seatFill {
   height: 100%;
-  background: linear-gradient(90deg, #ff6b35 0%, #f59e0b 100%);
+  background: linear-gradient(90deg, var(--accent) 0%, var(--warning) 100%);
   border-radius: 999px;
   transition: width 200ms ease;
 }

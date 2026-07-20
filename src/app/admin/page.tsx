@@ -180,11 +180,7 @@ export default async function AdminDashboardPage() {
             </span>
             <Icon name="ArrowRight" size="sm" />
           </Link>
-          <Link href="/admin/refunds" className={styles.quickLink}>
-            <Icon name="Receipt" size="md" />
-            <span>Review payments & refunds</span>
-            <Icon name="ArrowRight" size="sm" />
-          </Link>
+
         </div>
       </section>
     </div>

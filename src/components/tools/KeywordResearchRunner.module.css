@@ -181,19 +181,19 @@
 
 .priorityPRIMARY {
   background: var(--success, #16a34a);
-  color: #fff;
+  color: var(--ink-inverse);
   border-color: var(--success, #16a34a);
 }
 
 .prioritySECONDARY {
   background: var(--info, #2563eb);
-  color: #fff;
+  color: var(--ink-inverse);
   border-color: var(--info, #2563eb);
 }
 
 .priorityNEGATIVE {
   background: var(--warning, #d97706);
-  color: #fff;
+  color: var(--ink-inverse);
   border-color: var(--warning, #d97706);
 }
 

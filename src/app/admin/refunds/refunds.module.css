@@ -1,37 +1,37 @@
 .page {
   max-width: 1024px;
   margin: 0 auto;
-  padding: 32px 24px 96px;
+  padding: var(--space-8) var(--side-pad) 96px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-6);
 }
 
 .header {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .eyebrow {
-  font-size: 11px;
+  font-size: var(--text-xs);
   letter-spacing: 4px;
-  color: var(--color-text-muted, #5a5a6e);
+  color: var(--ink-500);
   margin: 0;
   text-transform: uppercase;
 }
 
 .title {
   font-family: var(--font-display, 'Space Grotesk', sans-serif);
-  font-size: 32px;
+  font-size: var(--text-3xl);
   font-weight: 700;
   margin: 0;
-  color: var(--color-text, #1a1a2e);
+  color: var(--ink-900);
 }
 
 .subtitle {
   font-size: 15px;
-  color: var(--color-text-muted, #5a5a6e);
+  color: var(--ink-500);
   margin: 0;
   max-width: 640px;
   line-height: 1.5;
@@ -51,15 +51,15 @@
 
 .statValue {
   font-family: var(--font-display, 'Space Grotesk', sans-serif);
-  font-size: 36px;
+  font-size: var(--text-4xl);
   font-weight: 700;
-  color: var(--color-text, #1a1a2e);
-  margin-top: 12px;
+  color: var(--ink-900);
+  margin-top: var(--space-3);
 }
 
 .empty {
   text-align: center;
-  padding: 48px 24px;
+  padding: var(--space-12) var(--side-pad);
 }
 
 .list {
@@ -68,7 +68,7 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .rowLink {
@@ -78,7 +78,7 @@
 }
 
 .rowLink:hover .row {
-  border-color: var(--color-primary, #ff6b35);
+  border-color: var(--accent);
   transform: translateY(-1px);
 }
 
@@ -86,8 +86,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  transition: border-color 0.15s ease, transform 0.15s ease;
+  gap: var(--space-6);
+  transition: border-color var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out);
 }
 
 .rowMain {
@@ -101,27 +101,27 @@
 .rowHeader {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   flex-wrap: wrap;
 }
 
 .rowTitle {
   font-family: var(--font-display, 'Space Grotesk', sans-serif);
-  font-size: 16px;
+  font-size: var(--text-lg);
   font-weight: 600;
   margin: 0;
-  color: var(--color-text, #1a1a2e);
+  color: var(--ink-900);
 }
 
 .rowMeta {
-  font-size: 13px;
-  color: var(--color-text-muted, #5a5a6e);
+  font-size: var(--text-sm);
+  color: var(--ink-500);
   margin: 0;
 }
 
 .rowReason {
-  font-size: 14px;
-  color: var(--color-text, #1a1a2e);
+  font-size: var(--text-sm);
+  color: var(--ink-900);
   font-style: italic;
   margin: 0;
   white-space: nowrap;
@@ -131,7 +131,7 @@
 }
 
 .rowArrow {
-  font-size: 20px;
-  color: var(--color-text-muted, #5a5a6e);
+  font-size: var(--text-xl);
+  color: var(--ink-500);
   flex-shrink: 0;
 }

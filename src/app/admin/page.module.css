@@ -58,7 +58,7 @@
   gap: var(--space-1);
   font-size: var(--text-sm);
   font-weight: 500;
-  color: var(--accent-orange);
+  color: var(--accent);
   text-decoration: none;
   transition: opacity 150ms ease;
 }
@@ -69,7 +69,7 @@
 
 .tableWrapper {
   background: var(--surface-1);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
   overflow: hidden;
 }
@@ -88,13 +88,13 @@
   letter-spacing: 0.05em;
   color: var(--ink-500);
   padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--border);
   background: var(--surface-2);
 }
 
 .table td {
   padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border);
   vertical-align: middle;
 }
 
@@ -119,7 +119,7 @@
 
 .studentEmail {
   font-size: var(--text-xs);
-  color: var(--ink-400);
+  color: var(--ink-500);
 }
 
 .amountCell {
@@ -165,7 +165,7 @@
   gap: var(--space-3);
   padding: var(--space-4);
   background: var(--surface-1);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
   text-decoration: none;
   color: var(--ink-700);
@@ -175,12 +175,12 @@
 }
 
 .quickLink:hover {
-  border-color: var(--accent-orange);
+  border-color: var(--accent);
   background: var(--surface-2);
 }
 
 .quickLink svg {
-  color: var(--ink-400);
+  color: var(--ink-500);
   flex-shrink: 0;
 }
 

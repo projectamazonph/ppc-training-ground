@@ -41,7 +41,6 @@
 @media (prefers-reduced-motion: reduce) {
   .heroEyebrow,
   .heroTitle,
-  .heroTagline,
   .heroSub,
   .heroActions,
   .heroDecorative {
@@ -102,7 +101,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
-  margin-bottom: var(--space-16);
+  margin-bottom: var(--space-20);
 }
 
 .heroContent {
@@ -125,13 +124,6 @@
   animation: fadeInUp var(--duration-slow) var(--ease-out) 40ms both;
 }
 
-.heroTagline {
-  font-size: var(--text-xl);
-  font-weight: 700;
-  color: var(--ink-900);
-  margin: 0 0 var(--space-4);
-  animation: fadeInUp var(--duration-slow) var(--ease-out) 120ms both;
-}
 
 .heroSub {
   font-size: var(--text-lg);
@@ -150,7 +142,20 @@
 }
 
 .heroDecorative {
-  display: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: var(--space-4) var(--space-6);
+  border-radius: var(--radius-lg);
+  white-space: nowrap;
+  margin-top: var(--space-4);
+  animation: fadeInUp var(--duration-slow) var(--ease-out) 360ms both;
 }
 
 @media (min-width: 768px) {
@@ -161,19 +166,9 @@
   }
 
   .heroDecorative {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-2);
-    font-family: var(--font-mono);
     font-size: var(--text-4xl);
-    font-weight: 700;
-    color: var(--accent);
-    background: var(--accent-soft);
     padding: var(--space-8) var(--space-10);
-    border-radius: var(--radius-lg);
-    white-space: nowrap;
-    animation: fadeInUp var(--duration-slow) var(--ease-out) 360ms both;
+    margin-top: 0;
   }
 
   .heroDecorativeCaption {
@@ -188,8 +183,13 @@
 
 /* ── Pain Points ──────────────────────────────────────────────── */
 .painSection {
-  padding: var(--space-12) 0;
+  padding: var(--space-16) 0;
+  margin: 0 calc(-1 * var(--side-pad));
+  padding-left: var(--side-pad);
+  padding-right: var(--side-pad);
+  background: var(--surface-tint);
   border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
 .painList {
@@ -243,7 +243,7 @@
 
 /* ── Simulators (zig-zag) ─────────────────────────────────────── */
 .simSection {
-  padding: var(--space-12) 0;
+  padding: var(--space-16) 0;
   border-top: 1px solid var(--border);
 }
 
@@ -346,8 +346,13 @@
 
 /* ── Coming Soon ──────────────────────────────────────────────── */
 .accessSection {
-  padding: var(--space-12) 0;
+  padding: var(--space-16) 0;
+  margin: 0 calc(-1 * var(--side-pad));
+  padding-left: var(--side-pad);
+  padding-right: var(--side-pad);
+  background: var(--surface-tint);
   border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
 .accessSub {
@@ -422,7 +427,7 @@
 
 /* ── Pricing Preview ──────────────────────────────────────────── */
 .pricingSection {
-  padding: var(--space-12) 0;
+  padding: var(--space-16) 0;
   border-top: 1px solid var(--border);
 }
 
@@ -438,9 +443,10 @@
 
 /* ── CTA ──────────────────────────────────────────────────────── */
 .ctaSection {
-  padding: var(--space-12);
+  padding: var(--space-16);
   background: var(--surface-3);
   border-radius: var(--radius-lg);
+  margin-top: var(--space-8);
 }
 
 .ctaSection h2 {
@@ -458,7 +464,7 @@
 
 /* ── Footer ────────────────────────────────────────────────────── */
 .footer {
-  padding: var(--space-12) 0;
+  padding: var(--space-16) 0;
   border-top: 1px solid var(--border);
 }
 
