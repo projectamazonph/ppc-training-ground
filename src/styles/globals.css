@@ -117,7 +117,6 @@
   --max-content: 1200px;
   --max-reading: 720px;
   --max-form: 640px;
-}
 
   /* ── Alias tokens (used by admin, tools, live-classes, refunds) ── */
   --color-text: var(--ink-900);
@@ -142,6 +141,7 @@
 
   /* Subtle tint for alternating sections */
   --surface-tint: #F0EFE9;
+}
 
 /* Dark mode — auto-applies when user has OS dark preference.
  * Only the tokens that need to change are overridden.

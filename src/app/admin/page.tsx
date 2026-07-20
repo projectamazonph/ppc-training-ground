@@ -174,27 +174,11 @@ export default async function AdminDashboardPage() {
             <span>Manage Courses</span>
             <Icon name="ArrowRight" size="sm" />
           </Link>
-<<<<<<< HEAD
           <Link href="/admin/analytics" className={styles.quickLink}>
             <Icon name="ChartBar" size="md" />
             <span>Analytics</span>
             <Icon name="ArrowRight" size="sm" />
           </Link>
-=======
-          <Link href="/admin/refunds" className={styles.quickLink}>
-            <Icon name="Receipt" size="md" />
-            <span>
-              Review Refunds
-              {pendingRefunds > 0 && (
-                <Badge variant="danger" className={styles.alertBadge}>
-                  {pendingRefunds}
-                </Badge>
-              )}
-            </span>
-            <Icon name="ArrowRight" size="sm" />
-          </Link>
-
->>>>>>> origin/main
         </div>
       </section>
     </div>
