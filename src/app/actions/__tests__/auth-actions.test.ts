@@ -43,11 +43,13 @@ describe('auth actions', () => {
     mockSignToken.mockResolvedValue('token');
   });
 
-  it('signInAction rejects unknown email', async () => {
+  it('signInAction rejects unknown email and mitigates timing attacks', async () => {
     (db.user.findUnique as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(null);
     const result = await signInAction({ email: 'nobody@example.com', password: 'x' });
     expect(result.success).toBe(false);
     if (!result.success) expect(result.error).toBe('Email or password is incorrect.');
+    // Assert that verifyPassword is still called with the dummy hash to prevent timing attacks
+    expect(mockVerifyPassword).toHaveBeenCalledWith('x', expect.stringContaining('scrypt$abcdef0123456789'));
   });
 
   it('signInAction rejects suspended account', async () => {

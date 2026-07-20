@@ -131,6 +131,16 @@ export const signInAction = createSafeAction(signInSchema, async (data) => {
   }
 
   const user = await db.user.findUnique({ where: { email: data.email } });
+
+  // Dummy password hash to use in verifyPassword when the user or passwordHash is missing,
+  // to prevent timing attacks that leak email registration status (email enumeration).
+  const dummyHash = 'scrypt$abcdef0123456789abcdef0123456789$0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+
+  const isValidPassword = await verifyPassword(
+    data.password,
+    user?.passwordHash ?? dummyHash
+  );
+
   if (!user || !user.passwordHash) {
     throw new Error('Email or password is incorrect.');
   }
@@ -139,7 +149,7 @@ export const signInAction = createSafeAction(signInSchema, async (data) => {
     throw new Error('This account is suspended. Contact support.');
   }
 
-  if (!(await verifyPassword(data.password, user.passwordHash))) {
+  if (!isValidPassword) {
     throw new Error('Email or password is incorrect.');
   }
 
