@@ -27,7 +27,12 @@ export type ActionResult<T = unknown> =
 // single spelling is stored and matched everywhere. `.trim()` runs before
 // `.email()` so surrounding whitespace never fails a legitimate address.
 const canonicalEmail = (invalidMessage: string) =>
-  z.string().trim().toLowerCase().email(invalidMessage);
+  z
+    .string()
+    .max(254, 'Email is too long.')
+    .trim()
+    .toLowerCase()
+    .email(invalidMessage);
 
 export const signUpSchema = z
   .object({
@@ -48,7 +53,10 @@ export const signUpSchema = z
 
 export const signInSchema = z.object({
   email: canonicalEmail('Enter a valid email.'),
-  password: z.string().min(1, 'Enter your password.'),
+  password: z
+    .string()
+    .min(1, 'Enter your password.')
+    .max(128, 'Password is too long.'),
 });
 
 // ---------------------------------------------------------------------------

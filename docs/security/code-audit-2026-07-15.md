@@ -198,7 +198,7 @@ re-verifies the cookie). **Resolution:** removed.
 | O2 | Async `scrypt` (event-loop) | Sprint 13 |
 | O3 | Distributed rate limiting (Upstash/KV) for multi-instance prod | Sprint 13 |
 | O4 | Real email-verification flow (send + verify endpoint + backfill) | Sprint 13 |
-| O5 | CSP header (pre-existing S13-001) | Sprint 13 |
+| O5 | CSP header (pre-existing S13-001) — **shipped Report-Only** in `next.config.ts`; promote to enforcing via `CSP_ENFORCE=true` after staging shows zero violations | Report-Only done; enforce pending staging |
 | O6 | Durable receipt storage on private Vercel Blob | Sprint 13 |
 | O7 | Verify CI's `migrate deploy` step actually ran (was green with SQLite lock?). Migration history now regenerated for Postgres (2026-07-16) — re-run CI to confirm. | Now |
 | O8 | Update `security-audit-2026-07-13.md` + `SESSION-HANDOVER.md` — PayMongo HMAC is done | Now |

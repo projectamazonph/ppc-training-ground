@@ -119,6 +119,30 @@
   --max-form: 640px;
 }
 
+  /* ── Alias tokens (used by admin, tools, live-classes, refunds) ── */
+  --color-text: var(--ink-900);
+  --color-text-muted: var(--ink-500);
+  --color-surface: var(--surface-1);
+  --color-surface-elevated: var(--surface-2);
+  --color-bg: var(--surface-0);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-bg: var(--accent-soft);
+  --color-primary: var(--accent);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --success-bg: var(--success-soft);
+  --warning-bg: var(--warning-soft);
+  --info-bg: var(--info-soft);
+  --danger-bg: var(--danger-soft);
+  --warning-600: var(--warning);
+  --info-600: var(--info);
+  --accent-strong: var(--accent-hover);
+  --surface-on-accent: var(--accent-ink);
+
+  /* Subtle tint for alternating sections */
+  --surface-tint: #F0EFE9;
+
 /* Dark mode — auto-applies when user has OS dark preference.
  * Only the tokens that need to change are overridden.
  * Everything else inherits from :root.
@@ -149,6 +173,7 @@
     --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
     --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.4);
 
+    --surface-tint: #1E1E1C;
     color-scheme: dark;
   }
 }
@@ -184,6 +209,7 @@ h1, h2, h3, h4, h5, h6 {
   line-height: var(--leading-tight);
   letter-spacing: -0.01em;
   color: var(--ink-900);
+  text-wrap: balance;
 }
 
 h1 { font-size: var(--text-3xl); }

@@ -65,11 +65,9 @@ export default function HomePage() {
         <div className={styles.heroContent}>
           <p className={styles.heroEyebrow}>{BRAND_NAME_UPPER}</p>
           <h1 className={styles.heroTitle}>Learn Amazon PPC the right way</h1>
-          <p className={styles.heroTagline}>We turn the theoretical into the practical.</p>
           <p className={styles.heroSub}>
-            Not only do you learn Amazon PPC from scratch. You turn that knowledge into
-            workflows you can actually run on the job, before a client ever hands you
-            their account.
+            Learn Amazon PPC from scratch, then practice the exact workflows
+            clients expect before you ever touch their account.
           </p>
           <div className={styles.heroActions}>
             <Link href="/pricing" className={styles.btnPrimary}>

@@ -31,6 +31,19 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_PH',
     siteName: BRAND_NAME,
+    images: [
+      {
+        url: '/og.png',
+        width: 1200,
+        height: 630,
+        alt: `${BRAND_NAME} - Amazon PPC Training`,
+      },
+    ],
+  },
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon-16x16.png',
+    apple: '/apple-touch-icon.png',
   },
   robots: {
     index: true,

@@ -182,7 +182,7 @@ All Sprint 11 additions are listed in `.env.example`.
 ### Post-launch (Sprint 13 candidates)
 
 1. ~~PayMongo HMAC verification~~ — stale, done (see above)
-2. CSP header (deferred from STORY-055)
+2. ~~CSP header (deferred from STORY-055)~~ — **shipped Report-Only** in `next.config.ts` (audit O5). Set `CSP_ENFORCE=true` in the deploy env to promote to an enforcing header once staging shows zero violations. Wiring a `report-uri`/`report-to` sink (e.g. Sentry) is the remaining follow-up.
 3. BottomNav on lesson/quiz pages (S9 carry-over)
 4. Verify Resend webhook secret env var set in Vercel prod (STORY-055 finding #3 / S12 audit)
 5. Audit follow-ups O1–O6 in `docs/security/code-audit-2026-07-15.md` (field renames, async scrypt, distributed rate limiting, email-verification flow, CSP, Blob receipt storage)
