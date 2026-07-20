@@ -87,8 +87,9 @@ function findingsAccuracy(
   for (const sf of student) {
     const match = ref.find((rf) => rf.field === sf.field);
     if (!match) continue;
-    // Severity at least matches
-    if (severityAtLeast(sf.severity, match.severity)) truePositives++;
+    // Exact severity match only — over-calling severity (e.g. warning as
+    // critical) is a real skill deficiency in Amazon PPC work, not accuracy.
+    if (sf.severity === match.severity) truePositives++;
   }
   const precision = truePositives / student.length;
   return gradedCriterion(
@@ -216,11 +217,6 @@ function aplusContentQuality(
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-function severityAtLeast(have: string, need: string): boolean {
-  const rank = { good: 0, warning: 1, critical: 2 };
-  return rank[have as 'good' | 'warning' | 'critical'] >= rank[need as 'good' | 'warning' | 'critical'];
-}
 
 /**
  * Generate automatic findings for a listing against an optimized reference.
