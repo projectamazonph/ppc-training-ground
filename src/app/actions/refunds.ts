@@ -24,6 +24,7 @@ import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
 import { requireAuth, requireAdmin } from '@/lib/auth';
+import { auditLog } from '@/lib/admin-audit';
 import { createSafeAction, type ActionResult } from '@/lib/validation';
 import { PaymentStatus, RefundStatus } from '@/lib/enums';
 import { refundPayment, PayMongoError } from '@/lib/paymongo';
