@@ -194,13 +194,24 @@ async function PendingLessons({
     take: 50,
   });
 
+  const lessonIds = allLessons.map((l) => l.id);
+
+  // Bolt optimization: limit query to the specific course's lessons rather than querying and loading
+  // all completed lesson progress for the user. Reduces payload, DB processing, and memory overhead.
   const completedSet = new Set(
-    (
-      await db.lessonProgress.findMany({
-        where: { userId, status: 'COMPLETED', deletedAt: null },
-        select: { lessonId: true },
-      })
-    ).map((p) => p.lessonId),
+    lessonIds.length > 0
+      ? (
+          await db.lessonProgress.findMany({
+            where: {
+              userId,
+              lessonId: { in: lessonIds },
+              status: 'COMPLETED',
+              deletedAt: null,
+            },
+            select: { lessonId: true },
+          })
+        ).map((p) => p.lessonId)
+      : [],
   );
 
   const pending = allLessons.filter((l) => !completedSet.has(l.id)).slice(0, 8);
