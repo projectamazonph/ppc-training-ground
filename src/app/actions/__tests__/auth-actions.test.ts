@@ -23,11 +23,19 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
+let currentTestIp = '127.0.0.1';
+
 vi.mock('next/headers', () => ({
   cookies: () => ({
     get: () => undefined,
     set: vi.fn(),
     delete: vi.fn(),
+  }),
+  headers: async () => ({
+    get: (name: string) => {
+      if (name === 'x-forwarded-for') return currentTestIp;
+      return null;
+    },
   }),
 }));
 
@@ -138,5 +146,48 @@ describe('auth actions', () => {
     const result = await signOutAction();
     expect(result.success).toBe(true);
     expect((result as any).data.ok).toBe(true);
+  });
+
+  it('signInAction rate limits by email after 5 attempts', async () => {
+    mockVerifyPassword.mockReturnValue(false);
+    (db.user.findUnique as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: 'u1', email: 'ratelimit-email@example.com', passwordHash: 'x', status: 'ACTIVE', role: 'STUDENT', name: 'A', emailVerified: new Date(), lastActiveAt: null, createdAt: new Date(), updatedAt: new Date(), deletedAt: null,
+    });
+
+    for (let i = 0; i < 5; i++) {
+      const result = await signInAction({ email: 'ratelimit-email@example.com', password: 'wrong' });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe('Email or password is incorrect.');
+      }
+    }
+
+    const result = await signInAction({ email: 'ratelimit-email@example.com', password: 'wrong' });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toContain('Too many attempts.');
+    }
+  });
+
+  it('signInAction rate limits by IP after 10 attempts with different emails', async () => {
+    currentTestIp = '192.168.1.50'; // Use a fresh IP address to avoid prior test interference
+    mockVerifyPassword.mockReturnValue(false);
+    (db.user.findUnique as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: 'u1', email: 'irrelevant@example.com', passwordHash: 'x', status: 'ACTIVE', role: 'STUDENT', name: 'A', emailVerified: new Date(), lastActiveAt: null, createdAt: new Date(), updatedAt: new Date(), deletedAt: null,
+    });
+
+    for (let i = 0; i < 10; i++) {
+      const result = await signInAction({ email: `ip-test-${i}@example.com`, password: 'wrong' });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe('Email or password is incorrect.');
+      }
+    }
+
+    const result = await signInAction({ email: 'ip-test-blocked@example.com', password: 'wrong' });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toContain('Too many attempts from this IP.');
+    }
   });
 });
