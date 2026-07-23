@@ -8,6 +8,12 @@ vi.mock('next/headers', () => ({
     set: vi.fn(),
     delete: vi.fn(),
   }),
+  headers: async () => ({
+    get: (key: string) => {
+      if (key === 'x-forwarded-for') return '127.0.0.1';
+      return undefined;
+    },
+  }),
 }));
 
 vi.mock('next/navigation', () => ({

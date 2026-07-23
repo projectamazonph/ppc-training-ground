@@ -7,6 +7,8 @@ const mockSetAuthCookie = vi.fn();
 const mockClearAuthCookie = vi.fn();
 const mockVerifyPassword = vi.fn();
 const mockHashPassword = vi.fn().mockReturnValue('hashed-pw');
+const mockHeadersGet = vi.fn().mockReturnValue(undefined);
+const mockRateLimit = vi.fn().mockReturnValue({ allowed: true, retryAfterSeconds: 0 });
 
 vi.mock('@/lib/auth', () => ({
   hashPassword: (...args: unknown[]) => mockHashPassword(...args),
@@ -29,6 +31,13 @@ vi.mock('next/headers', () => ({
     set: vi.fn(),
     delete: vi.fn(),
   }),
+  headers: async () => ({
+    get: mockHeadersGet,
+  }),
+}));
+
+vi.mock('@/lib/rate-limit', () => ({
+  rateLimit: (key: string, limit?: number, windowMs?: number) => mockRateLimit(key, limit, windowMs),
 }));
 
 vi.mock('next/navigation', () => ({
@@ -41,6 +50,8 @@ describe('auth actions', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     mockSignToken.mockResolvedValue('token');
+    mockRateLimit.mockReturnValue({ allowed: true, retryAfterSeconds: 0 });
+    mockHeadersGet.mockReturnValue(undefined);
   });
 
   it('signInAction rejects unknown email', async () => {
@@ -138,5 +149,77 @@ describe('auth actions', () => {
     const result = await signOutAction();
     expect(result.success).toBe(true);
     expect((result as any).data.ok).toBe(true);
+  });
+
+  it('signInAction throws rate-limiting error when email rate limit is exceeded', async () => {
+    mockRateLimit.mockImplementation((key) => {
+      if (key.startsWith('signin:nobody@example.com')) {
+        return { allowed: false, retryAfterSeconds: 45 };
+      }
+      return { allowed: true, retryAfterSeconds: 0 };
+    });
+
+    const result = await signInAction({ email: 'nobody@example.com', password: 'x' });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toContain('Too many attempts. Try again in 45s.');
+    }
+    expect(mockRateLimit).toHaveBeenCalledWith('signin:nobody@example.com', 5, 60000);
+  });
+
+  it('signInAction throws rate-limiting error when IP rate limit is exceeded', async () => {
+    mockHeadersGet.mockImplementation((key) => {
+      if (key === 'x-forwarded-for') return '203.0.113.195';
+      return undefined;
+    });
+    mockRateLimit.mockImplementation((key) => {
+      if (key === 'signin:ip:203.0.113.195') {
+        return { allowed: false, retryAfterSeconds: 30 };
+      }
+      return { allowed: true, retryAfterSeconds: 0 };
+    });
+
+    const result = await signInAction({ email: 'nobody@example.com', password: 'x' });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toContain('Too many attempts from this IP. Try again in 30s.');
+    }
+    expect(mockRateLimit).toHaveBeenCalledWith('signin:ip:203.0.113.195', 10, 60000);
+  });
+
+  it('signUpAction throws rate-limiting error when email rate limit is exceeded', async () => {
+    mockRateLimit.mockImplementation((key) => {
+      if (key.startsWith('signup:new@b.com')) {
+        return { allowed: false, retryAfterSeconds: 50 };
+      }
+      return { allowed: true, retryAfterSeconds: 0 };
+    });
+
+    const result = await signUpAction({ email: 'new@b.com', password: 'pass1234', confirmPassword: 'pass1234', name: 'New' });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toContain('Too many attempts. Try again in 50s.');
+    }
+    expect(mockRateLimit).toHaveBeenCalledWith('signup:new@b.com', 5, 60000);
+  });
+
+  it('signUpAction throws rate-limiting error when IP rate limit is exceeded', async () => {
+    mockHeadersGet.mockImplementation((key) => {
+      if (key === 'x-forwarded-for') return '203.0.113.195';
+      return undefined;
+    });
+    mockRateLimit.mockImplementation((key) => {
+      if (key === 'signup:ip:203.0.113.195') {
+        return { allowed: false, retryAfterSeconds: 40 };
+      }
+      return { allowed: true, retryAfterSeconds: 0 };
+    });
+
+    const result = await signUpAction({ email: 'new@b.com', password: 'pass1234', confirmPassword: 'pass1234', name: 'New' });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toContain('Too many attempts from this IP. Try again in 40s.');
+    }
+    expect(mockRateLimit).toHaveBeenCalledWith('signup:ip:203.0.113.195', 10, 60000);
   });
 });

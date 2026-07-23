@@ -5,6 +5,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 import { db } from '@/lib/db';
 import {
   hashPassword,
@@ -32,9 +33,19 @@ import {
 // ---------------------------------------------------------------------------
 
 export const signUpAction = createSafeAction(signUpSchema, async (data) => {
+  const heads = await headers();
+  const ip = heads.get('x-forwarded-for') ?? heads.get('x-real-ip') ?? '127.0.0.1';
+
+  // Target-based rate limit
   const rl = rateLimit(`signup:${data.email.toLowerCase()}`, 5, 60_000);
   if (!rl.allowed) {
     throw new Error(`Too many attempts. Try again in ${rl.retryAfterSeconds}s.`);
+  }
+
+  // IP-based rate limit
+  const ipRl = rateLimit(`signup:ip:${ip}`, 10, 60_000);
+  if (!ipRl.allowed) {
+    throw new Error(`Too many attempts from this IP. Try again in ${ipRl.retryAfterSeconds}s.`);
   }
 
   const existing = await db.user.findUnique({ where: { email: data.email } });
@@ -125,9 +136,19 @@ export const signUpAction = createSafeAction(signUpSchema, async (data) => {
 export const signInAction = createSafeAction(signInSchema, async (data) => {
   // Rate-limit BEFORE any DB or scrypt work — the sync scrypt verify is
   // exactly what an attacker would use to burn the event loop.
+  const heads = await headers();
+  const ip = heads.get('x-forwarded-for') ?? heads.get('x-real-ip') ?? '127.0.0.1';
+
+  // Target-based rate limit
   const rl = rateLimit(`signin:${data.email.toLowerCase()}`, 5, 60_000);
   if (!rl.allowed) {
     throw new Error(`Too many attempts. Try again in ${rl.retryAfterSeconds}s.`);
+  }
+
+  // IP-based rate limit
+  const ipRl = rateLimit(`signin:ip:${ip}`, 10, 60_000);
+  if (!ipRl.allowed) {
+    throw new Error(`Too many attempts from this IP. Try again in ${ipRl.retryAfterSeconds}s.`);
   }
 
   const user = await db.user.findUnique({ where: { email: data.email } });
