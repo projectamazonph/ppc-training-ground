@@ -30,15 +30,20 @@ export default async function DashboardPage() {
     },
   });
 
-  // Get user's lesson progress
-  const lessonProgress = await db.lessonProgress.findMany({
-    where: { userId: user.id, deletedAt: null },
-    select: { lessonId: true, status: true },
-  });
+  // Compute aggregate stats and collect active lesson IDs
+  const allLessons = courses.flatMap((c) => c.modules.flatMap((m) => m.lessons));
+  const allLessonIds = allLessons.map((l) => l.id);
+
+  // Bolt optimization: Scope progress queries to lesson IDs of published/existing courses.
+  // This avoids retrieving the entire user history, which protects against large database payloads and high memory consumption.
+  const lessonProgress = allLessonIds.length > 0
+    ? await db.lessonProgress.findMany({
+        where: { userId: user.id, lessonId: { in: allLessonIds }, deletedAt: null },
+        select: { lessonId: true, status: true },
+      })
+    : [];
   const progressMap = new Map(lessonProgress.map((p) => [p.lessonId, p.status]));
 
-  // Compute aggregate stats
-  const allLessons = courses.flatMap((c) => c.modules.flatMap((m) => m.lessons));
   const totalLessons = allLessons.length;
   const completedLessons = allLessons.filter((l) => progressMap.get(l.id) === ProgressStatus.COMPLETED).length;
   const inProgressLessons = allLessons.filter((l) => progressMap.get(l.id) === ProgressStatus.IN_PROGRESS).length;
