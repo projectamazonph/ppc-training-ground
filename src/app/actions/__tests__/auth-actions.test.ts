@@ -7,6 +7,7 @@ const mockSetAuthCookie = vi.fn();
 const mockClearAuthCookie = vi.fn();
 const mockVerifyPassword = vi.fn();
 const mockHashPassword = vi.fn().mockReturnValue('hashed-pw');
+const mockHeadersGet = vi.fn();
 
 vi.mock('@/lib/auth', () => ({
   hashPassword: (...args: unknown[]) => mockHashPassword(...args),
@@ -29,6 +30,9 @@ vi.mock('next/headers', () => ({
     set: vi.fn(),
     delete: vi.fn(),
   }),
+  headers: async () => ({
+    get: (key: string) => mockHeadersGet(key),
+  }),
 }));
 
 vi.mock('next/navigation', () => ({
@@ -41,6 +45,10 @@ describe('auth actions', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     mockSignToken.mockResolvedValue('token');
+    mockHeadersGet.mockImplementation((key: string) => {
+      if (key === 'x-forwarded-for') return '127.0.0.1';
+      return null;
+    });
   });
 
   it('signInAction rejects unknown email', async () => {
@@ -138,5 +146,65 @@ describe('auth actions', () => {
     const result = await signOutAction();
     expect(result.success).toBe(true);
     expect((result as any).data.ok).toBe(true);
+  });
+
+  describe('Dual Rate-Limiting', () => {
+    it('target-based rate limiting blocks the same email after 5 attempts even with different IPs', async () => {
+      const email = 'target-limit@rate.com';
+      (db.user.findUnique as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+
+      // Make 5 successful non-blocked attempts with different IPs
+      for (let i = 1; i <= 5; i++) {
+        mockHeadersGet.mockImplementation((key: string) => {
+          if (key === 'x-forwarded-for') return `9.9.1.${i}`;
+          return null;
+        });
+        const result = await signInAction({ email, password: 'wrong' });
+        expect(result.success).toBe(false);
+        // It fails because the user doesn't exist/wrong password, but it is NOT blocked yet
+        if (!result.success) {
+          expect(result.error).toBe('Email or password is incorrect.');
+        }
+      }
+
+      // The 6th attempt with a new IP should be blocked by the target-based rate limiter
+      mockHeadersGet.mockImplementation((key: string) => {
+        if (key === 'x-forwarded-for') return '9.9.1.6';
+        return null;
+      });
+      const result = await signInAction({ email, password: 'wrong' });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toContain('Too many attempts.');
+        expect(result.error).not.toContain('from this IP');
+      }
+    });
+
+    it('IP-based rate limiting blocks different emails from the same IP after 10 attempts', async () => {
+      // Use a static IP for all requests
+      mockHeadersGet.mockImplementation((key: string) => {
+        if (key === 'x-forwarded-for') return '9.9.9.9';
+        return null;
+      });
+      (db.user.findUnique as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+
+      // Make 10 attempts targeting different emails from the same IP
+      for (let i = 1; i <= 10; i++) {
+        const email = `ip-limit-${i}@rate.com`;
+        const result = await signInAction({ email, password: 'wrong' });
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.error).toBe('Email or password is incorrect.');
+        }
+      }
+
+      // The 11th attempt targeting a fresh email from the same IP should be blocked by the IP-based rate limiter
+      const email = 'ip-limit-11@rate.com';
+      const result = await signInAction({ email, password: 'wrong' });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toContain('Too many attempts from this IP.');
+      }
+    });
   });
 });
